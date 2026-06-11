@@ -1,0 +1,733 @@
+{
+  "version": "1.0",
+  "exercises": [
+    {
+      "id": "ex_001",
+      "name": { "fr": "Pompes classiques", "en": "Push-ups" },
+      "category": "push",
+      "muscles_primary": ["pectoraux", "triceps"],
+      "muscles_secondary": ["épaules", "abdominaux"],
+      "equipment": "none",
+      "level": "beginner",
+      "type": "reps",
+      "instructions": {
+        "fr": "Placez les mains à largeur d'épaules, corps aligné. Descendez la poitrine vers le sol en fléchissant les coudes, puis remontez en poussant.",
+        "en": "Place hands shoulder-width apart, body straight. Lower chest toward floor by bending elbows, then push back up."
+      },
+      "tips": {
+        "fr": "Gardez le corps bien droit, ne laissez pas les hanches s'affaisser.",
+        "en": "Keep your body straight, don't let your hips sag."
+      },
+      "variations": ["ex_002", "ex_003"]
+    },
+    {
+      "id": "ex_002",
+      "name": { "fr": "Pompes sur les genoux", "en": "Knee push-ups" },
+      "category": "push",
+      "muscles_primary": ["pectoraux", "triceps"],
+      "muscles_secondary": ["épaules"],
+      "equipment": "none",
+      "level": "beginner",
+      "type": "reps",
+      "instructions": {
+        "fr": "Comme les pompes classiques mais les genoux au sol. Idéal pour débuter.",
+        "en": "Like standard push-ups but with knees on the floor. Great for beginners."
+      },
+      "tips": {
+        "fr": "Croisez les pieds et gardez le dos droit.",
+        "en": "Cross your feet and keep your back straight."
+      },
+      "variations": ["ex_001"]
+    },
+    {
+      "id": "ex_003",
+      "name": { "fr": "Pompes déclinées", "en": "Decline push-ups" },
+      "category": "push",
+      "muscles_primary": ["pectoraux haut", "triceps"],
+      "muscles_secondary": ["épaules antérieures"],
+      "equipment": "none",
+      "level": "intermediate",
+      "type": "reps",
+      "instructions": {
+        "fr": "Pieds surélevés sur une chaise ou un banc, mains au sol. Effectuez une pompe normale.",
+        "en": "Feet elevated on a chair or bench, hands on floor. Perform a standard push-up."
+      },
+      "tips": {
+        "fr": "Plus la hauteur est grande, plus le pectoral supérieur est sollicité.",
+        "en": "The higher the elevation, the more upper chest is engaged."
+      },
+      "variations": ["ex_001"]
+    },
+    {
+      "id": "ex_004",
+      "name": { "fr": "Dips sur chaise", "en": "Chair dips" },
+      "category": "push",
+      "muscles_primary": ["triceps"],
+      "muscles_secondary": ["pectoraux", "épaules"],
+      "equipment": "none",
+      "level": "beginner",
+      "type": "reps",
+      "instructions": {
+        "fr": "Mains sur le bord d'une chaise derrière vous, jambes tendues. Descendez en fléchissant les coudes à 90°, puis remontez.",
+        "en": "Hands on edge of chair behind you, legs extended. Lower by bending elbows to 90°, then push back up."
+      },
+      "tips": {
+        "fr": "Gardez le dos proche de la chaise pour protéger les épaules.",
+        "en": "Keep your back close to the chair to protect your shoulders."
+      },
+      "variations": []
+    },
+    {
+      "id": "ex_005",
+      "name": { "fr": "Squat au poids du corps", "en": "Bodyweight squat" },
+      "category": "legs",
+      "muscles_primary": ["quadriceps", "fessiers"],
+      "muscles_secondary": ["ischio-jambiers", "mollets"],
+      "equipment": "none",
+      "level": "beginner",
+      "type": "reps",
+      "instructions": {
+        "fr": "Pieds à largeur d'épaules, orteils légèrement ouverts. Descendez comme pour vous asseoir en gardant le dos droit, puis remontez.",
+        "en": "Feet shoulder-width apart, toes slightly out. Lower as if sitting, keeping back straight, then stand back up."
+      },
+      "tips": {
+        "fr": "Les genoux suivent la direction des orteils, talons au sol.",
+        "en": "Knees track over toes, heels stay on the ground."
+      },
+      "variations": ["ex_006", "ex_007"]
+    },
+    {
+      "id": "ex_006",
+      "name": { "fr": "Squat sauté", "en": "Jump squat" },
+      "category": "legs",
+      "muscles_primary": ["quadriceps", "fessiers"],
+      "muscles_secondary": ["mollets", "abdominaux"],
+      "equipment": "none",
+      "level": "intermediate",
+      "type": "reps",
+      "instructions": {
+        "fr": "Effectuez un squat puis explosez vers le haut en sautant. Réceptionnez en douceur en revenant en position squat.",
+        "en": "Perform a squat then explode upward into a jump. Land softly back into squat position."
+      },
+      "tips": {
+        "fr": "Réception souple sur la pointe des pieds pour protéger les genoux.",
+        "en": "Land softly on the balls of your feet to protect your knees."
+      },
+      "variations": ["ex_005"]
+    },
+    {
+      "id": "ex_007",
+      "name": { "fr": "Squat bulgare", "en": "Bulgarian split squat" },
+      "category": "legs",
+      "muscles_primary": ["quadriceps", "fessiers"],
+      "muscles_secondary": ["ischio-jambiers", "équilibre"],
+      "equipment": "none",
+      "level": "intermediate",
+      "type": "reps",
+      "instructions": {
+        "fr": "Pied arrière posé sur une chaise, pied avant en fente. Descendez en fléchissant le genou avant à 90°.",
+        "en": "Rear foot on a chair, front foot in lunge position. Lower by bending front knee to 90°."
+      },
+      "tips": {
+        "fr": "Le genou avant ne dépasse pas la pointe du pied.",
+        "en": "Front knee should not go past your toes."
+      },
+      "variations": ["ex_005"]
+    },
+    {
+      "id": "ex_008",
+      "name": { "fr": "Fentes avant", "en": "Forward lunges" },
+      "category": "legs",
+      "muscles_primary": ["quadriceps", "fessiers"],
+      "muscles_secondary": ["ischio-jambiers", "mollets"],
+      "equipment": "none",
+      "level": "beginner",
+      "type": "reps",
+      "instructions": {
+        "fr": "Faites un grand pas en avant, descendez jusqu'à ce que les deux genoux soient à 90°, puis revenez à la position initiale.",
+        "en": "Step forward, lower until both knees are at 90°, then return to starting position."
+      },
+      "tips": {
+        "fr": "Gardez le buste droit et le regard devant vous.",
+        "en": "Keep your torso upright and eyes forward."
+      },
+      "variations": ["ex_009"]
+    },
+    {
+      "id": "ex_009",
+      "name": { "fr": "Fentes latérales", "en": "Side lunges" },
+      "category": "legs",
+      "muscles_primary": ["quadriceps internes", "fessiers"],
+      "muscles_secondary": ["adducteurs"],
+      "equipment": "none",
+      "level": "beginner",
+      "type": "reps",
+      "instructions": {
+        "fr": "Faites un grand pas sur le côté, fléchissez le genou de la jambe portante, l'autre jambe reste tendue.",
+        "en": "Step wide to the side, bend the knee of the stepping leg, keep the other leg straight."
+      },
+      "tips": {
+        "fr": "Gardez le pied à plat sur le sol lors de la descente.",
+        "en": "Keep your foot flat on the ground as you lower."
+      },
+      "variations": ["ex_008"]
+    },
+    {
+      "id": "ex_010",
+      "name": { "fr": "Élévations de mollets", "en": "Calf raises" },
+      "category": "legs",
+      "muscles_primary": ["mollets"],
+      "muscles_secondary": [],
+      "equipment": "none",
+      "level": "beginner",
+      "type": "reps",
+      "instructions": {
+        "fr": "Debout, pieds parallèles. Montez sur la pointe des pieds aussi haut que possible, puis redescendez lentement.",
+        "en": "Stand with feet parallel. Rise onto tiptoes as high as possible, then lower slowly."
+      },
+      "tips": {
+        "fr": "Faites une légère pause en haut pour maximiser la contraction.",
+        "en": "Pause briefly at the top to maximize the contraction."
+      },
+      "variations": []
+    },
+    {
+      "id": "ex_011",
+      "name": { "fr": "Glute bridge", "en": "Glute bridge" },
+      "category": "legs",
+      "muscles_primary": ["fessiers"],
+      "muscles_secondary": ["ischio-jambiers", "lombaires"],
+      "equipment": "none",
+      "level": "beginner",
+      "type": "reps",
+      "instructions": {
+        "fr": "Allongé sur le dos, genoux fléchis, pieds à plat. Poussez les hanches vers le haut en contractant les fessiers, maintenez 2 secondes.",
+        "en": "Lying on back, knees bent, feet flat. Push hips upward by squeezing glutes, hold for 2 seconds."
+      },
+      "tips": {
+        "fr": "Ne cambrez pas le dos en haut du mouvement.",
+        "en": "Don't hyperextend your back at the top."
+      },
+      "variations": ["ex_012"]
+    },
+    {
+      "id": "ex_012",
+      "name": { "fr": "Glute bridge unilatéral", "en": "Single-leg glute bridge" },
+      "category": "legs",
+      "muscles_primary": ["fessiers"],
+      "muscles_secondary": ["ischio-jambiers", "équilibre"],
+      "equipment": "none",
+      "level": "intermediate",
+      "type": "reps",
+      "instructions": {
+        "fr": "Comme le glute bridge, mais une jambe tendue dans les airs. Montez les hanches avec une seule jambe.",
+        "en": "Like glute bridge, but one leg extended in the air. Drive hips up with one leg only."
+      },
+      "tips": {
+        "fr": "Gardez le bassin horizontal pendant tout le mouvement.",
+        "en": "Keep your hips level throughout the movement."
+      },
+      "variations": ["ex_011"]
+    },
+    {
+      "id": "ex_013",
+      "name": { "fr": "Planche", "en": "Plank" },
+      "category": "core",
+      "muscles_primary": ["abdominaux", "transverse"],
+      "muscles_secondary": ["épaules", "lombaires"],
+      "equipment": "none",
+      "level": "beginner",
+      "type": "duration",
+      "instructions": {
+        "fr": "Appui sur les avant-bras et les orteils, corps aligné de la tête aux talons. Tenez la position.",
+        "en": "Support on forearms and toes, body aligned from head to heels. Hold the position."
+      },
+      "tips": {
+        "fr": "Respirez régulièrement et contractez les abdominaux.",
+        "en": "Breathe steadily and brace your abs."
+      },
+      "variations": ["ex_014", "ex_015"]
+    },
+    {
+      "id": "ex_014",
+      "name": { "fr": "Planche latérale", "en": "Side plank" },
+      "category": "core",
+      "muscles_primary": ["obliques", "transverse"],
+      "muscles_secondary": ["épaules", "fessiers"],
+      "equipment": "none",
+      "level": "intermediate",
+      "type": "duration",
+      "instructions": {
+        "fr": "Appui sur un avant-bras, corps aligné latéralement, hanche décollée du sol. Tenez la position.",
+        "en": "Support on one forearm, body aligned sideways, hip lifted from floor. Hold the position."
+      },
+      "tips": {
+        "fr": "Empilez les pieds l'un sur l'autre pour plus de difficulté.",
+        "en": "Stack your feet for added difficulty."
+      },
+      "variations": ["ex_013"]
+    },
+    {
+      "id": "ex_015",
+      "name": { "fr": "Planche dynamique", "en": "Dynamic plank" },
+      "category": "core",
+      "muscles_primary": ["abdominaux", "épaules"],
+      "muscles_secondary": ["triceps", "transverse"],
+      "equipment": "none",
+      "level": "intermediate",
+      "type": "reps",
+      "instructions": {
+        "fr": "En position de planche, passez alternativement d'un appui avant-bras à un appui mains tendues (pompe).",
+        "en": "In plank position, alternate between forearm and straight-arm support."
+      },
+      "tips": {
+        "fr": "Minimisez le mouvement des hanches lors du changement.",
+        "en": "Minimize hip rotation during the transition."
+      },
+      "variations": ["ex_013"]
+    },
+    {
+      "id": "ex_016",
+      "name": { "fr": "Crunchs", "en": "Crunches" },
+      "category": "core",
+      "muscles_primary": ["abdominaux"],
+      "muscles_secondary": [],
+      "equipment": "none",
+      "level": "beginner",
+      "type": "reps",
+      "instructions": {
+        "fr": "Allongé sur le dos, genoux fléchis, mains derrière la tête. Contractez les abdominaux pour soulever les épaules du sol.",
+        "en": "Lying on back, knees bent, hands behind head. Contract abs to lift shoulders off floor."
+      },
+      "tips": {
+        "fr": "Ne tirez pas sur la nuque, le mouvement vient des abdominaux.",
+        "en": "Don't pull on your neck; the movement comes from your abs."
+      },
+      "variations": ["ex_017"]
+    },
+    {
+      "id": "ex_017",
+      "name": { "fr": "Relevés de jambes", "en": "Leg raises" },
+      "category": "core",
+      "muscles_primary": ["abdominaux bas"],
+      "muscles_secondary": ["fléchisseurs de hanche"],
+      "equipment": "none",
+      "level": "intermediate",
+      "type": "reps",
+      "instructions": {
+        "fr": "Allongé sur le dos, jambes tendues. Levez les jambes à la verticale puis redescendez lentement sans toucher le sol.",
+        "en": "Lying on back, legs straight. Raise legs to vertical then lower slowly without touching the floor."
+      },
+      "tips": {
+        "fr": "Collez le bas du dos au sol pendant tout le mouvement.",
+        "en": "Press your lower back into the floor throughout the movement."
+      },
+      "variations": ["ex_016"]
+    },
+    {
+      "id": "ex_018",
+      "name": { "fr": "Mountain climbers", "en": "Mountain climbers" },
+      "category": "core",
+      "muscles_primary": ["abdominaux", "fléchisseurs de hanche"],
+      "muscles_secondary": ["épaules", "quadriceps"],
+      "equipment": "none",
+      "level": "intermediate",
+      "type": "duration",
+      "instructions": {
+        "fr": "En position de pompe, ramenez alternativement chaque genou vers la poitrine le plus vite possible.",
+        "en": "In push-up position, alternately drive each knee toward your chest as fast as possible."
+      },
+      "tips": {
+        "fr": "Gardez les hanches basses et le dos plat.",
+        "en": "Keep hips low and back flat."
+      },
+      "variations": []
+    },
+    {
+      "id": "ex_019",
+      "name": { "fr": "Burpees", "en": "Burpees" },
+      "category": "cardio",
+      "muscles_primary": ["corps entier"],
+      "muscles_secondary": ["cardio"],
+      "equipment": "none",
+      "level": "intermediate",
+      "type": "reps",
+      "instructions": {
+        "fr": "Debout → accroupi → pompe → accroupi → saut avec les bras en l'air. Enchaînez sans pause.",
+        "en": "Stand → squat → push-up → squat → jump with arms overhead. Chain without pause."
+      },
+      "tips": {
+        "fr": "Adaptez le rythme à votre niveau, la qualité prime sur la vitesse.",
+        "en": "Adapt the pace to your level; quality over speed."
+      },
+      "variations": []
+    },
+    {
+      "id": "ex_020",
+      "name": { "fr": "Jumping jacks", "en": "Jumping jacks" },
+      "category": "cardio",
+      "muscles_primary": ["cardio"],
+      "muscles_secondary": ["mollets", "épaules"],
+      "equipment": "none",
+      "level": "beginner",
+      "type": "duration",
+      "instructions": {
+        "fr": "Pieds joints, mains le long du corps. Sautez en écartant les jambes et en levant les bras, puis revenez.",
+        "en": "Feet together, arms at sides. Jump feet apart while raising arms, then return."
+      },
+      "tips": {
+        "fr": "Atterrissez en douceur sur la pointe des pieds.",
+        "en": "Land softly on the balls of your feet."
+      },
+      "variations": []
+    },
+    {
+      "id": "ex_021",
+      "name": { "fr": "Tractions (traction barre)", "en": "Pull-ups" },
+      "category": "pull",
+      "muscles_primary": ["dorsaux", "biceps"],
+      "muscles_secondary": ["trapèzes", "rhomboïdes"],
+      "equipment": "pull_bar",
+      "level": "intermediate",
+      "type": "reps",
+      "instructions": {
+        "fr": "Suspendu à une barre, prise en pronation (paumes vers l'avant). Tirez le menton au-dessus de la barre.",
+        "en": "Hang from a bar with overhand grip. Pull chin above the bar."
+      },
+      "tips": {
+        "fr": "Partez d'un arrêt complet (bras tendus) à chaque répétition.",
+        "en": "Start from a dead hang (arms fully extended) each rep."
+      },
+      "variations": ["ex_022"]
+    },
+    {
+      "id": "ex_022",
+      "name": { "fr": "Chin-ups", "en": "Chin-ups" },
+      "category": "pull",
+      "muscles_primary": ["biceps", "dorsaux"],
+      "muscles_secondary": ["trapèzes"],
+      "equipment": "pull_bar",
+      "level": "intermediate",
+      "type": "reps",
+      "instructions": {
+        "fr": "Comme les tractions mais prise supination (paumes vers vous). Plus facile, sollicite davantage les biceps.",
+        "en": "Like pull-ups but with underhand grip (palms facing you). Easier, emphasizes biceps more."
+      },
+      "tips": {
+        "fr": "Serrez les coudes vers le corps pour maximiser les dorsaux.",
+        "en": "Pull elbows toward your body to engage the lats more."
+      },
+      "variations": ["ex_021"]
+    },
+    {
+      "id": "ex_023",
+      "name": { "fr": "Superman", "en": "Superman" },
+      "category": "back",
+      "muscles_primary": ["lombaires", "érecteurs du rachis"],
+      "muscles_secondary": ["fessiers", "trapèzes"],
+      "equipment": "none",
+      "level": "beginner",
+      "type": "reps",
+      "instructions": {
+        "fr": "Allongé face au sol, bras tendus devant vous. Soulevez simultanément bras et jambes en contractant le dos.",
+        "en": "Lying face down, arms extended. Simultaneously lift arms and legs by contracting your back."
+      },
+      "tips": {
+        "fr": "Maintenez la position haute 2 secondes pour maximiser la contraction.",
+        "en": "Hold the top position for 2 seconds to maximize contraction."
+      },
+      "variations": []
+    },
+    {
+      "id": "ex_024",
+      "name": { "fr": "Pike push-ups", "en": "Pike push-ups" },
+      "category": "push",
+      "muscles_primary": ["épaules", "triceps"],
+      "muscles_secondary": ["trapèzes"],
+      "equipment": "none",
+      "level": "intermediate",
+      "type": "reps",
+      "instructions": {
+        "fr": "En position de pompe, formez un V inversé avec les hanches hautes. Fléchissez les coudes pour baisser la tête vers le sol.",
+        "en": "In push-up position, form an inverted V with hips high. Bend elbows to lower head toward floor."
+      },
+      "tips": {
+        "fr": "Progressez vers le handstand push-up une fois maîtrisé.",
+        "en": "Progress toward handstand push-ups once mastered."
+      },
+      "variations": ["ex_001"]
+    },
+    {
+      "id": "ex_025",
+      "name": { "fr": "Curl biceps haltères", "en": "Dumbbell bicep curl" },
+      "category": "pull",
+      "muscles_primary": ["biceps"],
+      "muscles_secondary": ["avant-bras"],
+      "equipment": "dumbbells",
+      "level": "beginner",
+      "type": "reps",
+      "instructions": {
+        "fr": "Debout, haltères en main, paumes vers l'avant. Fléchissez les coudes pour remonter les haltères vers les épaules.",
+        "en": "Standing, dumbbells in hand, palms forward. Flex elbows to curl weights toward shoulders."
+      },
+      "tips": {
+        "fr": "Les coudes restent fixes le long du corps, ne balancez pas.",
+        "en": "Keep elbows fixed at your sides; don't swing."
+      },
+      "variations": []
+    },
+    {
+      "id": "ex_026",
+      "name": { "fr": "Développé épaules haltères", "en": "Dumbbell shoulder press" },
+      "category": "push",
+      "muscles_primary": ["épaules"],
+      "muscles_secondary": ["triceps", "trapèzes"],
+      "equipment": "dumbbells",
+      "level": "beginner",
+      "type": "reps",
+      "instructions": {
+        "fr": "Assis ou debout, haltères à hauteur des épaules, paumes vers l'avant. Poussez vers le haut jusqu'à extension complète.",
+        "en": "Seated or standing, dumbbells at shoulder height, palms forward. Press upward to full extension."
+      },
+      "tips": {
+        "fr": "Ne verrouillez pas les coudes en haut du mouvement.",
+        "en": "Don't lock your elbows at the top."
+      },
+      "variations": []
+    },
+    {
+      "id": "ex_027",
+      "name": { "fr": "Soulevé de terre haltères", "en": "Dumbbell deadlift" },
+      "category": "legs",
+      "muscles_primary": ["ischio-jambiers", "fessiers", "lombaires"],
+      "muscles_secondary": ["trapèzes", "abdominaux"],
+      "equipment": "dumbbells",
+      "level": "intermediate",
+      "type": "reps",
+      "instructions": {
+        "fr": "Debout, haltères devant les cuisses. Inclinez le buste en gardant le dos droit, descendez les haltères le long des jambes jusqu'aux tibias.",
+        "en": "Standing, dumbbells in front of thighs. Hinge at hips keeping back straight, lower weights along shins."
+      },
+      "tips": {
+        "fr": "Le mouvement vient des hanches, pas du dos.",
+        "en": "The movement comes from your hips, not your back."
+      },
+      "variations": []
+    },
+    {
+      "id": "ex_028",
+      "name": { "fr": "Extension triceps haltère", "en": "Tricep overhead extension" },
+      "category": "push",
+      "muscles_primary": ["triceps"],
+      "muscles_secondary": [],
+      "equipment": "dumbbells",
+      "level": "beginner",
+      "type": "reps",
+      "instructions": {
+        "fr": "Debout, un haltère tenu à deux mains au-dessus de la tête. Fléchissez les coudes pour descendre l'haltère derrière la tête, puis remontez.",
+        "en": "Standing, one dumbbell held overhead with both hands. Bend elbows to lower behind head, then extend back up."
+      },
+      "tips": {
+        "fr": "Gardez les coudes proches des oreilles pendant tout le mouvement.",
+        "en": "Keep elbows close to your ears throughout."
+      },
+      "variations": ["ex_004"]
+    },
+    {
+      "id": "ex_029",
+      "name": { "fr": "Gainage latéral avec rotation", "en": "Side plank with rotation" },
+      "category": "core",
+      "muscles_primary": ["obliques"],
+      "muscles_secondary": ["épaules", "transverse"],
+      "equipment": "none",
+      "level": "advanced",
+      "type": "reps",
+      "instructions": {
+        "fr": "En planche latérale, passez le bras libre sous le corps en rotation, puis revenez au plafond.",
+        "en": "In side plank, thread top arm under body rotating torso, then return arm to ceiling."
+      },
+      "tips": {
+        "fr": "Contrôlez le mouvement, ne balancez pas.",
+        "en": "Control the movement, don't swing."
+      },
+      "variations": ["ex_014"]
+    },
+    {
+      "id": "ex_030",
+      "name": { "fr": "Pistol squat (assisté)", "en": "Assisted pistol squat" },
+      "category": "legs",
+      "muscles_primary": ["quadriceps", "fessiers"],
+      "muscles_secondary": ["équilibre", "mollets"],
+      "equipment": "none",
+      "level": "advanced",
+      "type": "reps",
+      "instructions": {
+        "fr": "Debout sur une jambe, l'autre tendue devant. Descendez sur la jambe d'appui jusqu'en bas, aidez-vous d'un mur ou d'une chaise au besoin.",
+        "en": "Stand on one leg, other extended forward. Lower on the supporting leg, use wall or chair for assistance if needed."
+      },
+      "tips": {
+        "fr": "Commencez avec assistance puis réduisez progressivement.",
+        "en": "Start with assistance then gradually reduce it."
+      },
+      "variations": ["ex_005", "ex_007"]
+    }
+  ],
+
+  "programs": [
+    {
+      "id": "prog_001",
+      "name": { "fr": "Remise en forme — Semaine 1-4", "en": "Getting back in shape — Week 1-4" },
+      "description": {
+        "fr": "Programme doux pour reprendre le sport. 3 séances par semaine, poids du corps uniquement.",
+        "en": "Gentle program to get back into exercise. 3 sessions per week, bodyweight only."
+      },
+      "level": "beginner",
+      "days_per_week": 3,
+      "duration_weeks": 4,
+      "equipment": ["none"],
+      "is_custom": false,
+      "sessions": [
+        {
+          "id": "sess_001_A",
+          "name": { "fr": "Séance A — Haut du corps", "en": "Session A — Upper body" },
+          "exercises": [
+            { "exercise_id": "ex_002", "sets": 3, "reps": 8, "rest_seconds": 90 },
+            { "exercise_id": "ex_004", "sets": 3, "reps": 8, "rest_seconds": 90 },
+            { "exercise_id": "ex_013", "sets": 3, "duration_seconds": 20, "rest_seconds": 60 },
+            { "exercise_id": "ex_016", "sets": 3, "reps": 10, "rest_seconds": 60 },
+            { "exercise_id": "ex_023", "sets": 3, "reps": 10, "rest_seconds": 60 }
+          ]
+        },
+        {
+          "id": "sess_001_B",
+          "name": { "fr": "Séance B — Bas du corps", "en": "Session B — Lower body" },
+          "exercises": [
+            { "exercise_id": "ex_005", "sets": 3, "reps": 10, "rest_seconds": 90 },
+            { "exercise_id": "ex_008", "sets": 3, "reps": 8, "rest_seconds": 90 },
+            { "exercise_id": "ex_011", "sets": 3, "reps": 12, "rest_seconds": 60 },
+            { "exercise_id": "ex_010", "sets": 3, "reps": 15, "rest_seconds": 60 },
+            { "exercise_id": "ex_013", "sets": 3, "duration_seconds": 20, "rest_seconds": 60 }
+          ]
+        },
+        {
+          "id": "sess_001_C",
+          "name": { "fr": "Séance C — Full body cardio léger", "en": "Session C — Full body light cardio" },
+          "exercises": [
+            { "exercise_id": "ex_020", "sets": 3, "duration_seconds": 30, "rest_seconds": 60 },
+            { "exercise_id": "ex_002", "sets": 2, "reps": 10, "rest_seconds": 60 },
+            { "exercise_id": "ex_005", "sets": 2, "reps": 12, "rest_seconds": 60 },
+            { "exercise_id": "ex_016", "sets": 2, "reps": 12, "rest_seconds": 60 },
+            { "exercise_id": "ex_013", "sets": 2, "duration_seconds": 25, "rest_seconds": 60 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "prog_002",
+      "name": { "fr": "Entretien — Corps complet", "en": "Maintenance — Full body" },
+      "description": {
+        "fr": "Programme d'entretien équilibré. 3 séances par semaine, poids du corps uniquement.",
+        "en": "Balanced maintenance program. 3 sessions per week, bodyweight only."
+      },
+      "level": "beginner",
+      "days_per_week": 3,
+      "duration_weeks": 8,
+      "equipment": ["none"],
+      "is_custom": false,
+      "sessions": [
+        {
+          "id": "sess_002_A",
+          "name": { "fr": "Séance A — Push", "en": "Session A — Push" },
+          "exercises": [
+            { "exercise_id": "ex_001", "sets": 4, "reps": 10, "rest_seconds": 90 },
+            { "exercise_id": "ex_024", "sets": 3, "reps": 8, "rest_seconds": 90 },
+            { "exercise_id": "ex_004", "sets": 3, "reps": 12, "rest_seconds": 75 },
+            { "exercise_id": "ex_013", "sets": 3, "duration_seconds": 30, "rest_seconds": 60 },
+            { "exercise_id": "ex_016", "sets": 3, "reps": 15, "rest_seconds": 60 }
+          ]
+        },
+        {
+          "id": "sess_002_B",
+          "name": { "fr": "Séance B — Legs & Core", "en": "Session B — Legs & Core" },
+          "exercises": [
+            { "exercise_id": "ex_005", "sets": 4, "reps": 15, "rest_seconds": 75 },
+            { "exercise_id": "ex_008", "sets": 3, "reps": 10, "rest_seconds": 75 },
+            { "exercise_id": "ex_011", "sets": 3, "reps": 15, "rest_seconds": 60 },
+            { "exercise_id": "ex_017", "sets": 3, "reps": 12, "rest_seconds": 60 },
+            { "exercise_id": "ex_014", "sets": 3, "duration_seconds": 25, "rest_seconds": 60 }
+          ]
+        },
+        {
+          "id": "sess_002_C",
+          "name": { "fr": "Séance C — Full body explosif", "en": "Session C — Explosive full body" },
+          "exercises": [
+            { "exercise_id": "ex_019", "sets": 3, "reps": 8, "rest_seconds": 90 },
+            { "exercise_id": "ex_006", "sets": 3, "reps": 10, "rest_seconds": 75 },
+            { "exercise_id": "ex_018", "sets": 3, "duration_seconds": 30, "rest_seconds": 60 },
+            { "exercise_id": "ex_015", "sets": 3, "reps": 10, "rest_seconds": 60 },
+            { "exercise_id": "ex_023", "sets": 3, "reps": 12, "rest_seconds": 60 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "prog_003",
+      "name": { "fr": "Progression — Intermédiaire", "en": "Progression — Intermediate" },
+      "description": {
+        "fr": "Programme pour progresser au-delà du débutant. 4 séances par semaine, poids du corps.",
+        "en": "Program to progress beyond beginner level. 4 sessions per week, bodyweight."
+      },
+      "level": "intermediate",
+      "days_per_week": 4,
+      "duration_weeks": 8,
+      "equipment": ["none"],
+      "is_custom": false,
+      "sessions": [
+        {
+          "id": "sess_003_A",
+          "name": { "fr": "Séance A — Push intensif", "en": "Session A — Intensive push" },
+          "exercises": [
+            { "exercise_id": "ex_001", "sets": 4, "reps": 15, "rest_seconds": 75 },
+            { "exercise_id": "ex_003", "sets": 3, "reps": 10, "rest_seconds": 75 },
+            { "exercise_id": "ex_024", "sets": 3, "reps": 10, "rest_seconds": 90 },
+            { "exercise_id": "ex_004", "sets": 3, "reps": 15, "rest_seconds": 60 },
+            { "exercise_id": "ex_015", "sets": 3, "reps": 12, "rest_seconds": 60 }
+          ]
+        },
+        {
+          "id": "sess_003_B",
+          "name": { "fr": "Séance B — Legs intensif", "en": "Session B — Intensive legs" },
+          "exercises": [
+            { "exercise_id": "ex_007", "sets": 4, "reps": 10, "rest_seconds": 90 },
+            { "exercise_id": "ex_006", "sets": 3, "reps": 12, "rest_seconds": 75 },
+            { "exercise_id": "ex_012", "sets": 3, "reps": 10, "rest_seconds": 75 },
+            { "exercise_id": "ex_009", "sets": 3, "reps": 12, "rest_seconds": 60 },
+            { "exercise_id": "ex_010", "sets": 4, "reps": 20, "rest_seconds": 45 }
+          ]
+        },
+        {
+          "id": "sess_003_C",
+          "name": { "fr": "Séance C — Core & Back", "en": "Session C — Core & Back" },
+          "exercises": [
+            { "exercise_id": "ex_013", "sets": 4, "duration_seconds": 45, "rest_seconds": 60 },
+            { "exercise_id": "ex_014", "sets": 3, "duration_seconds": 30, "rest_seconds": 60 },
+            { "exercise_id": "ex_029", "sets": 3, "reps": 10, "rest_seconds": 60 },
+            { "exercise_id": "ex_017", "sets": 3, "reps": 15, "rest_seconds": 60 },
+            { "exercise_id": "ex_023", "sets": 3, "reps": 15, "rest_seconds": 60 }
+          ]
+        },
+        {
+          "id": "sess_003_D",
+          "name": { "fr": "Séance D — Full body HIIT", "en": "Session D — Full body HIIT" },
+          "exercises": [
+            { "exercise_id": "ex_019", "sets": 4, "reps": 10, "rest_seconds": 75 },
+            { "exercise_id": "ex_018", "sets": 4, "duration_seconds": 40, "rest_seconds": 60 },
+            { "exercise_id": "ex_006", "sets": 3, "reps": 15, "rest_seconds": 60 },
+            { "exercise_id": "ex_020", "sets": 3, "duration_seconds": 45, "rest_seconds": 45 },
+            { "exercise_id": "ex_001", "sets": 3, "reps": 15, "rest_seconds": 60 }
+          ]
+        }
+      ]
+    }
+  ]
+}

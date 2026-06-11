@@ -1,0 +1,152 @@
+// FitQuest — schéma Prisma (Sprint 1)
+// Source : FitQuest_ProjectPlan.md §5 Modèle de Données
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DigestFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  NONE
+}
+
+model User {
+  id           String           @id @default(cuid())
+  username     String           @unique
+  passwordHash String
+  email        String?          @unique
+  emailDigest  DigestFrequency?
+  avatarStage  Int              @default(0)
+  themeId      String           @default("void_rpg")
+  level        Int              @default(1)
+  totalXP      Int              @default(0)
+  currentXP    Int              @default(0)
+  xpBalance    Int              @default(0) // XP dépensable boutique
+  streak       Int              @default(0)
+  lastWorkout  DateTime?
+  createdAt    DateTime         @default(now())
+  workoutLogs  WorkoutLog[]
+  bodyMetrics  BodyMetric[]
+  bodyPhotos   BodyPhoto[]
+  userBadges   UserBadge[]
+}
+
+model Exercise {
+  id               String   @id
+  nameFr           String
+  nameEn           String
+  category         String // push | pull | legs | core | cardio | back
+  musclesPrimary   String[]
+  musclesSecondary String[]
+  equipment        String // none | dumbbells | barbell | pull_bar | other
+  level            String // beginner | intermediate | advanced
+  type             String // reps | duration
+  instructionsFr   String
+  instructionsEn   String
+  tipsFr           String?
+  tipsEn           String?
+  imageUrl         String?
+  imageAiGen       Boolean  @default(false)
+  variations       String[] // IDs des variantes
+}
+
+model Program {
+  id            String    @id @default(cuid())
+  nameFr        String
+  nameEn        String
+  descFr        String?
+  descEn        String?
+  level         String
+  daysPerWeek   Int
+  durationWeeks Int?
+  equipment     String[]
+  isCustom      Boolean   @default(false)
+  isAiGen       Boolean   @default(false)
+  createdBy     String? // userId si custom
+  sessions      Session[]
+}
+
+model Session {
+  id        String            @id @default(cuid())
+  programId String
+  program   Program           @relation(fields: [programId], references: [id], onDelete: Cascade)
+  nameFr    String
+  nameEn    String
+  order     Int
+  exercises SessionExercise[]
+}
+
+model SessionExercise {
+  id              String  @id @default(cuid())
+  sessionId       String
+  session         Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  exerciseId      String
+  order           Int
+  sets            Int
+  reps            Int?
+  durationSeconds Int?
+  restSeconds     Int     @default(60)
+}
+
+model WorkoutLog {
+  id            String         @id @default(cuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId     String?
+  sessionName   String // snapshot nom séance
+  date          DateTime       @default(now())
+  durationSecs  Int
+  xpEarned      Int
+  completedSets CompletedSet[]
+}
+
+model CompletedSet {
+  id           String     @id @default(cuid())
+  logId        String
+  log          WorkoutLog @relation(fields: [logId], references: [id], onDelete: Cascade)
+  exerciseId   String
+  exerciseName String // snapshot
+  setNumber    Int
+  reps         Int?
+  durationSecs Int?
+  weightKg     Float?
+}
+
+model BodyMetric {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date          DateTime @default(now())
+  weightKg      Float?
+  waistCm       Float?
+  chestCm       Float?
+  bicepCm       Float?
+  thighCm       Float?
+  customMetrics Json? // [{ name, value, unit }]
+}
+
+model BodyPhoto {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date     DateTime @default(now())
+  type     String // full | front | back | side | arm | leg | other
+  filePath String
+  note     String?
+}
+
+model UserBadge {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeId    String
+  unlockedAt DateTime @default(now())
+}

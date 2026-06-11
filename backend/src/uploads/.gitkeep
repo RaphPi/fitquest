@@ -1,0 +1,2 @@
+# Volume Docker monté ici en production (photos de progression, images exercices).
+# Jamais de base64 en BDD — uniquement le chemin de fichier.

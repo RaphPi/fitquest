@@ -1,0 +1,17 @@
+{
+  "app": {
+    "name": "FitQuest",
+    "tagline": "LEVEL UP !"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "workout": "Workout",
+    "library": "Library",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Ready to level up?"
+  }
+}

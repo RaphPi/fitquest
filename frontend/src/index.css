@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Thèmes FitQuest (pilotés par data-theme) ─────────────── */
+:root,
+[data-theme='void_rpg'] {
+  --bg-main: #0a0a0f;
+  --bg-card: #0f1117;
+  --bg-shield: #0d0b1e;
+  --border: #1e2030;
+  --accent: #6366f1; /* indigo */
+  --accent-soft: #a78bfa; /* violet clair */
+  --xp: #f59e0b; /* or / XP */
+  --success: #22c55e;
+  --danger: #ef4444;
+  --text-primary: #f1f5f9;
+  --text-secondary: #64748b;
+  --radius: 0.75rem;
+}
+
+[data-theme='forest_warrior'] {
+  --bg-main: #0d1f0f;
+  --bg-card: #10260f;
+  --bg-shield: #0a1a0a;
+  --accent: #22c55e;
+  --accent-soft: #4ade80;
+}
+
+[data-theme='solar_blaze'] {
+  --bg-main: #1a0f00;
+  --bg-card: #241608;
+  --bg-shield: #140b00;
+  --accent: #f59e0b;
+  --accent-soft: #fbbf24;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+    min-height: 100vh;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
+}

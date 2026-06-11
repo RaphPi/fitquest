@@ -1,0 +1,13 @@
+# Normalise les fins de ligne : LF dans le dépôt pour tout le texte.
+* text=auto eol=lf
+
+# Scripts shell & fichiers Linux : LF obligatoire (sinon bash casse : "bad interpreter").
+*.sh        text eol=lf
+Dockerfile  text eol=lf
+*.cjs       text eol=lf
+
+# Binaires : pas de conversion.
+*.png binary
+*.jpg binary
+*.webp binary
+*.ico binary
