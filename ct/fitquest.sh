@@ -7,7 +7,7 @@
 #    bash -c "$(curl -fsSL https://raw.githubusercontent.com/RaphPi/fitquest/main/ct/fitquest.sh)"
 #
 #  Variables surchargables (toutes optionnelles) :
-#    CTID HOSTNAME CORES RAM_MB DISK_GB BRIDGE STORAGE
+#    CTID CT_HOSTNAME CORES RAM_MB DISK_GB BRIDGE STORAGE
 #    TEMPLATE_STORAGE OS_TEMPLATE APP_PORT BRANCH
 # ─────────────────────────────────────────────────────────────
 set -euo pipefail
@@ -17,7 +17,8 @@ APP="FitQuest"
 BRANCH="${BRANCH:-main}"
 RAW_BASE="https://raw.githubusercontent.com/RaphPi/fitquest/${BRANCH}"
 
-HOSTNAME="${HOSTNAME:-fitquest}"
+# NB : on n'utilise PAS la variable $HOSTNAME (déjà définie par bash = nom de l'hôte PVE).
+CT_HOSTNAME="${CT_HOSTNAME:-fitquest}"
 CORES="${CORES:-2}"
 RAM_MB="${RAM_MB:-4096}"
 DISK_GB="${DISK_GB:-12}"
@@ -81,9 +82,9 @@ msg_ok "Template prêt : ${TEMPLATE_FILE}"
 
 # ----- 2. Création de la LXC ---------------------------------
 # unprivileged + nesting/keyctl = nécessaire pour faire tourner Docker dans la CT.
-msg_info "Création de la LXC #${CTID} (${HOSTNAME} : ${CORES} vCPU, ${RAM_MB} Mo, ${DISK_GB} Go)…"
+msg_info "Création de la LXC #${CTID} (${CT_HOSTNAME} : ${CORES} vCPU, ${RAM_MB} Mo, ${DISK_GB} Go)…"
 pct create "$CTID" "${TEMPLATE_STORAGE}:vztmpl/${TEMPLATE_FILE}" \
-  --hostname "$HOSTNAME" \
+  --hostname "$CT_HOSTNAME" \
   --cores "$CORES" \
   --memory "$RAM_MB" \
   --swap 512 \

@@ -49,7 +49,7 @@ Docker + l'app, lance la stack `docker-compose.prod.yml`, migre et seed la base,
 affiche l'URL. Paramètres surchargables par variables d'env :
 
 ```bash
-CTID=120 HOSTNAME=fitquest RAM_MB=4096 CORES=2 DISK_GB=12 APP_PORT=80 \
+CTID=120 CT_HOSTNAME=fitquest RAM_MB=4096 CORES=2 DISK_GB=12 APP_PORT=80 \
   bash -c "$(curl -fsSL https://raw.githubusercontent.com/RaphPi/fitquest/main/ct/fitquest.sh)"
 ```
 
