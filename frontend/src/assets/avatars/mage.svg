@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 120" fill="none">
+  <!-- Head with pointed hat -->
+  <circle cx="40" cy="22" r="10" fill="currentColor" opacity="0.9"/>
+  <polygon points="40,1 28,26 52,26" fill="currentColor" opacity="0.6"/>
+  <rect x="26" y="25" width="28" height="4" rx="2" fill="currentColor" opacity="0.45"/>
+  <!-- Robe (wide) -->
+  <path d="M26 34 Q22 68 18 98 L62 98 Q58 68 54 34Z" fill="currentColor" opacity="0.7"/>
+  <!-- Arms with staff -->
+  <rect x="10" y="36" width="14" height="8" rx="4" fill="currentColor" opacity="0.6"/>
+  <rect x="56" y="36" width="14" height="8" rx="4" fill="currentColor" opacity="0.6"/>
+  <!-- Staff (right side) -->
+  <rect x="67" y="16" width="4" height="60" rx="2" fill="currentColor" opacity="0.45"/>
+  <!-- Orb on staff -->
+  <circle cx="69" cy="14" r="6" fill="currentColor" opacity="0.35"/>
+  <!-- Magic sparkles -->
+  <circle cx="14" cy="34" r="3" fill="currentColor" opacity="0.3"/>
+  <circle cx="10" cy="28" r="2" fill="currentColor" opacity="0.2"/>
+</svg>

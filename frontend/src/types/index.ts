@@ -59,6 +59,25 @@ export interface Program {
   sessions: WorkoutSession[];
 }
 
+export type DigestFrequency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'NONE';
+
+export interface RegisterPayload {
+  username: string;
+  password: string;
+  email?: string;
+  emailDigest?: DigestFrequency;
+  avatarStage?: number;
+}
+
+export interface LoginPayload {
+  username: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  user: UserProfile;
+}
+
 export interface UserProfile {
   id: string;
   username: string;

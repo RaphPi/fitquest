@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 120" fill="none">
+  <!-- Warrior silhouette - stage 0 (novice) -->
+  <circle cx="40" cy="18" r="12" fill="currentColor" opacity="0.85"/>
+  <!-- Body -->
+  <rect x="28" y="32" width="24" height="32" rx="4" fill="currentColor" opacity="0.75"/>
+  <!-- Arms -->
+  <rect x="14" y="34" width="12" height="26" rx="5" fill="currentColor" opacity="0.65"/>
+  <rect x="54" y="34" width="12" height="26" rx="5" fill="currentColor" opacity="0.65"/>
+  <!-- Legs -->
+  <rect x="28" y="64" width="10" height="34" rx="5" fill="currentColor" opacity="0.7"/>
+  <rect x="42" y="64" width="10" height="34" rx="5" fill="currentColor" opacity="0.7"/>
+</svg>

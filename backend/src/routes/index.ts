@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma';
+import authRouter from './auth';
 
 // Routeur racine de l'API versionnée : /api/v1/...
 const router = Router();
@@ -21,8 +22,9 @@ router.get('/health', async (_req, res) => {
   });
 });
 
+router.use('/auth', authRouter);
+
 // Les domaines suivants seront montés dans les sprints suivants :
-//   router.use('/auth', authRouter);          // S2
 //   router.use('/exercises', exerciseRouter);  // S4
 //   router.use('/programs', programRouter);    // S5
 //   ...
