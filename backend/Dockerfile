@@ -22,5 +22,6 @@ RUN npm run build
 
 EXPOSE 3001
 
-# Au démarrage : applique les migrations (no-op tant qu'aucune n'existe) puis lance l'API
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
+# Le conteneur ne fait que lancer l'API ; le schéma (db push / migrate deploy)
+# et le seed sont gérés par scripts/install.sh et scripts/update.sh.
+CMD ["node", "dist/index.js"]
