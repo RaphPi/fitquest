@@ -131,13 +131,19 @@ for i in $(seq 1 60); do
 done
 [[ "${DB_READY:-0}" == "1" ]] || die "La base n'est pas prête après 60s."
 
-# ----- 6. Migrations + seed ----------------------------------
-msg_info "Application des migrations Prisma…"
-docker compose -f docker-compose.prod.yml exec -T backend npx prisma migrate deploy \
-  || die "prisma migrate deploy a échoué."
+# ----- 6. Schéma + seed --------------------------------------
+DC="docker compose -f docker-compose.prod.yml"
+# Migrations présentes → migrate deploy ; sinon → db push (création directe du schéma).
+if $DC exec -T backend sh -c '[ -d prisma/migrations ] && [ -n "$(ls -A prisma/migrations 2>/dev/null)" ]'; then
+  msg_info "Application des migrations Prisma…"
+  $DC exec -T backend npx prisma migrate deploy || die "prisma migrate deploy a échoué."
+else
+  msg_info "Synchronisation du schéma (prisma db push)…"
+  $DC exec -T backend npx prisma db push --accept-data-loss || die "prisma db push a échoué."
+fi
 msg_info "Seed des données (exercices + programmes)…"
-docker compose -f docker-compose.prod.yml exec -T backend npx prisma db seed \
-  || msg_err "Le seed a échoué (non bloquant) — relancer : docker compose -f docker-compose.prod.yml exec backend npx prisma db seed"
+$DC exec -T backend npx prisma db seed \
+  || msg_err "Le seed a échoué (non bloquant) — relancer : ${DC} exec backend npx prisma db seed"
 msg_ok "Base initialisée"
 
 # ----- 7. Commande de mise à jour ----------------------------
