@@ -126,5 +126,5 @@ echo -e "${GN}${BOLD}═══════════════════�
 echo -e "  ${GN}${BOLD}${APP} déployé dans la LXC #${CTID} !${CL}"
 echo -e "  ${BOLD}URL        :${CL} ${GN}http://${IP}${PORT_DISPLAY}${CL}"
 echo -e "  ${BOLD}Console    :${CL} pct enter ${CTID}"
-echo -e "  ${BOLD}Mise à jour:${CL} ${YW}pct exec ${CTID} -- update${CL}"
+echo -e "  ${BOLD}Mise à jour:${CL} ${YW}pct exec ${CTID} -- bash /opt/fitquest/scripts/update.sh${CL}"
 echo -e "${GN}${BOLD}════════════════════════════════════════════════${CL}"
