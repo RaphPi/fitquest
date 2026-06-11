@@ -1,19 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 120" fill="none">
   <!-- Head with hood -->
-  <circle cx="40" cy="17" r="10" fill="currentColor" opacity="0.9"/>
-  <path d="M28 14 Q40 2 52 14 Q48 24 40 26 Q32 24 28 14Z" fill="currentColor" opacity="0.55"/>
+  <circle cx="40" cy="17" r="10" fill="#a78bfa" opacity="0.9"/>
+  <path d="M28 14 Q40 2 52 14 Q48 24 40 26 Q32 24 28 14Z" fill="#a78bfa" opacity="0.55"/>
   <!-- Slim archer body -->
-  <rect x="28" y="30" width="24" height="30" rx="4" fill="currentColor" opacity="0.75"/>
+  <rect x="28" y="30" width="24" height="30" rx="4" fill="#a78bfa" opacity="0.75"/>
   <!-- Arms — left holds bow, right draws -->
-  <rect x="12" y="28" width="14" height="10" rx="5" fill="currentColor" opacity="0.65"/>
-  <rect x="54" y="32" width="14" height="10" rx="5" fill="currentColor" opacity="0.65"/>
+  <rect x="12" y="28" width="14" height="10" rx="5" fill="#a78bfa" opacity="0.65"/>
+  <rect x="54" y="32" width="14" height="10" rx="5" fill="#a78bfa" opacity="0.65"/>
   <!-- Bow (left side) -->
-  <path d="M13 22 Q4 38 13 54" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity="0.5" fill="none"/>
-  <line x1="13" y1="22" x2="13" y2="54" stroke="currentColor" stroke-width="1.5" opacity="0.35"/>
+  <path d="M13 22 Q4 38 13 54" stroke="#a78bfa" stroke-width="3" stroke-linecap="round" opacity="0.5" fill="none"/>
+  <line x1="13" y1="22" x2="13" y2="54" stroke="#a78bfa" stroke-width="1.5" opacity="0.35"/>
   <!-- Arrow -->
-  <line x1="15" y1="38" x2="55" y2="38" stroke="currentColor" stroke-width="2" opacity="0.4"/>
-  <polygon points="56,36 62,38 56,40" fill="currentColor" opacity="0.4"/>
+  <line x1="15" y1="38" x2="55" y2="38" stroke="#a78bfa" stroke-width="2" opacity="0.4"/>
+  <polygon points="56,36 62,38 56,40" fill="#a78bfa" opacity="0.4"/>
   <!-- Legs -->
-  <rect x="28" y="61" width="11" height="36" rx="5" fill="currentColor" opacity="0.7"/>
-  <rect x="41" y="61" width="11" height="36" rx="5" fill="currentColor" opacity="0.7"/>
+  <rect x="28" y="61" width="11" height="36" rx="5" fill="#a78bfa" opacity="0.7"/>
+  <rect x="41" y="61" width="11" height="36" rx="5" fill="#a78bfa" opacity="0.7"/>
 </svg>

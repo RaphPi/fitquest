@@ -24,7 +24,8 @@ const LEVELS = [
 
 const DIGESTS: { value: DigestFrequency; label: string }[] = [
   { value: 'NONE', label: 'Jamais' },
-  { value: 'WEEKLY', label: 'Hebdomadaire' },
+  { value: 'DAILY', label: 'Quotidien' },
+  { value: 'WEEKLY', label: 'Hebdo' },
   { value: 'MONTHLY', label: 'Mensuel' },
 ];
 
@@ -185,18 +186,18 @@ export default function Register() {
                   key={av.id}
                   type="button"
                   onClick={() => setAvatarStage(av.id)}
-                  className="flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition"
+                  className="flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all duration-200"
                   style={{
-                    borderColor: avatarStage === av.id ? '#6366f1' : '#1e2030',
-                    background: avatarStage === av.id ? '#0d0b1e' : 'transparent',
-                    boxShadow: avatarStage === av.id ? '0 0 18px #6366f150' : undefined,
+                    borderColor: avatarStage === av.id ? '#a78bfa' : '#1e2030',
+                    background: avatarStage === av.id ? '#1a1040' : '#0d0b1e',
+                    boxShadow: avatarStage === av.id ? '0 0 20px #a78bfa60' : undefined,
+                    transform: avatarStage === av.id ? 'scale(1.06)' : undefined,
                   }}
                 >
                   <img
                     src={av.src}
                     alt={av.label}
-                    className="h-14 w-auto"
-                    style={{ color: avatarStage === av.id ? '#a78bfa' : '#64748b' }}
+                    className="h-16 w-auto drop-shadow-lg"
                   />
                   <span
                     className="text-[10px] font-bold uppercase tracking-wider"

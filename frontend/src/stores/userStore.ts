@@ -16,9 +16,19 @@ interface UserState {
 }
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(path, { credentials: 'include', ...init });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error ?? 'Erreur serveur');
+  let res: Response;
+  try {
+    res = await fetch(path, { credentials: 'include', ...init });
+  } catch {
+    throw new Error('Impossible de contacter le serveur');
+  }
+  let data: unknown;
+  try {
+    data = await res.json();
+  } catch {
+    throw new Error(`Erreur serveur (${res.status})`);
+  }
+  if (!res.ok) throw new Error((data as Record<string, string>).error ?? 'Erreur serveur');
   return data as T;
 }
 

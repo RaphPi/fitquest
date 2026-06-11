@@ -4,11 +4,12 @@ import { useUserStore } from '@/stores/userStore';
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, hydrate } = useUserStore();
-  const [checked, setChecked] = useState(false);
+  const [checked, setChecked] = useState(isAuthenticated); // déjà auth → pas besoin de vérifier
 
   useEffect(() => {
+    if (isAuthenticated) return; // déjà connecté en mémoire (ex: juste après login/register)
     hydrate().finally(() => setChecked(true));
-  }, [hydrate]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!checked) {
     return (
