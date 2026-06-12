@@ -16,14 +16,15 @@ export default function LevelBadge({ level, size = 'md', className }: LevelBadge
   return (
     <div
       className={cn(
-        'inline-flex shrink-0 items-center justify-center rounded-full border-2 border-primary bg-card-shield font-display font-black text-primary shadow-glow',
-        'leading-[1] tracking-tight',
+        'inline-grid shrink-0 place-items-center rounded-full border-2 border-primary bg-card-shield font-display font-black text-primary shadow-glow',
         sizes[size],
         className,
       )}
-      style={{ lineHeight: 1 }}
     >
-      {level}
+      {/* line-height et font-metrics Orbitron forcés sur le span pour un centrage pixel-perfect */}
+      <span style={{ lineHeight: 1, display: 'block', marginTop: '1px' }}>
+        {level}
+      </span>
     </div>
   );
 }
