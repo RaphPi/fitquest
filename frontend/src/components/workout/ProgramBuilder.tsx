@@ -1,10 +1,13 @@
 import { useState, useCallback, useMemo } from 'react';
-import { ArrowLeft, Plus, Trash2, ChevronUp, ChevronDown, Search, X, Clock, Layers } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, ChevronUp, ChevronDown, Search, X, Clock, Layers, Info, SlidersHorizontal } from 'lucide-react';
 import { useProgramStore } from '@/stores/programStore';
 import type { ProgramFormData, SessionExerciseInput } from '@/stores/programStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
 import GlowButton from '@/components/ui/GlowButton';
-import type { Program, Level, Equipment, Exercise } from '@/types';
+import NumberStepper from '@/components/ui/NumberStepper';
+import SetsFlow from '@/components/workout/SetsFlow';
+import ExerciseInfoModal from '@/components/workout/ExerciseInfoModal';
+import type { Program, Level, Equipment, Exercise, Category } from '@/types';
 import { estimateExerciseSeconds } from '@/lib/duration';
 
 interface ProgramBuilderProps {
@@ -41,6 +44,24 @@ const equipmentOptions: { value: Equipment; label: string }[] = [
   { value: 'pull_bar', label: 'Barre de traction' },
   { value: 'other', label: 'Autre' },
 ];
+
+const categoryLabels: Record<Category, string> = {
+  push: 'Push', pull: 'Pull', legs: 'Jambes', core: 'Core', cardio: 'Cardio', back: 'Dos',
+};
+
+const categoryColors: Record<Category, string> = {
+  push: 'border-indigo-500/40 bg-indigo-500/10 text-indigo-300',
+  pull: 'border-violet-500/40 bg-violet-500/10 text-violet-300',
+  legs: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300',
+  core: 'border-amber-500/40 bg-amber-500/10 text-amber-300',
+  cardio: 'border-red-500/40 bg-red-500/10 text-red-300',
+  back: 'border-cyan-500/40 bg-cyan-500/10 text-cyan-300',
+};
+
+const equipmentBadgeLabels: Record<Equipment, string> = {
+  none: 'Corps', dumbbells: 'Haltères', barbell: 'Barre',
+  pull_bar: 'Traction', other: 'Autre',
+};
 
 let _keySeq = 0;
 const nextKey = () => `k${++_keySeq}`;
@@ -86,6 +107,17 @@ function sessionEstimateMinutes(session: DraftSession): number {
   return Math.round(secs / 60);
 }
 
+function deriveEquipment(sessions: DraftSession[], exMap: Map<string, Exercise>): Equipment[] {
+  const set = new Set<Equipment>();
+  for (const s of sessions) {
+    for (const ex of s.exercises) {
+      const found = exMap.get(ex.exerciseId);
+      if (found) set.add(found.equipment as Equipment);
+    }
+  }
+  return Array.from(set);
+}
+
 export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuilderProps) {
   const { createProgram, updateProgram, createSession, updateSession, deleteSession } = useProgramStore();
   const { exercises, fetchExercises } = useExerciseStore();
@@ -109,8 +141,11 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
   const [saveError, setSaveError] = useState<string | null>(null);
   const [pickerSession, setPickerSession] = useState<string | null>(null);
   const [pickerSearch, setPickerSearch] = useState('');
+  const [pickerCategoryFilter, setPickerCategoryFilter] = useState<Category | null>(null);
+  const [pickerEquipmentFilter, setPickerEquipmentFilter] = useState<Equipment | null>(null);
+  const [pickerShowFilters, setPickerShowFilters] = useState(false);
+  const [infoExercise, setInfoExercise] = useState<Exercise | null>(null);
 
-  // Live duration estimates
   const liveStats = useMemo(() => {
     const totalSets = sessions.reduce((a, s) => a + s.exercises.reduce((b, e) => b + e.sets, 0), 0);
     const totalEx = sessions.reduce((a, s) => a + s.exercises.length, 0);
@@ -124,19 +159,23 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
     if (exercises.length === 0) fetchExercises();
     setPickerSession(sessionKey);
     setPickerSearch('');
+    setPickerCategoryFilter(null);
+    setPickerEquipmentFilter(null);
+    setPickerShowFilters(false);
   }, [exercises.length, fetchExercises]);
 
   const filteredExercises = useMemo(() => {
+    let list = exercises;
     const q = pickerSearch.trim().toLowerCase();
-    if (!q) return exercises;
-    return exercises.filter(
-      (e) => e.nameFr.toLowerCase().includes(q) || e.nameEn.toLowerCase().includes(q),
-    );
-  }, [exercises, pickerSearch]);
+    if (q) list = list.filter((e) => e.nameFr.toLowerCase().includes(q) || e.nameEn.toLowerCase().includes(q));
+    if (pickerCategoryFilter) list = list.filter((e) => e.category === pickerCategoryFilter);
+    if (pickerEquipmentFilter) list = list.filter((e) => e.equipment === pickerEquipmentFilter);
+    return list;
+  }, [exercises, pickerSearch, pickerCategoryFilter, pickerEquipmentFilter]);
 
   const addExerciseToSession = (sessionKey: string, ex: Exercise) => {
-    setSessions((prev) =>
-      prev.map((s) => {
+    setSessions((prev) => {
+      const next = prev.map((s) => {
         if (s._key !== sessionKey) return s;
         return {
           ...s,
@@ -156,8 +195,11 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
             },
           ],
         };
-      }),
-    );
+      });
+      // auto-update equipment
+      setEquipment(deriveEquipment(next, exMap));
+      return next;
+    });
     setPickerSession(null);
   };
 
@@ -184,14 +226,11 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
   const updateSessionField = (key: string, field: 'nameFr' | 'nameEn', value: string) =>
     setSessions((prev) => prev.map((s) => (s._key === key ? { ...s, [field]: value } : s)));
 
-  const updateExerciseField = (sessionKey: string, exKey: string, field: string, value: number | null) =>
+  const updateExField = (sessionKey: string, exKey: string, field: string, value: number | null) =>
     setSessions((prev) =>
       prev.map((s) => {
         if (s._key !== sessionKey) return s;
-        return {
-          ...s,
-          exercises: s.exercises.map((e) => e._key === exKey ? { ...e, [field]: value } : e),
-        };
+        return { ...s, exercises: s.exercises.map((e) => e._key === exKey ? { ...e, [field]: value } : e) };
       }),
     );
 
@@ -199,10 +238,9 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
     setSessions((prev) =>
       prev.map((s) => {
         if (s._key !== sessionKey) return s;
-        return {
-          ...s,
-          exercises: s.exercises.filter((e) => e._key !== exKey).map((e, i) => ({ ...e, order: i })),
-        };
+        const next = { ...s, exercises: s.exercises.filter((e) => e._key !== exKey).map((e, i) => ({ ...e, order: i })) };
+        setEquipment(deriveEquipment([next, ...prev.filter(x => x._key !== sessionKey)], exMap));
+        return next;
       }),
     );
 
@@ -261,9 +299,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
       } else {
         const program = await updateProgram(initial.id, meta);
         programId = program.id;
-        const toDelete = initial.sessions
-          .map((s) => s.id)
-          .filter((id) => !sessions.some((s) => s.id === id));
+        const toDelete = initial.sessions.map((s) => s.id).filter((id) => !sessions.some((s) => s.id === id));
         for (const id of toDelete) await deleteSession(programId, id);
         for (const s of sessions) {
           if (s.id) await updateSession(programId, s.id, toSessionData(s));
@@ -282,8 +318,10 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
     }
   };
 
+  const pickerHasFilters = pickerCategoryFilter !== null || pickerEquipmentFilter !== null;
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="relative flex flex-col gap-4 pb-24">
       <button
         onClick={onBack}
         className="flex items-center gap-1.5 self-start text-sm text-muted-foreground hover:text-foreground"
@@ -296,11 +334,9 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
         {initial ? 'Modifier le programme' : 'Créer un programme'}
       </h2>
 
-      {/* ── Live duration ─────────────────────────────── */}
+      {/* ── Live stats ─────────────────────────────────── */}
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-primary/70">
-          Estimation temps réel
-        </p>
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-primary/70">Estimation temps réel</p>
         <div className="grid grid-cols-4 gap-2">
           {[
             { val: sessions.length, lbl: 'Séances' },
@@ -309,55 +345,48 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
             { val: liveStats.avgMin > 0 ? `~${liveStats.avgMin}` : '—', lbl: 'min/séance', gold: true },
           ].map(({ val, lbl, gold }) => (
             <div key={lbl} className="flex flex-col items-center rounded-lg border border-border bg-card py-2 px-1">
-              <span className={`font-display text-lg font-black ${gold ? 'text-xp' : 'text-primary'}`}>
-                {val}
-              </span>
+              <span className={`font-display text-lg font-black ${gold ? 'text-xp' : 'text-primary'}`}>{val}</span>
               <span className="text-center text-[9px] text-muted-foreground leading-tight mt-0.5">{lbl}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* ── Program info ──────────────────────────────── */}
+      {/* ── Program info ───────────────────────────────── */}
       <div className="rounded-xl border border-border bg-card p-4 flex flex-col gap-4">
         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Informations</p>
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1">
             <label className="text-[11px] text-muted-foreground font-semibold">Nom FR *</label>
-            <input
-              value={nameFr} onChange={(e) => setNameFr(e.target.value)}
+            <input value={nameFr} onChange={(e) => setNameFr(e.target.value)}
               placeholder="ex : Full Body Débutant"
               className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none"
             />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[11px] text-muted-foreground font-semibold">Nom EN *</label>
-            <input
-              value={nameEn} onChange={(e) => setNameEn(e.target.value)}
+            <input value={nameEn} onChange={(e) => setNameEn(e.target.value)}
               placeholder="ex : Full Body Beginner"
               className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none"
             />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[11px] text-muted-foreground font-semibold">Description FR</label>
-            <input
-              value={descFr} onChange={(e) => setDescFr(e.target.value)}
+            <input value={descFr} onChange={(e) => setDescFr(e.target.value)}
               placeholder="Description courte"
               className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none"
             />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[11px] text-muted-foreground font-semibold">Description EN</label>
-            <input
-              value={descEn} onChange={(e) => setDescEn(e.target.value)}
+            <input value={descEn} onChange={(e) => setDescEn(e.target.value)}
               placeholder="Short description"
               className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none"
             />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[11px] text-muted-foreground font-semibold">Niveau *</label>
-            <select
-              value={level} onChange={(e) => setLevel(e.target.value as Level)}
+            <select value={level} onChange={(e) => setLevel(e.target.value as Level)}
               className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary/60 focus:outline-none"
             >
               {levelOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -365,28 +394,30 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[11px] text-muted-foreground font-semibold">Jours / semaine *</label>
-            <input
-              type="number" min={1} max={7} value={daysPerWeek}
+            <input type="number" min={1} max={7} value={daysPerWeek}
               onChange={(e) => setDaysPerWeek(Number(e.target.value))}
               className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary/60 focus:outline-none"
             />
           </div>
           <div className="flex flex-col gap-1 col-span-2">
             <label className="text-[11px] text-muted-foreground font-semibold">Durée (semaines)</label>
-            <input
-              type="number" min={1} value={durationWeeks}
+            <input type="number" min={1} value={durationWeeks}
               onChange={(e) => setDurationWeeks(e.target.value)}
               placeholder="Optionnel"
               className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none"
             />
           </div>
         </div>
+
+        {/* Equipment — auto-updated but still editable */}
         <div className="flex flex-col gap-2">
-          <label className="text-[11px] text-muted-foreground font-semibold">Équipement</label>
+          <div className="flex items-center gap-2">
+            <label className="text-[11px] text-muted-foreground font-semibold">Équipement</label>
+            <span className="text-[9px] text-muted-foreground italic">(mis à jour automatiquement)</span>
+          </div>
           <div className="flex flex-wrap gap-2">
             {equipmentOptions.map((o) => (
-              <button
-                key={o.value} type="button" onClick={() => toggleEquipment(o.value)}
+              <button key={o.value} type="button" onClick={() => toggleEquipment(o.value)}
                 className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
                   equipment.includes(o.value)
                     ? 'border-primary/60 bg-primary/15 text-primary'
@@ -400,13 +431,12 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
         </div>
       </div>
 
-      {/* ── Sessions ──────────────────────────────────── */}
+      {/* ── Sessions ───────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           Séances ({sessions.length})
         </p>
-        <button
-          type="button" onClick={addSession}
+        <button type="button" onClick={addSession}
           className="flex items-center gap-1 rounded-lg border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary hover:bg-primary/20"
         >
           <Plus className="h-3.5 w-3.5" />
@@ -416,6 +446,10 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
 
       {sessions.map((session, sIdx) => {
         const sessionMin = sessionEstimateMinutes(session);
+        // collect equipment badges for this session
+        const sessionEquipment = Array.from(new Set(
+          session.exercises.map((ex) => exMap.get(ex.exerciseId)?.equipment as Equipment).filter(Boolean)
+        ));
         return (
           <div key={session._key} className="overflow-hidden rounded-xl border border-border bg-card">
             {/* Session header */}
@@ -424,14 +458,12 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                 {sIdx + 1}
               </span>
               <div className="grid flex-1 grid-cols-2 gap-2">
-                <input
-                  value={session.nameFr}
+                <input value={session.nameFr}
                   onChange={(e) => updateSessionField(session._key, 'nameFr', e.target.value)}
                   placeholder="Nom FR *"
                   className="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none"
                 />
-                <input
-                  value={session.nameEn}
+                <input value={session.nameEn}
                   onChange={(e) => updateSessionField(session._key, 'nameEn', e.target.value)}
                   placeholder="Name EN *"
                   className="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none"
@@ -444,98 +476,177 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                 </span>
               )}
               <div className="flex gap-0.5 shrink-0">
-                <button type="button" onClick={() => moveSession(session._key, -1)} disabled={sIdx === 0} className="rounded p-1 text-muted-foreground hover:text-foreground disabled:opacity-30">
+                <button type="button" onClick={() => moveSession(session._key, -1)} disabled={sIdx === 0}
+                  className="rounded p-1 text-muted-foreground hover:text-foreground disabled:opacity-30">
                   <ChevronUp className="h-3.5 w-3.5" />
                 </button>
-                <button type="button" onClick={() => moveSession(session._key, 1)} disabled={sIdx === sessions.length - 1} className="rounded p-1 text-muted-foreground hover:text-foreground disabled:opacity-30">
+                <button type="button" onClick={() => moveSession(session._key, 1)} disabled={sIdx === sessions.length - 1}
+                  className="rounded p-1 text-muted-foreground hover:text-foreground disabled:opacity-30">
                   <ChevronDown className="h-3.5 w-3.5" />
                 </button>
-                <button type="button" onClick={() => removeSession(session._key)} className="rounded p-1 text-muted-foreground hover:text-red-400">
+                <button type="button" onClick={() => removeSession(session._key)}
+                  className="rounded p-1 text-muted-foreground hover:text-red-400">
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
             </div>
 
-            {/* Legend */}
-            <div className="flex gap-3 border-b border-border px-3 py-1.5">
-              <span className="flex items-center gap-1 text-[9px] text-muted-foreground">
-                <span className="inline-block h-2 w-2 rounded-sm border border-primary/40 bg-primary/10" />
-                Repos↕ entre séries
-              </span>
-              <span className="flex items-center gap-1 text-[9px] text-muted-foreground">
-                <span className="inline-block h-2 w-2 rounded-sm border border-xp/40 bg-xp/10" />
-                Trans→ avant exercice suivant
-              </span>
-            </div>
+            {/* Session equipment badges */}
+            {sessionEquipment.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 border-b border-border px-3 py-1.5">
+                {sessionEquipment.map((eq) => (
+                  <span key={eq} className="rounded-full border border-border bg-white/5 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
+                    {equipmentBadgeLabels[eq]}
+                  </span>
+                ))}
+              </div>
+            )}
 
             {/* Exercises */}
             <div className="divide-y divide-border">
-              {session.exercises.map((ex, eIdx) => (
-                <div key={ex._key} className="flex items-center gap-2 px-3 py-2.5">
-                  <span className="w-4 shrink-0 text-center text-[10px] font-bold text-muted-foreground">{eIdx + 1}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-foreground font-display truncate">{ex._name || ex.exerciseId}</p>
-                    <div className="mt-1.5 flex flex-wrap gap-2">
-                      <label className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                        Séries
-                        <input type="number" min={1} value={ex.sets}
-                          onChange={(e) => updateExerciseField(session._key, ex._key, 'sets', Number(e.target.value))}
-                          className="w-11 rounded border border-border bg-background px-1.5 py-0.5 text-[11px] font-bold text-foreground text-center focus:outline-none"
-                        />
-                      </label>
-                      {ex._type === 'reps' ? (
-                        <label className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                          Reps
-                          <input type="number" min={1} value={ex.reps ?? ''}
-                            onChange={(e) => updateExerciseField(session._key, ex._key, 'reps', e.target.value ? Number(e.target.value) : null)}
-                            className="w-11 rounded border border-border bg-background px-1.5 py-0.5 text-[11px] font-bold text-foreground text-center focus:outline-none"
-                          />
-                        </label>
-                      ) : (
-                        <label className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                          Durée (s)
-                          <input type="number" min={1} value={ex.durationSeconds ?? ''}
-                            onChange={(e) => updateExerciseField(session._key, ex._key, 'durationSeconds', e.target.value ? Number(e.target.value) : null)}
-                            className="w-14 rounded border border-border bg-background px-1.5 py-0.5 text-[11px] font-bold text-xp text-center focus:outline-none"
-                          />
-                        </label>
-                      )}
-                      <label className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                        Repos↕
-                        <input type="number" min={0} value={ex.restBetweenSetsSeconds}
-                          onChange={(e) => updateExerciseField(session._key, ex._key, 'restBetweenSetsSeconds', Number(e.target.value))}
-                          className="w-11 rounded border border-primary/30 bg-primary/5 px-1.5 py-0.5 text-[11px] font-bold text-foreground text-center focus:outline-none"
-                        />
-                        <span className="text-[9px]">s</span>
-                      </label>
-                      <label className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                        Trans→
-                        <input type="number" min={0} value={ex.restAfterExerciseSeconds}
-                          onChange={(e) => updateExerciseField(session._key, ex._key, 'restAfterExerciseSeconds', Number(e.target.value))}
-                          className="w-11 rounded border border-xp/30 bg-xp/5 px-1.5 py-0.5 text-[11px] font-bold text-foreground text-center focus:outline-none"
-                        />
-                        <span className="text-[9px]">s</span>
-                      </label>
+              {session.exercises.map((ex, eIdx) => {
+                const exInfo = exMap.get(ex.exerciseId);
+                const exEquipment = exInfo?.equipment as Equipment | undefined;
+                const exCategory = exInfo?.category as Category | undefined;
+                return (
+                  <div key={ex._key} className="px-3 py-3 flex flex-col gap-2">
+                    {/* Exercise header row */}
+                    <div className="flex items-center gap-2">
+                      <span className="w-4 shrink-0 text-center text-[10px] font-bold text-muted-foreground">{eIdx + 1}</span>
+                      <div className="flex-1 min-w-0 flex items-center gap-1.5">
+                        <p className="font-display text-xs font-bold text-foreground truncate">{ex._name || ex.exerciseId}</p>
+                        {/* Info icon */}
+                        {exInfo && (
+                          <button
+                            type="button"
+                            onClick={() => setInfoExercise(exInfo)}
+                            className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-primary transition-colors"
+                            title="Voir la fiche exercice"
+                          >
+                            <Info className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      </div>
+                      {/* Badges */}
+                      <div className="flex gap-1 shrink-0">
+                        {exCategory && (
+                          <span className={`rounded-full border px-1.5 py-0.5 text-[8px] font-bold uppercase ${categoryColors[exCategory]}`}>
+                            {categoryLabels[exCategory]}
+                          </span>
+                        )}
+                        {exEquipment && exEquipment !== 'none' && (
+                          <span className="rounded-full border border-border bg-white/5 px-1.5 py-0.5 text-[8px] font-semibold text-muted-foreground">
+                            {equipmentBadgeLabels[exEquipment]}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex shrink-0 gap-0.5">
+                        <button type="button" onClick={() => moveExercise(session._key, ex._key, -1)} disabled={eIdx === 0}
+                          className="rounded p-1 text-muted-foreground hover:text-foreground disabled:opacity-30">
+                          <ChevronUp className="h-3 w-3" />
+                        </button>
+                        <button type="button" onClick={() => moveExercise(session._key, ex._key, 1)} disabled={eIdx === session.exercises.length - 1}
+                          className="rounded p-1 text-muted-foreground hover:text-foreground disabled:opacity-30">
+                          <ChevronDown className="h-3 w-3" />
+                        </button>
+                        <button type="button" onClick={() => removeExercise(session._key, ex._key)}
+                          className="rounded p-1 text-muted-foreground hover:text-red-400">
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
                     </div>
+
+                    {/* Fields row: Séries | Transition | Reps/Durée | Repos */}
+                    <div className="ml-6 flex flex-wrap gap-2.5 items-end">
+                      {/* Séries */}
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Séries</span>
+                        <NumberStepper
+                          value={ex.sets} min={1} max={20}
+                          onChange={(v) => updateExField(session._key, ex._key, 'sets', v)}
+                          variant="default"
+                        />
+                      </div>
+
+                      {/* Transition (restBetweenSetsSeconds) */}
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-[9px] font-semibold uppercase tracking-wider text-primary/70">Transition</span>
+                        <NumberStepper
+                          value={ex.restBetweenSetsSeconds} min={0} max={300} step={5} suffix="s"
+                          onChange={(v) => updateExField(session._key, ex._key, 'restBetweenSetsSeconds', v)}
+                          variant="primary"
+                        />
+                      </div>
+
+                      {/* Reps or Durée */}
+                      {ex._type === 'reps' ? (
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Reps</span>
+                          <NumberStepper
+                            value={ex.reps ?? 1} min={1} max={100}
+                            onChange={(v) => updateExField(session._key, ex._key, 'reps', v)}
+                            variant="default"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="text-[9px] font-semibold uppercase tracking-wider text-xp/80">Durée</span>
+                          <NumberStepper
+                            value={ex.durationSeconds ?? 30} min={5} max={600} step={5} suffix="s"
+                            onChange={(v) => updateExField(session._key, ex._key, 'durationSeconds', v)}
+                            variant="gold"
+                          />
+                        </div>
+                      )}
+
+                      {/* Repos (restAfterExerciseSeconds) */}
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-[9px] font-semibold uppercase tracking-wider text-xp/70">Repos</span>
+                        <NumberStepper
+                          value={ex.restAfterExerciseSeconds} min={0} max={300} step={5} suffix="s"
+                          onChange={(v) => updateExField(session._key, ex._key, 'restAfterExerciseSeconds', v)}
+                          variant="gold"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Sets flow preview */}
+                    <div className="ml-6 mt-0.5">
+                      <SetsFlow
+                        sets={ex.sets}
+                        reps={ex.reps}
+                        durationSeconds={ex.durationSeconds}
+                        restBetweenSetsSeconds={ex.restBetweenSetsSeconds}
+                        isDuration={ex._type === 'duration'}
+                        compact
+                      />
+                    </div>
+
+                    {/* Repos separator (inter-exercise, shown if not last) */}
+                    {eIdx < session.exercises.length - 1 && (
+                      <div className="ml-6 flex items-center gap-2 pt-1">
+                        <div className="h-px flex-1"
+                          style={{
+                            background: 'repeating-linear-gradient(to right,rgba(234,179,8,.35) 0,rgba(234,179,8,.35) 4px,transparent 4px,transparent 10px)',
+                          }}
+                        />
+                        <span className="text-[9px] font-semibold text-xp/60 whitespace-nowrap">
+                          Repos {ex.restAfterExerciseSeconds}s
+                        </span>
+                        <div className="h-px flex-1"
+                          style={{
+                            background: 'repeating-linear-gradient(to right,rgba(234,179,8,.35) 0,rgba(234,179,8,.35) 4px,transparent 4px,transparent 10px)',
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
-                  <div className="flex shrink-0 flex-col gap-0.5">
-                    <button type="button" onClick={() => moveExercise(session._key, ex._key, -1)} disabled={eIdx === 0} className="rounded p-1 text-muted-foreground hover:text-foreground disabled:opacity-30">
-                      <ChevronUp className="h-3 w-3" />
-                    </button>
-                    <button type="button" onClick={() => moveExercise(session._key, ex._key, 1)} disabled={eIdx === session.exercises.length - 1} className="rounded p-1 text-muted-foreground hover:text-foreground disabled:opacity-30">
-                      <ChevronDown className="h-3 w-3" />
-                    </button>
-                    <button type="button" onClick={() => removeExercise(session._key, ex._key)} className="rounded p-1 text-muted-foreground hover:text-red-400">
-                      <Trash2 className="h-3 w-3" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Add exercise */}
-            <button
-              type="button" onClick={() => openPicker(session._key)}
+            <button type="button" onClick={() => openPicker(session._key)}
               className="flex w-full items-center justify-center gap-1.5 border-t border-dashed border-border py-2.5 text-xs font-semibold text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors"
             >
               <Plus className="h-3.5 w-3.5" />
@@ -551,10 +662,10 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
         </div>
       )}
 
-      <div className="flex gap-3 pb-4">
-        <button
-          type="button" onClick={onBack}
-          className="flex-1 rounded-lg border border-border py-2.5 text-sm font-semibold text-foreground hover:bg-white/5"
+      {/* ── Sticky save bar ────────────────────────────── */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur-sm px-4 py-3 flex gap-3">
+        <button type="button" onClick={onBack}
+          className="flex-1 rounded-lg border border-border py-2.5 text-sm font-semibold text-foreground hover:bg-white/5 transition-colors"
         >
           Annuler
         </button>
@@ -563,19 +674,40 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
         </GlowButton>
       </div>
 
-      {/* Exercise picker modal */}
+      {/* ── Exercise picker modal ──────────────────────── */}
       {pickerSession && (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-black/70">
-          <div className="w-full max-w-lg rounded-t-2xl sm:rounded-2xl border border-border bg-card shadow-2xl flex flex-col max-h-[80vh]">
+          <div className="w-full max-w-lg rounded-t-2xl sm:rounded-2xl border border-border bg-card shadow-2xl flex flex-col max-h-[85vh]">
             <div className="flex items-center justify-between border-b border-border p-4">
               <div className="flex items-center gap-2">
                 <Layers className="h-4 w-4 text-primary" />
                 <p className="font-display text-sm font-bold text-foreground">Choisir un exercice</p>
               </div>
-              <button onClick={() => setPickerSession(null)} className="text-muted-foreground hover:text-foreground">
-                <X className="h-5 w-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPickerShowFilters((v) => !v)}
+                  className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-xs transition-colors ${
+                    pickerShowFilters || pickerHasFilters
+                      ? 'border-primary/60 bg-primary/10 text-primary'
+                      : 'border-border text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                  Filtres
+                  {pickerHasFilters && (
+                    <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary text-[8px] font-black text-white">
+                      {(pickerCategoryFilter ? 1 : 0) + (pickerEquipmentFilter ? 1 : 0)}
+                    </span>
+                  )}
+                </button>
+                <button onClick={() => setPickerSession(null)} className="text-muted-foreground hover:text-foreground">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
+
+            {/* Search */}
             <div className="border-b border-border p-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -586,20 +718,76 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                 />
               </div>
             </div>
+
+            {/* Filters */}
+            {pickerShowFilters && (
+              <div className="border-b border-border p-3 space-y-3">
+                <div className="space-y-1.5">
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Catégorie</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(Object.keys(categoryLabels) as Category[]).map((cat) => (
+                      <button key={cat} type="button"
+                        onClick={() => setPickerCategoryFilter(pickerCategoryFilter === cat ? null : cat)}
+                        className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold transition-colors ${
+                          pickerCategoryFilter === cat
+                            ? categoryColors[cat]
+                            : 'border-border text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {categoryLabels[cat]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Équipement</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {equipmentOptions.map((o) => (
+                      <button key={o.value} type="button"
+                        onClick={() => setPickerEquipmentFilter(pickerEquipmentFilter === o.value ? null : o.value)}
+                        className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold transition-colors ${
+                          pickerEquipmentFilter === o.value
+                            ? 'border-primary/60 bg-primary/15 text-primary'
+                            : 'border-border text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {o.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {pickerHasFilters && (
+                  <button
+                    type="button"
+                    onClick={() => { setPickerCategoryFilter(null); setPickerEquipmentFilter(null); }}
+                    className="text-[10px] font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                  >
+                    Effacer les filtres
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Results */}
             <div className="overflow-y-auto divide-y divide-border">
               {filteredExercises.length === 0 ? (
                 <p className="p-6 text-center text-sm text-muted-foreground">Aucun exercice trouvé</p>
               ) : (
                 filteredExercises.map((ex) => (
-                  <button
-                    key={ex.id} onClick={() => addExerciseToSession(pickerSession, ex)}
+                  <button key={ex.id} onClick={() => addExerciseToSession(pickerSession, ex)}
                     className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-white/5"
                   >
                     <div className="flex-1 min-w-0">
                       <p className="font-display text-sm font-bold text-foreground">{ex.nameFr}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {ex.category} · {ex.level} · {ex.type === 'duration' ? 'Durée' : 'Reps'}
-                      </p>
+                      <div className="mt-0.5 flex gap-1.5">
+                        <span className={`rounded-full border px-1.5 py-px text-[9px] font-bold uppercase ${categoryColors[ex.category as Category]}`}>
+                          {categoryLabels[ex.category as Category]}
+                        </span>
+                        <span className="text-xs text-muted-foreground">{ex.type === 'duration' ? 'Durée' : 'Reps'}</span>
+                        {ex.equipment !== 'none' && (
+                          <span className="text-xs text-muted-foreground">{equipmentBadgeLabels[ex.equipment as Equipment]}</span>
+                        )}
+                      </div>
                     </div>
                     <Plus className="h-4 w-4 shrink-0 text-primary" />
                   </button>
@@ -608,6 +796,11 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
             </div>
           </div>
         </div>
+      )}
+
+      {/* Exercise info modal */}
+      {infoExercise && (
+        <ExerciseInfoModal exercise={infoExercise} onClose={() => setInfoExercise(null)} />
       )}
     </div>
   );

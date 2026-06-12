@@ -7,6 +7,7 @@ import { useProgramStore } from '@/stores/programStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
 import type { Program, WorkoutSession, Exercise, Level } from '@/types';
 import GlowButton from '@/components/ui/GlowButton';
+import SetsFlow from '@/components/workout/SetsFlow';
 import {
   estimateSessionMinutes,
   estimateProgramMinutes,
@@ -202,39 +203,14 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
                               </span>
                             </div>
 
-                            {/* Sets flow — scrollable on mobile */}
-                            <div className="flex items-end gap-0 overflow-x-auto pb-1">
-                              {Array.from({ length: se.sets }).map((_, i) => (
-                                <div key={i} className="flex items-end shrink-0">
-                                  {/* Set pill */}
-                                  <div className="flex flex-col items-center gap-1">
-                                    <div className={`flex h-8 min-w-[36px] items-center justify-center rounded-lg border px-2 text-xs font-bold ${
-                                      isDuration
-                                        ? 'border-xp/30 bg-xp/10 text-xp'
-                                        : 'border-primary/25 bg-primary/10 text-foreground'
-                                    }`}>
-                                      {isDuration ? `${se.durationSeconds ?? '?'}s` : `${se.reps ?? '?'}`}
-                                    </div>
-                                    <span className="text-[9px] text-muted-foreground whitespace-nowrap">s{i + 1}</span>
-                                  </div>
-
-                                  {/* Rest between sets (not after last set) */}
-                                  {i < se.sets - 1 && (
-                                    <div className="flex flex-col items-center px-1.5 pb-4 shrink-0">
-                                      <div
-                                        className="h-px w-6"
-                                        style={{
-                                          background: `repeating-linear-gradient(to right, rgba(99,102,241,0.4) 0px, rgba(99,102,241,0.4) 3px, transparent 3px, transparent 7px)`,
-                                        }}
-                                      />
-                                      <span className="mt-0.5 text-[9px] font-semibold text-primary/60 whitespace-nowrap">
-                                        {se.restBetweenSetsSeconds}s
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
+                            {/* Sets flow */}
+                            <SetsFlow
+                              sets={se.sets}
+                              reps={se.reps}
+                              durationSeconds={se.durationSeconds}
+                              restBetweenSetsSeconds={se.restBetweenSetsSeconds}
+                              isDuration={isDuration}
+                            />
                           </div>
 
                           {/* Inter-exercise transition (not after last exercise) */}
@@ -247,7 +223,7 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
                                 }}
                               />
                               <span className="shrink-0 rounded-full border border-xp/25 bg-xp/8 px-2 py-0.5 text-[10px] font-semibold text-xp/70">
-                                ↓ transition {se.restAfterExerciseSeconds}s
+                                Repos {se.restAfterExerciseSeconds}s
                               </span>
                               <div
                                 className="flex-1 h-px"
