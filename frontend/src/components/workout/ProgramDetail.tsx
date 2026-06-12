@@ -207,8 +207,8 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
                               )}
                               <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-black ${
                                 isDuration
-                                  ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-400'
-                                  : 'border-primary/30 bg-primary/10 text-primary'
+                                  ? 'border-cyan-400/40 bg-cyan-400/15 text-cyan-400'
+                                  : 'border-white/25 bg-white/8 text-white'
                               }`}>
                                 {se.sets} × {isDuration ? `${se.durationSeconds ?? '?'}s` : `${se.reps ?? '?'}`}
                               </span>
