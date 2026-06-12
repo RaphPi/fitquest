@@ -34,13 +34,13 @@ function MobileHeader() {
         </span>
       </div>
       <div className="flex items-center gap-2.5">
-        <div className="w-28">
-          <XPBar
-            current={user.currentXP}
-            required={xpRequired(user.level)}
-            level={user.level}
-            animated={false}
-          />
+        <div className="text-right">
+          <p className="font-display text-[11px] font-bold leading-none text-primary">
+            LVL {user.level}
+          </p>
+          <p className="mt-0.5 text-[10px] leading-none text-muted-foreground">
+            {user.currentXP} / {xpRequired(user.level)} XP
+          </p>
         </div>
         <LevelBadge level={user.level} size="sm" />
       </div>
