@@ -68,4 +68,4 @@ fi
 
 # 6. Confirmation
 echo
-msg_ok "${BOLD}Mise à jour terminée.${CL} — $(date '+%d/%m/%Y %H:%M:%S')"
+msg_ok "${BOLD}Mise à jour terminée.${CL} — $(TZ='Europe/Paris' date '+%d/%m/%Y %H:%M:%S')"
