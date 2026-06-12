@@ -23,7 +23,7 @@ export default function SetsFlow({
 }: SetsFlowProps) {
   const pillValue = isDuration ? `${durationSeconds ?? '?'}s` : `${reps ?? '?'}`;
   const pillClass = isDuration
-    ? 'border-xp/30 bg-xp/10 text-xp'
+    ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-400'
     : 'border-primary/25 bg-primary/10 text-foreground';
 
   const h = compact ? 'h-7 min-w-[32px] text-[11px]' : 'h-8 min-w-[36px] text-xs';

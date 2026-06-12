@@ -54,7 +54,7 @@ export default function ProgramCard({ program, onClick, onEdit, onDelete, classN
           <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
         </div>
 
-        <p className="font-display text-base font-bold leading-tight text-foreground">{program.nameFr}</p>
+        <p className="font-display text-base font-bold leading-tight text-foreground line-clamp-2 min-h-[2.5rem]">{program.nameFr}</p>
 
         {program.descFr && (
           <p className="line-clamp-2 text-xs text-muted-foreground leading-relaxed">{program.descFr}</p>

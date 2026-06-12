@@ -7,7 +7,7 @@ interface NumberStepperProps {
   max?: number;
   step?: number;
   suffix?: string;
-  variant?: 'default' | 'primary' | 'gold';
+  variant?: 'default' | 'primary' | 'gold' | 'cyan';
   className?: string;
 }
 
@@ -27,6 +27,11 @@ const variantStyles = {
     btn: 'text-xp/70 hover:text-xp hover:bg-xp/15',
     val: 'text-xp font-bold',
   },
+  cyan: {
+    wrap: 'border-cyan-400/30 bg-cyan-400/8',
+    btn: 'text-cyan-400/70 hover:text-cyan-400 hover:bg-cyan-400/15',
+    val: 'text-cyan-400 font-bold',
+  },
 };
 
 export default function NumberStepper({
@@ -36,7 +41,7 @@ export default function NumberStepper({
   max = 999,
   step = 1,
   suffix,
-  variant = 'default',
+  variant = 'default' as const,
   className,
 }: NumberStepperProps) {
   const styles = variantStyles[variant];

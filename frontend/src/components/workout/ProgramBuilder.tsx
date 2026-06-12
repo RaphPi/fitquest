@@ -394,18 +394,17 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[11px] text-muted-foreground font-semibold">Jours / semaine *</label>
-            <input type="number" min={1} max={7} value={daysPerWeek}
-              onChange={(e) => setDaysPerWeek(Number(e.target.value))}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary/60 focus:outline-none"
-            />
+            <NumberStepper value={daysPerWeek} min={1} max={7} onChange={setDaysPerWeek} variant="primary" className="w-full" />
           </div>
           <div className="flex flex-col gap-1 col-span-2">
-            <label className="text-[11px] text-muted-foreground font-semibold">Durée (semaines)</label>
-            <input type="number" min={1} value={durationWeeks}
-              onChange={(e) => setDurationWeeks(e.target.value)}
-              placeholder="Optionnel"
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none"
-            />
+            <label className="text-[11px] text-muted-foreground font-semibold">Durée (semaines) <span className="font-normal italic text-muted-foreground">— optionnel</span></label>
+            <div className="flex items-center gap-3">
+              <NumberStepper value={durationWeeks ? Number(durationWeeks) : 0} min={0} max={52} suffix="sem."
+                onChange={(v) => setDurationWeeks(v === 0 ? '' : String(v))} variant="default" className="w-auto" />
+              {durationWeeks && (
+                <button type="button" onClick={() => setDurationWeeks('')} className="text-xs text-muted-foreground underline hover:text-foreground">Effacer</button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -556,56 +555,52 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                       </div>
                     </div>
 
-                    {/* Fields row: Séries | Transition | Reps/Durée | Repos */}
-                    <div className="ml-6 flex flex-wrap gap-2.5 items-end">
-                      {/* Séries */}
-                      <div className="flex flex-col items-center gap-1">
+                    {/* Fields: 2×2 grid — [Séries | Transition] / [Reps/Durée | Repos] */}
+                    <div className="ml-6 grid grid-cols-2 gap-x-3 gap-y-2.5">
+                      {/* Row 1: Séries | Transition */}
+                      <div className="flex flex-col gap-1">
                         <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Séries</span>
                         <NumberStepper
                           value={ex.sets} min={1} max={20}
                           onChange={(v) => updateExField(session._key, ex._key, 'sets', v)}
-                          variant="default"
+                          variant="default" className="w-full"
                         />
                       </div>
-
-                      {/* Transition (restBetweenSetsSeconds) */}
-                      <div className="flex flex-col items-center gap-1">
+                      <div className="flex flex-col gap-1">
                         <span className="text-[9px] font-semibold uppercase tracking-wider text-primary/70">Transition</span>
                         <NumberStepper
                           value={ex.restBetweenSetsSeconds} min={0} max={300} step={5} suffix="s"
                           onChange={(v) => updateExField(session._key, ex._key, 'restBetweenSetsSeconds', v)}
-                          variant="primary"
+                          variant="primary" className="w-full"
                         />
                       </div>
 
-                      {/* Reps or Durée */}
+                      {/* Row 2: Reps/Durée | Repos */}
                       {ex._type === 'reps' ? (
-                        <div className="flex flex-col items-center gap-1">
+                        <div className="flex flex-col gap-1">
                           <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Reps</span>
                           <NumberStepper
                             value={ex.reps ?? 1} min={1} max={100}
                             onChange={(v) => updateExField(session._key, ex._key, 'reps', v)}
-                            variant="default"
+                            variant="default" className="w-full"
                           />
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center gap-1">
-                          <span className="text-[9px] font-semibold uppercase tracking-wider text-xp/80">Durée</span>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[9px] font-semibold uppercase tracking-wider text-cyan-400/80">Durée</span>
                           <NumberStepper
                             value={ex.durationSeconds ?? 30} min={5} max={600} step={5} suffix="s"
                             onChange={(v) => updateExField(session._key, ex._key, 'durationSeconds', v)}
-                            variant="gold"
+                            variant="cyan" className="w-full"
                           />
                         </div>
                       )}
-
-                      {/* Repos (restAfterExerciseSeconds) */}
-                      <div className="flex flex-col items-center gap-1">
+                      <div className="flex flex-col gap-1">
                         <span className="text-[9px] font-semibold uppercase tracking-wider text-xp/70">Repos</span>
                         <NumberStepper
                           value={ex.restAfterExerciseSeconds} min={0} max={300} step={5} suffix="s"
                           onChange={(v) => updateExField(session._key, ex._key, 'restAfterExerciseSeconds', v)}
-                          variant="gold"
+                          variant="gold" className="w-full"
                         />
                       </div>
                     </div>
@@ -676,8 +671,8 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
 
       {/* ── Exercise picker modal ──────────────────────── */}
       {pickerSession && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-black/70">
-          <div className="w-full max-w-lg rounded-t-2xl sm:rounded-2xl border border-border bg-card shadow-2xl flex flex-col max-h-[85vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 sm:p-6">
+          <div className="w-full max-w-lg rounded-2xl border border-border bg-card shadow-2xl flex flex-col" style={{ maxHeight: 'min(85vh, 600px)' }}>
             <div className="flex items-center justify-between border-b border-border p-4">
               <div className="flex items-center gap-2">
                 <Layers className="h-4 w-4 text-primary" />

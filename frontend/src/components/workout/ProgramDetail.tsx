@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import {
   ArrowLeft, ChevronDown, ChevronRight, Clock, Dumbbell,
-  Layers, Calendar, Pencil, Trash2, Plus,
+  Layers, Calendar, Pencil, Trash2, Plus, Info,
 } from 'lucide-react';
 import { useProgramStore } from '@/stores/programStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
 import type { Program, WorkoutSession, Exercise, Level } from '@/types';
 import GlowButton from '@/components/ui/GlowButton';
 import SetsFlow from '@/components/workout/SetsFlow';
+import ExerciseInfoModal from '@/components/workout/ExerciseInfoModal';
 import {
   estimateSessionMinutes,
   estimateProgramMinutes,
@@ -33,6 +34,7 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
   const { isSaving } = useProgramStore();
   const [openSession, setOpenSession] = useState<string | null>(program.sessions[0]?.id ?? null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [infoExercise, setInfoExercise] = useState<Exercise | null>(null);
 
   useEffect(() => {
     if (exercises.length === 0) fetchExercises();
@@ -194,9 +196,18 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
                               <span className="font-display text-sm font-bold text-foreground flex-1 min-w-0 truncate">
                                 {ex?.nameFr ?? se.exerciseId}
                               </span>
+                              {ex && (
+                                <button
+                                  onClick={() => setInfoExercise(ex)}
+                                  className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-primary transition-colors"
+                                  title="Voir la fiche exercice"
+                                >
+                                  <Info className="h-3.5 w-3.5" />
+                                </button>
+                              )}
                               <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-black ${
                                 isDuration
-                                  ? 'border-xp/30 bg-xp/10 text-xp'
+                                  ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-400'
                                   : 'border-primary/30 bg-primary/10 text-primary'
                               }`}>
                                 {se.sets} × {isDuration ? `${se.durationSeconds ?? '?'}s` : `${se.reps ?? '?'}`}
@@ -243,6 +254,11 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
             );
           })}
         </div>
+      )}
+
+      {/* Exercise info modal */}
+      {infoExercise && (
+        <ExerciseInfoModal exercise={infoExercise} onClose={() => setInfoExercise(null)} />
       )}
 
       {/* Delete confirm modal */}
