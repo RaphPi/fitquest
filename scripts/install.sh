@@ -154,7 +154,8 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y -qq openssh-server >/dev/null 
 # Autorise login root par mot de passe
 sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
-systemctl enable --now ssh >/dev/null 2>&1 || true
+systemctl enable ssh >/dev/null 2>&1 || true
+systemctl restart ssh >/dev/null 2>&1 || true   # recharge sshd_config
 
 # Mot de passe root aléatoire si non défini (sera affiché à la fin)
 if [[ -t 0 ]]; then
@@ -167,10 +168,7 @@ echo "root:${ROOT_PW}" | chpasswd
 msg_ok "SSH prêt — login : root / mot de passe ci-dessous"
 
 # ----- 8. Commande de mise à jour ----------------------------
-cat > /usr/bin/update <<EOF
-#!/usr/bin/env bash
-exec bash ${INSTALL_DIR}/scripts/update.sh "\$@"
-EOF
+printf '#!/bin/bash\nexec /bin/bash %s/scripts/update.sh "$@"\n' "${INSTALL_DIR}" > /usr/bin/update
 chmod +x /usr/bin/update
 msg_ok "Commande 'update' installée (/usr/bin/update)"
 

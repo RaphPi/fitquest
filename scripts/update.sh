@@ -46,21 +46,24 @@ fi
 msg_ok "Schéma à jour"
 
 # 5. Auto-réparation : s'assure que les commandes utilitaires sont en place
-if [[ ! -x /usr/bin/update ]]; then
-  cat > /usr/bin/update <<'HEREDOC'
-#!/usr/bin/env bash
-exec bash /opt/fitquest/scripts/update.sh "$@"
-HEREDOC
+# Répare le wrapper update si absent ou s'il contient encore l'ancien shebang /usr/bin/env
+if [[ ! -x /usr/bin/update ]] || grep -q '/usr/bin/env' /usr/bin/update 2>/dev/null; then
+  printf '#!/bin/bash\nexec /bin/bash /opt/fitquest/scripts/update.sh "$@"\n' > /usr/bin/update
   chmod +x /usr/bin/update
   msg_ok "Commande 'update' réparée dans /usr/bin/update"
 fi
 
+# Répare SSH si absent ou si PermitRootLogin n'est pas activé
 if ! command -v sshd >/dev/null 2>&1; then
   msg_info "Installation de SSH (absent)…"
-  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq openssh-server >/dev/null 2>&1 && \
-  sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config && \
-  systemctl enable --now ssh >/dev/null 2>&1 && \
-  msg_ok "SSH installé — définis un mot de passe root : passwd root"
+  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq openssh-server >/dev/null 2>&1
+  msg_ok "SSH installé"
+fi
+if ! grep -q '^PermitRootLogin yes' /etc/ssh/sshd_config 2>/dev/null; then
+  sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+  sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+  systemctl restart ssh >/dev/null 2>&1 || true
+  msg_ok "SSH reconfiguré (PermitRootLogin yes) et redémarré"
 fi
 
 # 6. Confirmation
