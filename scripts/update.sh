@@ -45,7 +45,12 @@ else
 fi
 msg_ok "Schéma à jour"
 
-# 5. Auto-réparation : s'assure que les commandes utilitaires sont en place
+# 5. Seed (idempotent — upsert exercices, reset programmes seed)
+msg_info "Seed de la base…"
+$DC exec -T backend npx prisma db seed || die "prisma db seed a échoué."
+msg_ok "Base seedée"
+
+# 6. Auto-réparation : s'assure que les commandes utilitaires sont en place
 # Répare le wrapper update si absent ou s'il contient encore l'ancien shebang /usr/bin/env
 if [[ ! -x /usr/bin/update ]] || grep -q '/usr/bin/env' /usr/bin/update 2>/dev/null; then
   printf '#!/bin/bash\nexec /bin/bash /opt/fitquest/scripts/update.sh "$@"\n' > /usr/bin/update
@@ -66,6 +71,6 @@ if ! grep -q '^PermitRootLogin yes' /etc/ssh/sshd_config 2>/dev/null; then
   msg_ok "SSH reconfiguré (PermitRootLogin yes) et redémarré"
 fi
 
-# 6. Confirmation
+# 7. Confirmation
 echo
 msg_ok "${BOLD}Mise à jour terminée.${CL} — $(TZ='Europe/Paris' date '+%d/%m/%Y %H:%M:%S')"
