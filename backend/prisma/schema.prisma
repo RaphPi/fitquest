@@ -85,15 +85,16 @@ model Session {
 }
 
 model SessionExercise {
-  id              String  @id @default(cuid())
-  sessionId       String
-  session         Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  exerciseId      String
-  order           Int
-  sets            Int
-  reps            Int?
-  durationSeconds Int?
-  restSeconds     Int     @default(60)
+  id                      String  @id @default(cuid())
+  sessionId               String
+  session                 Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  exerciseId              String
+  order                   Int
+  sets                    Int
+  reps                    Int?
+  durationSeconds         Int?
+  restBetweenSetsSeconds  Int     @default(60)
+  restAfterExerciseSeconds Int    @default(20)
 }
 
 model WorkoutLog {

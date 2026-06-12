@@ -1,9 +1,18 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, ChevronDown, ChevronRight, Dumbbell, Timer, Pencil, Trash2, Plus } from 'lucide-react';
+import {
+  ArrowLeft, ChevronDown, ChevronRight, Clock, Dumbbell,
+  Layers, Calendar, Pencil, Trash2, Plus,
+} from 'lucide-react';
 import { useProgramStore } from '@/stores/programStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
-import type { Program, WorkoutSession, Level } from '@/types';
+import type { Program, WorkoutSession, Exercise, Level } from '@/types';
 import GlowButton from '@/components/ui/GlowButton';
+import {
+  estimateSessionMinutes,
+  estimateProgramMinutes,
+  countProgramExercises,
+  countProgramSets,
+} from '@/lib/duration';
 
 interface ProgramDetailProps {
   program: Program;
@@ -21,143 +30,237 @@ const levelLabels: Record<Level, string> = {
 export default function ProgramDetail({ program, onBack, onEdit, onDelete }: ProgramDetailProps) {
   const { exercises, fetchExercises } = useExerciseStore();
   const { isSaving } = useProgramStore();
-  const [expandedSession, setExpandedSession] = useState<string | null>(
-    program.sessions[0]?.id ?? null,
-  );
+  const [openSession, setOpenSession] = useState<string | null>(program.sessions[0]?.id ?? null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (exercises.length === 0) fetchExercises();
   }, [exercises.length, fetchExercises]);
 
-  const getExerciseName = (exerciseId: string) => {
-    return exercises.find((e) => e.id === exerciseId)?.nameFr ?? exerciseId;
-  };
+  const exMap = new Map<string, Exercise>(exercises.map((e) => [e.id, e]));
 
-  const getExerciseType = (exerciseId: string) => {
-    return exercises.find((e) => e.id === exerciseId)?.type ?? 'reps';
-  };
+  const avgMin = estimateProgramMinutes(program);
+  const totalEx = countProgramExercises(program);
+  const totalSets = countProgramSets(program);
+
+  const toggleSession = (id: string) =>
+    setOpenSession((prev) => (prev === id ? null : id));
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Retour
-        </button>
-      </div>
+      {/* Back */}
+      <button
+        onClick={onBack}
+        className="flex items-center gap-1.5 self-start text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Retour
+      </button>
 
-      <div className="flex flex-col gap-2">
+      {/* Header */}
+      <div className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex flex-col gap-1">
-            <h2 className="font-display text-xl font-black text-foreground">{program.nameFr}</h2>
-            {program.descFr && <p className="text-sm text-muted-foreground">{program.descFr}</p>}
+          <div className="flex flex-col gap-1.5">
+            <span className="inline-flex w-fit rounded-full border border-border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              {levelLabels[program.level as Level] ?? program.level}
+            </span>
+            <h2 className="font-display text-xl font-black leading-tight text-foreground">
+              {program.nameFr}
+            </h2>
+            {program.descFr && (
+              <p className="text-sm text-muted-foreground leading-relaxed">{program.descFr}</p>
+            )}
           </div>
-          {program.isCustom && (
-            <div className="flex gap-1 shrink-0">
-              <button
-                onClick={onEdit}
-                className="rounded-lg p-2 text-muted-foreground hover:bg-primary/10 hover:text-primary"
-              >
-                <Pencil className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setDeleteConfirm(true)}
-                className="rounded-lg p-2 text-muted-foreground hover:bg-danger/10 hover:text-red-400"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          )}
+          <div className="flex shrink-0 gap-1">
+            <button
+              onClick={onEdit}
+              className="rounded-lg p-2 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+              title="Modifier"
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setDeleteConfirm(true)}
+              className="rounded-lg p-2 text-muted-foreground hover:bg-danger/10 hover:text-red-400 transition-colors"
+              title="Supprimer"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-          <span className="rounded-full border border-border px-2.5 py-0.5">
-            {levelLabels[program.level as Level] ?? program.level}
-          </span>
-          <span className="rounded-full border border-border px-2.5 py-0.5">
+        {/* Program stats row */}
+        <div className="flex flex-wrap gap-2">
+          <span className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-semibold text-muted-foreground">
+            <Calendar className="h-3.5 w-3.5" />
             {program.daysPerWeek} j/semaine
+            {program.durationWeeks ? ` · ${program.durationWeeks} sem.` : ''}
           </span>
-          {program.durationWeeks && (
-            <span className="rounded-full border border-border px-2.5 py-0.5">
-              {program.durationWeeks} semaines
-            </span>
-          )}
-          <span className="rounded-full border border-border px-2.5 py-0.5">
+          <span className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-semibold text-muted-foreground">
+            <Dumbbell className="h-3.5 w-3.5" />
             {program.sessions.length} séance{program.sessions.length !== 1 ? 's' : ''}
           </span>
+          {totalEx > 0 && (
+            <span className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-semibold text-muted-foreground">
+              <Layers className="h-3.5 w-3.5" />
+              {totalEx} exercices · {totalSets} séries
+            </span>
+          )}
+          {avgMin > 0 && (
+            <span className="flex items-center gap-1.5 rounded-lg border border-xp/30 bg-xp/10 px-2.5 py-1.5 text-xs font-semibold text-xp">
+              <Clock className="h-3.5 w-3.5" />
+              ~{avgMin} min/séance
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Sessions list */}
+      {/* Sessions accordion */}
       {program.sessions.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Aucune séance dans ce programme.
-          {program.isCustom && (
-            <div className="mt-3">
-              <GlowButton variant="primary" size="sm" onClick={onEdit}>
-                <Plus className="mr-1.5 h-4 w-4" />
-                Ajouter une séance
-              </GlowButton>
-            </div>
-          )}
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-8 text-center">
+          <p className="text-sm text-muted-foreground">Aucune séance dans ce programme.</p>
+          <GlowButton variant="primary" size="sm" onClick={onEdit}>
+            <Plus className="mr-1.5 h-4 w-4" />
+            Ajouter une séance
+          </GlowButton>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          {program.sessions.map((session: WorkoutSession) => {
-            const isOpen = expandedSession === session.id;
+          {program.sessions.map((session: WorkoutSession, idx) => {
+            const isOpen = openSession === session.id;
+            const sessionMin = estimateSessionMinutes(session);
+            const label = String.fromCharCode(65 + idx); // A, B, C...
+
             return (
-              <div key={session.id} className="rounded-xl border border-border bg-card overflow-hidden">
+              <div
+                key={session.id}
+                className={`overflow-hidden rounded-xl border transition-colors duration-200 ${
+                  isOpen ? 'border-primary/30 bg-card' : 'border-border bg-card'
+                }`}
+              >
+                {/* Accordion header */}
                 <button
-                  className="flex w-full items-center justify-between gap-3 p-4 text-left hover:bg-white/5"
-                  onClick={() => setExpandedSession(isOpen ? null : session.id)}
+                  className="flex w-full items-center gap-3 p-4 text-left"
+                  onClick={() => toggleSession(session.id)}
                 >
-                  <div>
-                    <p className="font-display text-sm font-bold text-foreground">{session.nameFr}</p>
+                  <span
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border font-display text-xs font-black ${
+                      isOpen
+                        ? 'border-primary/40 bg-primary/15 text-primary'
+                        : 'border-border bg-background text-muted-foreground'
+                    }`}
+                  >
+                    {label}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className={`font-display text-sm font-bold ${isOpen ? 'text-foreground' : 'text-muted-foreground'}`}>
+                      {session.nameFr}
+                    </p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {session.exercises.length} exercice{session.exercises.length !== 1 ? 's' : ''}
+                      {sessionMin > 0 ? ` · ${session.exercises.reduce((a, e) => a + e.sets, 0)} séries` : ''}
                     </p>
                   </div>
+                  {sessionMin > 0 && (
+                    <span className={`shrink-0 text-xs font-bold ${isOpen ? 'text-xp' : 'text-muted-foreground'}`}>
+                      ~{sessionMin} min
+                    </span>
+                  )}
                   {isOpen ? (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <ChevronDown className="h-4 w-4 shrink-0 text-primary" />
                   ) : (
-                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                   )}
                 </button>
 
+                {/* Accordion body */}
                 {isOpen && session.exercises.length > 0 && (
-                  <div className="border-t border-border divide-y divide-border">
-                    {session.exercises.map((se) => {
-                      const exType = getExerciseType(se.exerciseId);
+                  <div className="border-t border-border">
+                    {session.exercises.map((se, eIdx) => {
+                      const ex = exMap.get(se.exerciseId);
+                      const isDuration = ex?.type === 'duration';
+                      const isLast = eIdx === session.exercises.length - 1;
+
                       return (
-                        <div key={se.id} className="flex items-center gap-3 px-4 py-3">
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                            {exType === 'duration' ? (
-                              <Timer className="h-4 w-4 text-primary" />
-                            ) : (
-                              <Dumbbell className="h-4 w-4 text-primary" />
-                            )}
+                        <div key={se.id}>
+                          {/* Exercise block */}
+                          <div className="px-4 pt-3 pb-2">
+                            {/* Exercise header */}
+                            <div className="flex items-center gap-2 mb-2.5">
+                              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-primary/10 text-[10px] font-black text-primary">
+                                {eIdx + 1}
+                              </span>
+                              <span className="font-display text-sm font-bold text-foreground flex-1 min-w-0 truncate">
+                                {ex?.nameFr ?? se.exerciseId}
+                              </span>
+                              <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-black ${
+                                isDuration
+                                  ? 'border-xp/30 bg-xp/10 text-xp'
+                                  : 'border-primary/30 bg-primary/10 text-primary'
+                              }`}>
+                                {se.sets} × {isDuration ? `${se.durationSeconds ?? '?'}s` : `${se.reps ?? '?'}`}
+                              </span>
+                            </div>
+
+                            {/* Sets flow — scrollable on mobile */}
+                            <div className="flex items-end gap-0 overflow-x-auto pb-1">
+                              {Array.from({ length: se.sets }).map((_, i) => (
+                                <div key={i} className="flex items-end shrink-0">
+                                  {/* Set pill */}
+                                  <div className="flex flex-col items-center gap-1">
+                                    <div className={`flex h-8 min-w-[36px] items-center justify-center rounded-lg border px-2 text-xs font-bold ${
+                                      isDuration
+                                        ? 'border-xp/30 bg-xp/10 text-xp'
+                                        : 'border-primary/25 bg-primary/10 text-foreground'
+                                    }`}>
+                                      {isDuration ? `${se.durationSeconds ?? '?'}s` : `${se.reps ?? '?'}`}
+                                    </div>
+                                    <span className="text-[9px] text-muted-foreground whitespace-nowrap">s{i + 1}</span>
+                                  </div>
+
+                                  {/* Rest between sets (not after last set) */}
+                                  {i < se.sets - 1 && (
+                                    <div className="flex flex-col items-center px-1.5 pb-4 shrink-0">
+                                      <div
+                                        className="h-px w-6"
+                                        style={{
+                                          background: `repeating-linear-gradient(to right, rgba(99,102,241,0.4) 0px, rgba(99,102,241,0.4) 3px, transparent 3px, transparent 7px)`,
+                                        }}
+                                      />
+                                      <span className="mt-0.5 text-[9px] font-semibold text-primary/60 whitespace-nowrap">
+                                        {se.restBetweenSetsSeconds}s
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-foreground truncate">
-                              {getExerciseName(se.exerciseId)}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {se.sets} série{se.sets !== 1 ? 's' : ''} ×{' '}
-                              {exType === 'duration'
-                                ? `${se.durationSeconds ?? '?'}s`
-                                : `${se.reps ?? '?'} reps`}
-                              {' · '}
-                              repos {se.restSeconds}s
-                            </p>
-                          </div>
+
+                          {/* Inter-exercise transition (not after last exercise) */}
+                          {!isLast && (
+                            <div className="flex items-center gap-2 px-4 py-1.5">
+                              <div
+                                className="flex-1 h-px"
+                                style={{
+                                  background: `repeating-linear-gradient(to right, rgba(245,158,11,0.3) 0px, rgba(245,158,11,0.3) 4px, transparent 4px, transparent 9px)`,
+                                }}
+                              />
+                              <span className="shrink-0 rounded-full border border-xp/25 bg-xp/8 px-2 py-0.5 text-[10px] font-semibold text-xp/70">
+                                ↓ transition {se.restAfterExerciseSeconds}s
+                              </span>
+                              <div
+                                className="flex-1 h-px"
+                                style={{
+                                  background: `repeating-linear-gradient(to right, rgba(245,158,11,0.3) 0px, rgba(245,158,11,0.3) 4px, transparent 4px, transparent 9px)`,
+                                }}
+                              />
+                            </div>
+                          )}
                         </div>
                       );
                     })}
+                    <div className="h-2" />
                   </div>
                 )}
               </div>
@@ -166,13 +269,13 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
         </div>
       )}
 
-      {/* Delete confirm */}
+      {/* Delete confirm modal */}
       {deleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
           <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-2xl">
             <h3 className="font-display text-lg font-bold text-foreground">Supprimer ce programme ?</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Cette action est irréversible. Toutes les séances seront supprimées.
+              Cette action est irréversible. Toutes les séances associées seront supprimées.
             </p>
             <div className="mt-5 flex gap-3">
               <button

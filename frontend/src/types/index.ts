@@ -33,7 +33,8 @@ export interface SessionExercise {
   sets: number;
   reps?: number | null;
   durationSeconds?: number | null;
-  restSeconds: number;
+  restBetweenSetsSeconds: number;
+  restAfterExerciseSeconds: number;
 }
 
 export interface WorkoutSession {

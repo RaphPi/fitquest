@@ -1,6 +1,11 @@
 import { cn } from '@/lib/utils';
 import type { Program, Level } from '@/types';
-import { Calendar, Dumbbell, ChevronRight, Pencil, Trash2 } from 'lucide-react';
+import { Calendar, Dumbbell, Clock, Pencil, Trash2, ChevronRight, Layers } from 'lucide-react';
+import {
+  estimateProgramMinutes,
+  countProgramExercises,
+  countProgramSets,
+} from '@/lib/duration';
 
 interface ProgramCardProps {
   program: Program;
@@ -24,87 +29,85 @@ const levelLabels: Record<Level, string> = {
 
 export default function ProgramCard({ program, onClick, onEdit, onDelete, className }: ProgramCardProps) {
   const level = program.level as Level;
+  const avgMin = estimateProgramMinutes(program);
+  const totalEx = countProgramExercises(program);
+  const totalSets = countProgramSets(program);
 
   return (
     <div
       className={cn(
-        'group relative flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition-all duration-200 hover:border-primary/40 hover:shadow-glow',
+        'group flex flex-col gap-0 rounded-xl border border-border bg-card transition-all duration-200 hover:border-primary/40 hover:shadow-glow overflow-hidden',
         className,
       )}
     >
-      <button className="flex w-full flex-col gap-3 text-left" onClick={onClick}>
+      {/* Main clickable area */}
+      <button className="flex flex-col gap-3 p-4 text-left w-full" onClick={onClick}>
         <div className="flex items-start justify-between gap-2">
           <span
             className={cn(
               'rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider',
-              levelColors[level] ?? 'text-muted-foreground',
+              levelColors[level] ?? 'text-muted-foreground border-border',
             )}
           >
             {levelLabels[level] ?? level}
           </span>
-          {program.isCustom && (
-            <span className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-primary">
-              Custom
-            </span>
-          )}
+          <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
         </div>
 
         <p className="font-display text-base font-bold leading-tight text-foreground">{program.nameFr}</p>
 
         {program.descFr && (
-          <p className="line-clamp-2 text-xs text-muted-foreground">{program.descFr}</p>
+          <p className="line-clamp-2 text-xs text-muted-foreground leading-relaxed">{program.descFr}</p>
         )}
 
-        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <Calendar className="h-3.5 w-3.5" />
-            {program.daysPerWeek} j/semaine
+        {/* Stats chips */}
+        <div className="flex flex-wrap gap-2">
+          <span className="flex items-center gap-1 rounded-lg border border-border bg-background px-2 py-1 text-[11px] font-semibold text-muted-foreground">
+            <Calendar className="h-3 w-3" />
+            {program.daysPerWeek} j/sem
           </span>
-          {program.durationWeeks && (
-            <span className="flex items-center gap-1">
-              <Calendar className="h-3.5 w-3.5" />
-              {program.durationWeeks} sem.
-            </span>
-          )}
-          <span className="flex items-center gap-1">
-            <Dumbbell className="h-3.5 w-3.5" />
+          <span className="flex items-center gap-1 rounded-lg border border-border bg-background px-2 py-1 text-[11px] font-semibold text-muted-foreground">
+            <Dumbbell className="h-3 w-3" />
             {program.sessions.length} séance{program.sessions.length !== 1 ? 's' : ''}
           </span>
+          {totalEx > 0 && (
+            <span className="flex items-center gap-1 rounded-lg border border-border bg-background px-2 py-1 text-[11px] font-semibold text-muted-foreground">
+              <Layers className="h-3 w-3" />
+              {totalEx} ex · {totalSets} séries
+            </span>
+          )}
+          {avgMin > 0 && (
+            <span className="flex items-center gap-1 rounded-lg border border-xp/30 bg-xp/10 px-2 py-1 text-[11px] font-semibold text-xp">
+              <Clock className="h-3 w-3" />
+              ~{avgMin} min/séance
+            </span>
+          )}
         </div>
       </button>
 
-      <div className="flex items-center justify-between">
-        <button
-          onClick={onClick}
-          className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-        >
-          Voir le détail
-          <ChevronRight className="h-3.5 w-3.5" />
-        </button>
-
-        {program.isCustom && (
-          <div className="flex gap-1">
-            {onEdit && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                className="rounded-lg p-1.5 text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                title="Modifier"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </button>
-            )}
-            {onDelete && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                className="rounded-lg p-1.5 text-muted-foreground hover:bg-danger/10 hover:text-red-400"
-                title="Supprimer"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
-        )}
-      </div>
+      {/* Edit / delete actions */}
+      {(onEdit || onDelete) && (
+        <div className="flex items-center justify-end gap-1 border-t border-border px-3 py-2">
+          {onEdit && (
+            <button
+              onClick={onEdit}
+              className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              Modifier
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={onDelete}
+              className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-muted-foreground hover:bg-danger/10 hover:text-red-400 transition-colors"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Supprimer
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

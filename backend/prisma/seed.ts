@@ -35,7 +35,9 @@ interface SeedSessionExercise {
   sets: number;
   reps?: number;
   duration_seconds?: number;
-  rest_seconds?: number;
+  rest_between_sets_seconds?: number;
+  rest_seconds?: number; // ancien nom conservé pour compat seed existant
+  rest_after_exercise_seconds?: number;
 }
 
 interface SeedSession {
@@ -124,7 +126,8 @@ async function main(): Promise<void> {
                 sets: e.sets,
                 reps: e.reps ?? null,
                 durationSeconds: e.duration_seconds ?? null,
-                restSeconds: e.rest_seconds ?? 60,
+                restBetweenSetsSeconds: e.rest_between_sets_seconds ?? e.rest_seconds ?? 60,
+                restAfterExerciseSeconds: e.rest_after_exercise_seconds ?? 20,
               })),
             },
           })),
