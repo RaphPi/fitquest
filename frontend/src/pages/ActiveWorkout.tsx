@@ -4,10 +4,13 @@ import { Pause, Minus, Plus, Info } from 'lucide-react';
 import { useWorkoutStore } from '@/stores/workoutStore';
 import { useUserStore } from '@/stores/userStore';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useExerciseStore } from '@/stores/exerciseStore';
 import { effortPoints, typeCopy } from '@/lib/bossFight';
 import { levelProgressPct } from '@/lib/xp';
-import { renderBoss, drawSprite, WEAPONS, SHIELD } from '@/lib/pixelSprites';
+import { playSound } from '@/lib/sound';
+import { renderBoss, drawSprite, WEAPONS, SHIELD, ANVIL, HAMMER } from '@/lib/pixelSprites';
 import PixelCanvas from '@/components/workout/active/PixelCanvas';
+import ExerciseInfoModal from '@/components/workout/ExerciseInfoModal';
 
 const CSS = `
 @keyframes fq-bossIdle { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
@@ -23,6 +26,8 @@ const CSS = `
 @keyframes fq-rise { 0%{opacity:0;transform:translateY(30px) scale(.5)} 25%{opacity:1} 100%{opacity:0;transform:translateY(-140px) scale(1.1)} }
 @keyframes fq-flash { 0%{opacity:.9} 100%{opacity:0} }
 @keyframes fq-xpcount { 0%{opacity:0;transform:translateY(8px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes fq-hammer { 0%,50%{transform:rotate(-46deg)} 68%{transform:rotate(10deg)} 78%{transform:rotate(2deg)} 100%{transform:rotate(-46deg)} }
+@keyframes fq-fspark { 0%{opacity:0;transform:translate(0,0) scale(1)} 8%{opacity:1} 100%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(.3)} }
 .fq-idle { animation:fq-bossIdle 3s ease-in-out infinite; }
 .fq-recoil { animation:fq-recoil .45s; }
 .fq-scan::after { content:'';position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;opacity:.45;background:repeating-linear-gradient(0deg,rgba(0,0,0,.32) 0 1px,transparent 1px 3px); }
@@ -39,33 +44,6 @@ function fmt(secs: number): string {
 
 interface Particle { id: number; mx: string; my: string; color: string; }
 
-/** Petite fanfare WebAudio (zéro asset) : arpège de victoire + note bonus si level-up. */
-function playVictoryChime(leveledUp: boolean) {
-  try {
-    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (!Ctx) return;
-    const ctx = new Ctx();
-    void ctx.resume();
-    const notes = leveledUp ? [523.25, 659.25, 783.99, 1046.5] : [392, 523.25, 659.25];
-    notes.forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'square';
-      osc.frequency.value = freq;
-      const t0 = ctx.currentTime + i * 0.12;
-      gain.gain.setValueAtTime(0.0001, t0);
-      gain.gain.exponentialRampToValueAtTime(0.18, t0 + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.22);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(t0);
-      osc.stop(t0 + 0.24);
-    });
-    setTimeout(() => void ctx.close(), 1200);
-  } catch {
-    /* audio indisponible — on ignore silencieusement */
-  }
-}
-
 export default function ActiveWorkout() {
   const navigate = useNavigate();
   const {
@@ -76,9 +54,13 @@ export default function ActiveWorkout() {
   const user = useUserStore((s) => s.user);
   const bossKey = useSettingsStore((s) => s.boss);
   const weaponKey = useSettingsStore((s) => s.weapon);
+  const autoAdvanceRest = useSettingsStore((s) => s.autoAdvanceRest);
+  const exercises = useExerciseStore((s) => s.exercises);
+  const fetchExercises = useExerciseStore((s) => s.fetchExercises);
 
   const [, forceTick] = useState(0);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
   const [inputVal, setInputVal] = useState(0);
   const [striking, setStriking] = useState(false);
   const [combo, setCombo] = useState(0);
@@ -93,11 +75,21 @@ export default function ActiveWorkout() {
   const cur = session?.exercises[exerciseIndex];
   const copy = cur ? typeCopy(cur.type) : typeCopy('reps');
   const clock = useMemo(() => new Date().toTimeString().slice(0, 5), []);
+  const curExercise = useMemo(
+    () => exercises.find((e) => e.id === cur?.exerciseId) ?? null,
+    [exercises, cur?.exerciseId],
+  );
 
   // Chrono : re-render chaque seconde.
   useEffect(() => {
     const id = setInterval(() => forceTick((t) => t + 1), 1000);
     return () => clearInterval(id);
+  }, []);
+
+  // Catalogue d'exercices (pour la fiche info) — chargé si absent.
+  useEffect(() => {
+    if (exercises.length === 0) void fetchExercises();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Sync displayHp hors animation.
@@ -115,7 +107,13 @@ export default function ActiveWorkout() {
     setRestRemaining(total);
     const id = setInterval(() => {
       setRestRemaining((r) => {
-        if (r <= 1) { clearInterval(id); resumeFromRest(); return 0; }
+        if (r <= 1) {
+          clearInterval(id);
+          // Enchaînement auto seulement si activé dans les paramètres ;
+          // sinon on reste à 0 en attendant que l'utilisateur appuie sur « Reprendre ».
+          if (autoAdvanceRest) { playSound('resume'); resumeFromRest(); }
+          return 0;
+        }
         return r - 1;
       });
     }, 1000);
@@ -129,9 +127,12 @@ export default function ActiveWorkout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
-  // Fanfare à l'apparition du résultat (note bonus si montée de niveau).
+  // Sons à l'apparition du résultat : victoire/fuite, puis level-up en bonus.
   useEffect(() => {
-    if (result) playVictoryChime(result.leveledUp);
+    if (!result) return;
+    playSound(result.user ? (bossHp <= 0 ? 'victory' : 'flee') : 'victory');
+    if (result.leveledUp) setTimeout(() => playSound('levelup'), 650);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result]);
 
   if (!session || !cur) return <Navigate to="/workout" replace />;
@@ -147,16 +148,16 @@ export default function ActiveWorkout() {
   }
 
   function spawnMagic(n: number) {
-    const cols = ['#f59e0b', '#fcd34d', '#a78bfa', '#7dd3fc', '#fff3c4'];
+    const cols = ['#f59e0b', '#fcd34d', '#a78bfa', '#7dd3fc', '#fff3c4', '#fb7185'];
     const next: Particle[] = [];
-    const count = Math.min(18, 8 + n * 2);
+    const count = Math.min(46, 22 + n * 3);
     for (let i = 0; i < count; i++) {
       const ang = Math.random() * Math.PI * 2;
-      const dist = 40 + Math.random() * 80;
+      const dist = 70 + Math.random() * 150;
       next.push({ id: Date.now() + i, mx: `${Math.cos(ang) * dist}px`, my: `${Math.sin(ang) * dist}px`, color: cols[i % cols.length] });
     }
     setParticles(next);
-    setTimeout(() => setParticles([]), 1200);
+    setTimeout(() => setParticles([]), 1400);
   }
 
   function doStrike(value: number) {
@@ -280,12 +281,14 @@ export default function ActiveWorkout() {
         {/* Arène centrale */}
         <main className="relative flex flex-col items-center justify-center">
           <div className="pointer-events-none absolute left-1/2 top-[44%] h-56 w-56 rounded-full" style={{ background: 'radial-gradient(circle, rgba(239,68,68,.20), transparent 62%)', animation: 'fq-pulse 3s ease-in-out infinite' }} />
-          {surpass && <div className="absolute top-[6%] z-30 text-[11px] text-xp" style={{ fontFamily: PX, left: '50%', textShadow: '0 0 10px rgba(245,158,11,.9)', animation: 'fq-surpass 1.4s ease-out' }}>✦ SURPASSEMENT ✦</div>}
+          {/* Flash doré de surpassement */}
+          {surpass && <div key={`sf-${hitKey}`} className="pointer-events-none absolute inset-0 z-20" style={{ background: 'radial-gradient(circle at 50% 44%, rgba(245,158,11,.5), transparent 60%)', animation: 'fq-flash 1s ease-out forwards' }} />}
+          {surpass && <div className="absolute top-[4%] z-30 font-black text-xp" style={{ fontFamily: PX, fontSize: 16, left: '50%', textShadow: '0 0 16px rgba(245,158,11,1),2px 2px 0 #7f1d1d', animation: 'fq-surpass 1.5s ease-out' }}>✦ SURPASSEMENT ✦</div>}
           {combo > 0 && striking && <div className="absolute top-[12%] z-30 -translate-x-1/2 text-[15px] text-primary-soft" style={{ fontFamily: PX, left: '50%', textShadow: '2px 2px 0 #312e81' }}>COMBO x{combo}</div>}
           {striking && <div key={`f-${hitKey}`} className="absolute top-[24%] z-30 font-display text-2xl font-black text-xp" style={{ left: '55%', textShadow: '2px 2px 0 #7f1d1d', animation: 'fq-float 1.3s ease-out' }}>-{floatDmg}</div>}
           <div className="pointer-events-none absolute top-[42%] z-30" style={{ left: '50%' }}>
             {particles.map((p) => (
-              <span key={p.id} className="absolute h-[7px] w-[7px]" style={{ background: p.color, ['--mx' as string]: p.mx, ['--my' as string]: p.my, animation: 'fq-mp .9s ease-out forwards', imageRendering: 'pixelated' }} />
+              <span key={p.id} className="absolute h-[10px] w-[10px]" style={{ background: p.color, boxShadow: `0 0 6px ${p.color}`, ['--mx' as string]: p.mx, ['--my' as string]: p.my, animation: 'fq-mp 1.1s ease-out forwards', imageRendering: 'pixelated' }} />
             ))}
           </div>
           {bossCanvas(11)}
@@ -302,23 +305,59 @@ export default function ActiveWorkout() {
         {/* Panneau droit (desktop) : liste des exercices */}
         <aside className="hidden flex-col gap-2 border-l border-border/60 p-5 lg:flex">
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Séance</div>
-          {session.exercises.map((ex, i) => (
-            <div key={ex.sessionExerciseId} className={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm ${
-              i === exerciseIndex ? 'border-primary/50 bg-primary/10 text-foreground' : i < exerciseIndex ? 'border-border text-muted-foreground line-through' : 'border-border text-muted-foreground'
-            }`}>
-              <span className="truncate">{ex.name}</span>
-              <span className="ml-2 shrink-0 font-display text-[11px]">{ex.sets}×{ex.target}{ex.type === 'duration' ? 's' : ''}</span>
-            </div>
-          ))}
+          {session.exercises.map((ex, i) => {
+            const isCurrent = i === exerciseIndex;
+            const isDone = i < exerciseIndex;
+            return (
+              <div
+                key={ex.sessionExerciseId}
+                className={`flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm transition-all ${
+                  isCurrent
+                    ? 'border-primary bg-primary/15 text-foreground shadow-[0_0_16px_-4px_var(--accent)]'
+                    : isDone
+                      ? 'border-success/30 bg-success/5 text-muted-foreground'
+                      : 'border-border text-muted-foreground'
+                }`}
+              >
+                {/* Pastille d'état */}
+                <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-[10px] font-black ${
+                  isDone ? 'bg-success text-[#04250f]' : isCurrent ? 'bg-primary text-white' : 'border border-border text-muted-foreground'
+                }`}>
+                  {isDone ? '✓' : i + 1}
+                </span>
+                <span className={`flex-1 truncate ${isCurrent ? 'font-semibold' : ''}`}>{ex.name}</span>
+                {isCurrent && <span className="shrink-0 text-[9px] font-bold uppercase tracking-wider text-primary-soft">en cours</span>}
+                <span className="ml-1 shrink-0 font-display text-[11px]">{ex.sets}×{ex.target}{ex.type === 'duration' ? 's' : ''}</span>
+              </div>
+            );
+          })}
         </aside>
       </div>
 
       {/* EXERCICE COURANT (sous l'arène, toutes tailles) */}
       <div className="z-20 px-4 text-center">
-        <div className="font-display text-xl font-bold">{cur.name}</div>
-        <div className="mt-1.5 flex flex-wrap justify-center gap-2">
+        <div className="flex items-center justify-center gap-2">
+          <div className="font-display text-xl font-bold">{cur.name}</div>
+          {curExercise && (
+            <button onClick={() => setInfoOpen(true)} title="Fiche de l'exercice"
+              className="grid h-6 w-6 place-items-center rounded-full border border-border text-muted-foreground hover:text-primary">
+              <Info className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+        <div className="mt-1.5 flex items-center justify-center gap-3">
           <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-bold text-primary-soft">{cur.category.toUpperCase()}</span>
-          <span className="rounded-full border border-border px-3 py-1 text-[11px] font-bold">Série {setIndex + 1}/{cur.sets} · cible {cur.target}{cur.type === 'duration' ? 's' : ''}</span>
+          <span className="text-[11px] font-bold text-muted-foreground">Série {setIndex + 1}/{cur.sets}</span>
+        </div>
+        {/* Objectif bien visible */}
+        <div className="mt-2.5 inline-flex items-baseline gap-2 rounded-2xl border-2 px-6 py-2"
+          style={cur.type === 'duration'
+            ? { borderColor: 'rgba(34,211,238,.5)', background: 'rgba(34,211,238,.08)' }
+            : { borderColor: 'rgba(255,255,255,.2)', background: 'rgba(255,255,255,.04)' }}>
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Objectif</span>
+          <span className="font-display text-5xl font-black leading-none"
+            style={{ color: cur.type === 'duration' ? 'rgba(34,211,238,1)' : '#ffffff' }}>{cur.target}</span>
+          <span className="text-sm font-bold text-muted-foreground">{cur.type === 'duration' ? 'sec' : 'reps'}</span>
         </div>
         <div className="mt-2.5">{setsRow}</div>
       </div>
@@ -338,10 +377,18 @@ export default function ActiveWorkout() {
           ⚔ {copy.cta}
         </button>
         <div className="mt-3 flex gap-2">
-          <button className="h-10 flex-1 rounded-xl border border-border bg-card text-xs font-semibold text-muted-foreground"><Info className="mx-auto h-4 w-4" /></button>
+          <button onClick={() => setInfoOpen(true)} disabled={!curExercise}
+            className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-border bg-card text-xs font-semibold text-muted-foreground disabled:opacity-40">
+            <Info className="h-4 w-4" /> Fiche
+          </button>
           <button onClick={skipExercise} className="h-10 flex-1 rounded-xl border border-border bg-card text-xs font-semibold text-muted-foreground">Passer l'exo ▸</button>
         </div>
       </footer>
+
+      {/* Fiche exercice */}
+      {infoOpen && curExercise && (
+        <ExerciseInfoModal exercise={curExercise} onClose={() => setInfoOpen(false)} />
+      )}
 
       {/* CONFIRM */}
       {confirmOpen && (
@@ -368,15 +415,24 @@ export default function ActiveWorkout() {
       {phase === 'rest' && (
         <Overlay blur>
           <div className="flex flex-col items-center gap-4 text-center">
-            <div className="text-[9px]" style={{ fontFamily: PX, color: restKind === 'transition' ? 'var(--accent-soft)' : 'var(--xp)' }}>
-              ⏳ {restKind === 'transition' ? 'REPRENDS TON SOUFFLE' : 'RÉCUPÉRATION'}
-            </div>
+            {restKind === 'repos' ? (
+              <>
+                <div style={{ fontFamily: PX, fontSize: 11, color: 'var(--xp)', textShadow: '0 0 10px rgba(245,158,11,.6)' }}>⚒ À LA FORGE</div>
+                <Forge />
+                <p className="-mt-1 text-xs italic text-muted-foreground">« Le forgeron répare ton bouclier… »</p>
+              </>
+            ) : (
+              <div style={{ fontFamily: PX, fontSize: 11, color: 'var(--accent-soft)', textShadow: '0 0 10px rgba(167,139,250,.6)' }}>⏳ REPRENDS TON SOUFFLE</div>
+            )}
             <RestRing remaining={restRemaining} total={restTotalRef.current} color={restKind === 'transition' ? '#a78bfa' : '#f59e0b'} />
             <div className="rounded-xl border border-border bg-card px-4 py-2.5">
               <div className="text-[9px] uppercase tracking-widest text-muted-foreground">Prochaine attaque</div>
               <div className="mt-0.5 font-display text-sm font-bold">Série {setIndex + 1} — {cur.name}</div>
             </div>
-            <button onClick={resumeFromRest} className="rounded-xl border border-primary bg-primary px-6 py-2.5 text-sm font-bold text-white">Reprendre ⚔</button>
+            <button onClick={() => { playSound('resume'); resumeFromRest(); }}
+              className="rounded-xl border border-primary bg-primary px-8 py-3 font-display text-base font-bold text-white shadow-glow">
+              Reprendre ⚔
+            </button>
           </div>
         </Overlay>
       )}
@@ -496,17 +552,56 @@ function ResultStat({ v, l }: { v: string; l: string }) {
 }
 
 function RestRing({ remaining, total, color }: { remaining: number; total: number; color: string }) {
-  const r = 78;
+  const r = 92;
+  const sw = 13;
+  const pad = 24; // marge pour que le glow ne soit pas rogné (plus de carré visible)
+  const box = 2 * r + sw + pad * 2;
+  const c = box / 2;
   const circ = 2 * Math.PI * r;
   const frac = Math.max(0, Math.min(1, remaining / Math.max(1, total)));
   return (
-    <div className="relative grid h-44 w-44 place-items-center">
-      <svg width="176" height="176" className="-rotate-90">
-        <circle cx="88" cy="88" r={r} stroke="#1e2030" strokeWidth="12" fill="none" />
-        <circle cx="88" cy="88" r={r} stroke={color} strokeWidth="12" fill="none" strokeLinecap="round"
-          strokeDasharray={circ} strokeDashoffset={circ * (1 - frac)} style={{ filter: `drop-shadow(0 0 8px ${color})`, transition: 'stroke-dashoffset 1s linear' }} />
+    <div className="relative grid place-items-center" style={{ width: box, height: box }}>
+      <svg width={box} height={box} className="-rotate-90" style={{ overflow: 'visible' }}>
+        <circle cx={c} cy={c} r={r} stroke="#1e2030" strokeWidth={sw} fill="none" />
+        <circle cx={c} cy={c} r={r} stroke={color} strokeWidth={sw} fill="none" strokeLinecap="round"
+          strokeDasharray={circ} strokeDashoffset={circ * (1 - frac)} style={{ filter: `drop-shadow(0 0 10px ${color})`, transition: 'stroke-dashoffset 1s linear' }} />
       </svg>
-      <div className="absolute font-display text-4xl font-bold">{fmt(remaining)}</div>
+      <div className="absolute font-display font-bold" style={{ fontSize: 56 }}>{fmt(remaining)}</div>
+    </div>
+  );
+}
+
+/** Scène de forge animée affichée pendant le repos entre exercices. */
+function Forge() {
+  const sparks = Array.from({ length: 9 });
+  return (
+    <div className="relative grid h-40 w-60 place-items-center">
+      <div className="pointer-events-none absolute h-28 w-28 rounded-full" style={{ background: 'radial-gradient(circle, rgba(245,158,11,.35), transparent 65%)', animation: 'fq-pulse 1.1s ease-in-out infinite' }} />
+      {/* Enclume */}
+      <div className="absolute" style={{ bottom: 8 }}>
+        <PixelCanvas render={(c) => drawSprite(c, ANVIL, 5)} deps={[]} />
+      </div>
+      {/* Marteau qui frappe (pivot bas) */}
+      <div className="absolute" style={{ bottom: 64, left: '54%', transformOrigin: 'bottom center', animation: 'fq-hammer 1.1s ease-in-out infinite' }}>
+        <PixelCanvas render={(c) => drawSprite(c, HAMMER, 4)} deps={[]} />
+      </div>
+      {/* Étincelles synchronisées sur l'impact (~0.75s) */}
+      <div className="absolute" style={{ bottom: 58, left: '44%' }}>
+        {sparks.map((_, i) => {
+          const ang = (-15 - i * 17) * (Math.PI / 180);
+          const d = 24 + (i % 3) * 9;
+          return (
+            <span key={i} className="absolute h-[5px] w-[5px]" style={{
+              background: i % 2 ? '#fcd34d' : '#f59e0b',
+              boxShadow: '0 0 5px #f59e0b',
+              ['--sx' as string]: `${Math.cos(ang) * d}px`,
+              ['--sy' as string]: `${-Math.abs(Math.sin(ang)) * d}px`,
+              imageRendering: 'pixelated',
+              animation: `fq-fspark 1.1s ease-out ${0.7}s infinite`,
+            }} />
+          );
+        })}
+      </div>
     </div>
   );
 }

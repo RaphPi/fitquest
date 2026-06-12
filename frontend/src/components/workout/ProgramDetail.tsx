@@ -7,8 +7,8 @@ import {
 import { useProgramStore } from '@/stores/programStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
 import { useWorkoutStore } from '@/stores/workoutStore';
-import { bossTitle } from '@/lib/bossFight';
-import type { Program, WorkoutSession, Exercise, Level, ActiveExercise } from '@/types';
+import { buildActiveSession } from '@/lib/launchSession';
+import type { Program, WorkoutSession, Exercise, Level } from '@/types';
 import GlowButton from '@/components/ui/GlowButton';
 import SetsFlow from '@/components/workout/SetsFlow';
 import ExerciseInfoModal from '@/components/workout/ExerciseInfoModal';
@@ -55,32 +55,9 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
     setOpenSession((prev) => (prev === id ? null : id));
 
   const launchSession = (session: WorkoutSession) => {
-    const resolved: ActiveExercise[] = session.exercises
-      .filter((se) => se.sets > 0)
-      .map((se) => {
-        const ex = exMap.get(se.exerciseId);
-        const type = ex?.type ?? (se.durationSeconds ? 'duration' : 'reps');
-        const target = type === 'duration' ? (se.durationSeconds ?? 30) : (se.reps ?? 10);
-        return {
-          sessionExerciseId: se.id,
-          exerciseId: se.exerciseId,
-          name: ex?.nameFr ?? se.exerciseId,
-          category: ex?.category ?? 'core',
-          type,
-          sets: se.sets,
-          target,
-          restBetweenSetsSeconds: se.restBetweenSetsSeconds,
-          restAfterExerciseSeconds: se.restAfterExerciseSeconds,
-        };
-      });
-    if (resolved.length === 0) return;
-    startSession({
-      programId: program.id,
-      sessionId: session.id,
-      sessionName: session.nameFr,
-      exercises: resolved,
-      bossTitle: bossTitle(resolved),
-    });
+    const data = buildActiveSession(program.id, session, exMap);
+    if (!data) return;
+    startSession(data);
     navigate('/workout/active');
   };
 
@@ -177,39 +154,50 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
                 }`}
               >
                 {/* Accordion header */}
-                <button
-                  className="flex w-full items-center gap-3 p-4 text-left"
-                  onClick={() => toggleSession(session.id)}
-                >
-                  <span
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border font-display text-xs font-black ${
-                      isOpen
-                        ? 'border-primary/40 bg-primary/15 text-primary'
-                        : 'border-border bg-background text-muted-foreground'
-                    }`}
+                <div className="flex w-full items-center gap-3 p-4">
+                  <button
+                    className="flex flex-1 items-center gap-3 text-left min-w-0"
+                    onClick={() => toggleSession(session.id)}
                   >
-                    {label}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className={`font-display text-sm font-bold ${isOpen ? 'text-foreground' : 'text-muted-foreground'}`}>
-                      {session.nameFr}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {session.exercises.length} exercice{session.exercises.length !== 1 ? 's' : ''}
-                      {sessionMin > 0 ? ` · ${session.exercises.reduce((a, e) => a + e.sets, 0)} séries` : ''}
-                    </p>
-                  </div>
-                  {sessionMin > 0 && (
-                    <span className={`shrink-0 text-xs font-bold ${isOpen ? 'text-xp' : 'text-muted-foreground'}`}>
-                      ~{sessionMin} min
+                    <span
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border font-display text-xs font-black ${
+                        isOpen
+                          ? 'border-primary/40 bg-primary/15 text-primary'
+                          : 'border-border bg-background text-muted-foreground'
+                      }`}
+                    >
+                      {label}
                     </span>
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-display text-sm font-bold ${isOpen ? 'text-foreground' : 'text-muted-foreground'}`}>
+                        {session.nameFr}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {session.exercises.length} exercice{session.exercises.length !== 1 ? 's' : ''}
+                        {sessionMin > 0 ? ` · ${session.exercises.reduce((a, e) => a + e.sets, 0)} séries · ~${sessionMin} min` : ''}
+                      </p>
+                    </div>
+                  </button>
+                  {/* Lancement rapide — sans avoir à déplier la séance */}
+                  {session.exercises.some((e) => e.sets > 0) && (
+                    <button
+                      onClick={() => launchSession(session)}
+                      title="Lancer la séance"
+                      className="flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-2 font-display text-xs font-bold uppercase tracking-wide text-white transition-transform active:scale-[0.97]"
+                      style={{ borderColor: '#fca5a5', background: 'linear-gradient(180deg,#ef4444,#991b1b)', boxShadow: '0 3px 0 #5b1212' }}
+                    >
+                      <Swords className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Lancer</span>
+                    </button>
                   )}
-                  {isOpen ? (
-                    <ChevronDown className="h-4 w-4 shrink-0 text-primary" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  )}
-                </button>
+                  <button onClick={() => toggleSession(session.id)} className="shrink-0 p-1">
+                    {isOpen ? (
+                      <ChevronDown className="h-4 w-4 text-primary" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </button>
+                </div>
 
                 {/* Accordion body */}
                 {isOpen && session.exercises.length > 0 && (

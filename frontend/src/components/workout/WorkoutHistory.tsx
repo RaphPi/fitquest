@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Clock, Swords, ChevronDown, Zap } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Clock, Swords, ChevronDown, Zap, RotateCcw } from 'lucide-react';
 import { useWorkoutStore } from '@/stores/workoutStore';
-import type { WorkoutLog } from '@/types';
+import { useProgramStore } from '@/stores/programStore';
+import { useExerciseStore } from '@/stores/exerciseStore';
+import { buildActiveSession } from '@/lib/launchSession';
+import type { Exercise, Program, WorkoutLog, WorkoutSession } from '@/types';
 
 interface Props {
   /** Nombre max de séances affichées (le reste est résumé en pied de liste). */
@@ -28,13 +31,43 @@ function formatDuration(secs: number): string {
   return s > 0 ? `${m} min ${s.toString().padStart(2, '0')}` : `${m} min`;
 }
 
+/** Retrouve le programme + la séance d'origine d'un log via son sessionId. */
+function resolveSession(
+  programs: Program[],
+  sessionId: string | null | undefined,
+): { program: Program; session: WorkoutSession } | null {
+  if (!sessionId) return null;
+  for (const program of programs) {
+    const session = program.sessions.find((s) => s.id === sessionId);
+    if (session) return { program, session };
+  }
+  return null;
+}
+
 /** Liste de l'historique des séances terminées (récentes d'abord). */
 export default function WorkoutHistory({ limit }: Props) {
-  const { history, isLoadingHistory, fetchHistory } = useWorkoutStore();
+  const navigate = useNavigate();
+  const { history, isLoadingHistory, fetchHistory, start } = useWorkoutStore();
+  const { programs, fetchPrograms } = useProgramStore();
+  const { exercises, fetchExercises } = useExerciseStore();
 
   useEffect(() => {
     void fetchHistory();
-  }, [fetchHistory]);
+    if (programs.length === 0) void fetchPrograms();
+    if (exercises.length === 0) void fetchExercises();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const exMap = useMemo(() => new Map<string, Exercise>(exercises.map((e) => [e.id, e])), [exercises]);
+
+  function relaunch(log: WorkoutLog) {
+    const resolved = resolveSession(programs, log.sessionId);
+    if (!resolved) return;
+    const data = buildActiveSession(resolved.program.id, resolved.session, exMap);
+    if (!data) return;
+    start(data);
+    navigate('/workout/active');
+  }
 
   if (isLoadingHistory && history.length === 0) {
     return (
@@ -67,7 +100,13 @@ export default function WorkoutHistory({ limit }: Props) {
   return (
     <div className="space-y-2.5">
       {shown.map((log) => (
-        <HistoryItem key={log.id} log={log} />
+        <HistoryItem
+          key={log.id}
+          log={log}
+          programName={resolveSession(programs, log.sessionId)?.program.nameFr ?? null}
+          canRelaunch={resolveSession(programs, log.sessionId) !== null}
+          onRelaunch={() => relaunch(log)}
+        />
       ))}
       {remaining > 0 && (
         <p className="pt-1 text-center text-xs text-muted-foreground">
@@ -78,31 +117,46 @@ export default function WorkoutHistory({ limit }: Props) {
   );
 }
 
-function HistoryItem({ log }: { log: WorkoutLog }) {
+function HistoryItem({
+  log,
+  programName,
+  canRelaunch,
+  onRelaunch,
+}: {
+  log: WorkoutLog;
+  programName: string | null;
+  canRelaunch: boolean;
+  onRelaunch: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const setCount = log.completedSets.length;
 
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-card">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-primary/5"
-      >
-        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-primary/30 bg-primary/10">
-          <Swords className="h-5 w-5 text-primary-soft" />
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <div className="truncate font-display text-sm font-bold">{log.sessionName}</div>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-            <span>{formatDate(log.date)} · {formatTime(log.date)}</span>
-            <span className="inline-flex items-center gap-1" style={{ color: 'rgba(34,211,238,1)' }}>
-              <Clock className="h-3 w-3" /> {formatDuration(log.durationSecs)}
-            </span>
-            <span>{setCount} série{setCount > 1 ? 's' : ''}</span>
+      <div className="flex items-center gap-3 px-4 py-3">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="flex min-w-0 flex-1 items-center gap-3 text-left transition-colors"
+        >
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-primary/30 bg-primary/10">
+            <Swords className="h-5 w-5 text-primary-soft" />
           </div>
-        </div>
+
+          <div className="min-w-0 flex-1">
+            <div className="truncate font-display text-sm font-bold">{log.sessionName}</div>
+            {programName && (
+              <div className="truncate text-[11px] font-semibold text-primary-soft/80">{programName}</div>
+            )}
+            <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+              <span>{formatDate(log.date)} · {formatTime(log.date)}</span>
+              <span className="inline-flex items-center gap-1" style={{ color: 'rgba(34,211,238,1)' }}>
+                <Clock className="h-3 w-3" /> {formatDuration(log.durationSecs)}
+              </span>
+              <span>{setCount} série{setCount > 1 ? 's' : ''}</span>
+            </div>
+          </div>
+        </button>
 
         <div className="shrink-0 text-right">
           <div className="inline-flex items-center gap-1 font-display text-sm font-black text-xp">
@@ -111,10 +165,23 @@ function HistoryItem({ log }: { log: WorkoutLog }) {
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground">XP</div>
         </div>
 
-        <ChevronDown
-          className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`}
-        />
-      </button>
+        {canRelaunch && (
+          <button
+            type="button"
+            onClick={onRelaunch}
+            title="Relancer cette séance"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-primary/40 bg-primary/10 text-primary-soft transition-all hover:shadow-glow"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </button>
+        )}
+
+        <button type="button" onClick={() => setOpen((o) => !o)} className="shrink-0 p-1">
+          <ChevronDown
+            className={`h-4 w-4 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`}
+          />
+        </button>
+      </div>
 
       {open && (
         <div className="border-t border-border/60 px-4 py-3">

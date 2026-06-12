@@ -1,7 +1,22 @@
 // FitQuest — logique XP / niveaux / streak (Sprint 6)
 // Source : FitQuest_ProjectPlan.md §9 Système de Gamification.
 
-export const BASE_WORKOUT_XP = 100;
+/** 1 rép = 1 point. 1 point de gainage = SECONDS_PER_POINT secondes tenues. (miroir lib/bossFight) */
+export const SECONDS_PER_POINT = 3;
+
+export interface CompletedSetEffort {
+  reps?: number | null;
+  durationSecs?: number | null;
+}
+
+/** Points d'effort réellement infligés au boss, sommés sur les séries réalisées. */
+export function effortFromSets(sets: CompletedSetEffort[]): number {
+  return sets.reduce((sum, s) => {
+    if (s.reps != null) return sum + Math.max(0, Math.round(s.reps));
+    if (s.durationSecs != null) return sum + Math.max(1, Math.round(s.durationSecs / SECONDS_PER_POINT));
+    return sum;
+  }, 0);
+}
 
 /** XP nécessaire pour passer du niveau `level` au suivant. Courbe RPG : level * 150. */
 export function xpRequiredForLevel(level: number): number {
@@ -9,17 +24,19 @@ export function xpRequiredForLevel(level: number): number {
 }
 
 /**
- * XP gagnée pour une séance terminée.
- * - 100 XP de base
- * - +1 XP / minute au-delà de 20 min
+ * XP gagnée pour une séance terminée — proportionnelle à l'EFFORT réellement fourni.
+ * - 1 XP par point d'effort infligé (reps + secondes/SECONDS_PER_POINT)
+ * - + petit bonus d'endurance : +1 XP / minute au-delà de 20 min (uniquement si effort > 0)
  * - bonus streak : +10 % par jour consécutif, plafonné à +50 %
+ * Une séance sans effort réalisé (abandon immédiat, exercices tous passés) rapporte 0 XP.
  */
-export function computeWorkoutXp(durationSecs: number, streak: number): number {
+export function computeWorkoutXp(effortDealt: number, durationSecs: number, streak: number): number {
+  const effort = Math.max(0, Math.round(effortDealt));
+  if (effort <= 0) return 0;
   const minutes = Math.floor(Math.max(0, durationSecs) / 60);
   const durationBonus = Math.max(0, minutes - 20);
-  const base = BASE_WORKOUT_XP + durationBonus;
   const streakMult = 1 + Math.min(0.5, Math.max(0, streak) * 0.1);
-  return Math.round(base * streakMult);
+  return Math.round((effort + durationBonus) * streakMult);
 }
 
 export interface XpResult {

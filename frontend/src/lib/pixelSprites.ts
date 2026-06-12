@@ -141,6 +141,41 @@ export const SHIELD: Sprite = {
   pal: { '#': '#0c0a12', G: '#8b5a2b', I: '#9aa3b5', C: '#f59e0b', l: '#cdd4e2' },
 };
 
+// ─── Forge (écran de repos) : enclume + marteau pixel ───
+export const ANVIL: Sprite = {
+  grid: [
+    '...########....',
+    '..#MMMMMMMM#...',
+    '#MMMMMMMMMMMM#.',
+    '#MMMMMMMMMMMM##',
+    '.#mmmmmmmmmm#..',
+    '....#MMMM#.....',
+    '....#MMMM#.....',
+    '...#mmmmmm#....',
+    '..#MMMMMMMM#...',
+    '.#PPPPPPPPPP#..',
+    '.#PPPPPPPPPP#..',
+    '.#mmmmmmmmmm#..',
+  ],
+  pal: { '#': '#08070c', M: '#4a505e', m: '#2c303a', P: '#3a3f4b' },
+};
+
+export const HAMMER: Sprite = {
+  grid: [
+    '.######..',
+    '#HHHHHH#.',
+    '#HHHHHH#.',
+    '#HHHHHH#.',
+    '.##WW##..',
+    '...WW....',
+    '...WW....',
+    '...WW....',
+    '...WW....',
+    '..#WW#...',
+  ],
+  pal: { '#': '#08070c', H: '#6b7280', W: '#8b5a2b' },
+};
+
 /** Dessine un sprite (grille + palette) sur un canvas, à l'échelle indiquée. */
 export function drawSprite(canvas: HTMLCanvasElement, sprite: Sprite, scale: number): void {
   const ctx = canvas.getContext('2d');

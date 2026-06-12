@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma';
 import { requireAuth, type AuthRequest } from '../middleware/requireAuth';
-import { applyXp, computeStreak, computeWorkoutXp } from '../lib/xp';
+import { applyXp, computeStreak, computeWorkoutXp, effortFromSets } from '../lib/xp';
 
 const router = Router();
 
@@ -39,8 +39,13 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
     if (!user) { res.status(404).json({ error: 'Utilisateur introuvable' }); return; }
 
     const now = new Date();
-    const newStreak = computeStreak(user.streak, user.lastWorkout, now);
-    const xpEarned = computeWorkoutXp(Number(durationSecs), newStreak);
+    const sets = completedSets ?? [];
+    const effortDealt = effortFromSets(sets);
+    // Une séance sans effort (abandon immédiat / tout passé) n'est pas une vraie séance :
+    // ni XP, ni streak, ni mise à jour de lastWorkout. Le log est conservé pour l'historique.
+    const counts = effortDealt > 0;
+    const newStreak = counts ? computeStreak(user.streak, user.lastWorkout, now) : user.streak;
+    const xpEarned = computeWorkoutXp(effortDealt, Number(durationSecs), newStreak);
     const xp = applyXp(user.level, user.currentXP, user.totalXP, xpEarned);
 
     const [log, updatedUser] = await prisma.$transaction([
@@ -53,7 +58,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
           durationSecs: Number(durationSecs),
           xpEarned,
           completedSets: {
-            create: (completedSets ?? []).map((s) => ({
+            create: sets.map((s) => ({
               exerciseId: s.exerciseId,
               exerciseName: s.exerciseName,
               setNumber: s.setNumber,
@@ -73,7 +78,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
           totalXP: xp.totalXP,
           xpBalance: user.xpBalance + xpEarned,
           streak: newStreak,
-          lastWorkout: now,
+          lastWorkout: counts ? now : user.lastWorkout,
         },
         select: userSelect,
       }),
