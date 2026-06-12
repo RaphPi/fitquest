@@ -33,8 +33,8 @@ function MobileHeader() {
           FIT<span className="font-black text-primary-soft">QUEST</span>
         </span>
       </div>
-      <div className="flex items-center gap-2">
-        <div className="w-24">
+      <div className="flex items-center gap-2.5">
+        <div className="w-28">
           <XPBar
             current={user.currentXP}
             required={xpRequired(user.level)}
@@ -90,10 +90,10 @@ function Sidebar() {
       {/* XP summary desktop */}
       {user && (
         <div className="border-t border-border p-3 lg:p-4">
-          <div className="flex items-center gap-3">
-            <LevelBadge level={user.level} size="sm" />
+          <div className="flex items-start gap-3">
+            <LevelBadge level={user.level} size="sm" className="mt-0.5" />
             <div className="hidden flex-1 lg:block">
-              <p className="mb-1 text-xs font-medium text-foreground">{user.username}</p>
+              <p className="mb-1.5 text-xs font-medium text-foreground">{user.username}</p>
               <XPBar
                 current={user.currentXP}
                 required={xpRequired(user.level)}

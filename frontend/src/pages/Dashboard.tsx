@@ -33,7 +33,7 @@ export default function Dashboard() {
           />
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <StatCard icon={Flame} value={user.streak} label="Streak" accent />
+            <StatCard icon={Flame} value={user.streak} label="Streak" accent={user.streak > 0} />
             <StatCard icon={Zap} value={user.totalXP} label="XP total" />
             <StatCard icon={Trophy} value={user.level} label="Niveau" />
             <StatCard icon={Calendar} value="—" label="Séances" />

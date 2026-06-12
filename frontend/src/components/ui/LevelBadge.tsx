@@ -7,7 +7,7 @@ interface LevelBadgeProps {
 }
 
 const sizes = {
-  sm: 'h-7 w-7 text-xs',
+  sm: 'h-7 w-7 text-[11px]',
   md: 'h-9 w-9 text-sm',
   lg: 'h-12 w-12 text-base',
 };
@@ -16,12 +16,12 @@ export default function LevelBadge({ level, size = 'md', className }: LevelBadge
   return (
     <div
       className={cn(
-        'flex items-center justify-center rounded-full border-2 border-primary bg-card-shield font-display font-black text-primary shadow-glow',
+        'inline-flex shrink-0 items-center justify-center rounded-full border-2 border-primary bg-card-shield font-display font-black leading-none text-primary shadow-glow',
         sizes[size],
         className,
       )}
     >
-      {level}
+      <span className="translate-y-px">{level}</span>
     </div>
   );
 }
