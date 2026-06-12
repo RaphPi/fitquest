@@ -205,11 +205,13 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
                                   <Info className="h-3.5 w-3.5" />
                                 </button>
                               )}
-                              <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-black ${
-                                isDuration
-                                  ? 'border-cyan-400/40 bg-cyan-400/15 text-cyan-400'
-                                  : 'border-white/25 bg-white/8 text-white'
-                              }`}>
+                              <span
+                                className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black"
+                                style={isDuration
+                                  ? { border: '1px solid rgba(34,211,238,0.5)', background: 'rgba(34,211,238,0.15)', color: 'rgba(34,211,238,1)' }
+                                  : { border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.1)', color: 'white' }
+                                }
+                              >
                                 {se.sets} × {isDuration ? `${se.durationSeconds ?? '?'}s` : `${se.reps ?? '?'}`}
                               </span>
                             </div>
@@ -228,18 +230,21 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
                           {!isLast && (
                             <div className="flex items-center gap-2 px-4 py-1.5">
                               <div
-                                className="flex-1 h-px"
+                                className="flex-1 h-0.5"
                                 style={{
-                                  background: `repeating-linear-gradient(to right, rgba(245,158,11,0.3) 0px, rgba(245,158,11,0.3) 4px, transparent 4px, transparent 9px)`,
+                                  background: `repeating-linear-gradient(to right, rgba(234,179,8,0.7) 0px, rgba(234,179,8,0.7) 4px, transparent 4px, transparent 9px)`,
                                 }}
                               />
-                              <span className="shrink-0 rounded-full border border-xp/25 bg-xp/8 px-2 py-0.5 text-[10px] font-semibold text-xp/70">
+                              <span
+                                className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap"
+                                style={{ border: '1px solid rgba(234,179,8,0.5)', background: 'rgba(234,179,8,0.12)', color: 'rgba(234,179,8,1)' }}
+                              >
                                 Repos {se.restAfterExerciseSeconds}s
                               </span>
                               <div
-                                className="flex-1 h-px"
+                                className="flex-1 h-0.5"
                                 style={{
-                                  background: `repeating-linear-gradient(to right, rgba(245,158,11,0.3) 0px, rgba(245,158,11,0.3) 4px, transparent 4px, transparent 9px)`,
+                                  background: `repeating-linear-gradient(to right, rgba(234,179,8,0.7) 0px, rgba(234,179,8,0.7) 4px, transparent 4px, transparent 9px)`,
                                 }}
                               />
                             </div>

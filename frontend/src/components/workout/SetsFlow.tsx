@@ -4,13 +4,20 @@
 //   restBetweenSetsSeconds  = Transition (temps entre 2 séries du même exercice)
 //   restAfterExerciseSeconds = Repos (temps avant l'exercice suivant)
 
+// Couleurs — inline rgba() car les modificateurs d'opacité Tailwind
+// ne fonctionnent pas avec les CSS custom properties (--color-primary, etc.)
+const VIOLET = 'rgba(99,102,241,1)';        // primary
+const VIOLET_DOT = 'rgba(99,102,241,0.85)'; // dotted line
+const CYAN = 'rgba(34,211,238,1)';           // cyan-400
+const CYAN_BG = 'rgba(34,211,238,0.15)';
+
 interface SetsFlowProps {
   sets: number;
   reps?: number | null;
   durationSeconds?: number | null;
   restBetweenSetsSeconds: number; // Transition
   isDuration: boolean;
-  compact?: boolean; // moins de padding, texte plus petit
+  compact?: boolean;
 }
 
 export default function SetsFlow({
@@ -22,11 +29,15 @@ export default function SetsFlow({
   compact = false,
 }: SetsFlowProps) {
   const pillValue = isDuration ? `${durationSeconds ?? '?'}s` : `${reps ?? '?'}`;
-  const pillClass = isDuration
-    ? 'border-cyan-400/40 bg-cyan-400/15 text-cyan-400'
-    : 'border-white/25 bg-white/8 text-white';
-
   const h = compact ? 'h-7 min-w-[32px] text-[11px]' : 'h-8 min-w-[36px] text-xs';
+
+  const pillStyle = isDuration
+    ? { border: `1px solid ${CYAN_BG.replace('0.15', '0.5')}`, background: CYAN_BG, color: CYAN }
+    : { border: '1px solid rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.08)', color: 'white' };
+
+  const transitionLineStyle = {
+    background: `repeating-linear-gradient(to right,${VIOLET_DOT} 0px,${VIOLET_DOT} 3px,transparent 3px,transparent 7px)`,
+  };
 
   return (
     <div className="flex items-end overflow-x-auto pb-1 gap-0" style={{ scrollbarWidth: 'thin' }}>
@@ -34,7 +45,10 @@ export default function SetsFlow({
         <div key={i} className="flex items-end shrink-0">
           {/* Set pill */}
           <div className="flex flex-col items-center gap-1">
-            <div className={`flex items-center justify-center rounded-lg border px-2 font-bold ${h} ${pillClass}`}>
+            <div
+              className={`flex items-center justify-center rounded-lg px-2 font-bold ${h}`}
+              style={pillStyle}
+            >
               {pillValue}
             </div>
             <span className={`text-muted-foreground whitespace-nowrap ${compact ? 'text-[8px]' : 'text-[9px]'}`}>
@@ -42,17 +56,14 @@ export default function SetsFlow({
             </span>
           </div>
 
-          {/* Transition between sets (not after the last one) */}
+          {/* Transition (between sets, not after the last) */}
           {i < sets - 1 && (
             <div className="flex flex-col items-center px-1.5 pb-4 shrink-0">
-              <div
-                className="h-px w-5"
-                style={{
-                  background:
-                    'repeating-linear-gradient(to right,rgba(99,102,241,.7) 0px,rgba(99,102,241,.7) 3px,transparent 3px,transparent 7px)',
-                }}
-              />
-              <span className="mt-0.5 text-[9px] font-semibold text-primary/80 whitespace-nowrap">
+              <div className="h-0.5 w-6" style={transitionLineStyle} />
+              <span
+                className="mt-0.5 text-[9px] font-semibold whitespace-nowrap"
+                style={{ color: VIOLET }}
+              >
                 {restBetweenSetsSeconds}s
               </span>
             </div>

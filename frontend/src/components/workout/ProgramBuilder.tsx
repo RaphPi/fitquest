@@ -620,17 +620,17 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                     {/* Repos separator (inter-exercise, shown if not last) */}
                     {eIdx < session.exercises.length - 1 && (
                       <div className="ml-6 flex items-center gap-2 pt-1">
-                        <div className="h-px flex-1"
+                        <div className="h-0.5 flex-1"
                           style={{
-                            background: 'repeating-linear-gradient(to right,rgba(234,179,8,.35) 0,rgba(234,179,8,.35) 4px,transparent 4px,transparent 10px)',
+                            background: 'repeating-linear-gradient(to right,rgba(234,179,8,.7) 0,rgba(234,179,8,.7) 4px,transparent 4px,transparent 10px)',
                           }}
                         />
-                        <span className="text-[9px] font-semibold text-xp/60 whitespace-nowrap">
+                        <span className="text-[9px] font-semibold whitespace-nowrap" style={{ color: 'rgba(234,179,8,1)' }}>
                           Repos {ex.restAfterExerciseSeconds}s
                         </span>
-                        <div className="h-px flex-1"
+                        <div className="h-0.5 flex-1"
                           style={{
-                            background: 'repeating-linear-gradient(to right,rgba(234,179,8,.35) 0,rgba(234,179,8,.35) 4px,transparent 4px,transparent 10px)',
+                            background: 'repeating-linear-gradient(to right,rgba(234,179,8,.7) 0,rgba(234,179,8,.7) 4px,transparent 4px,transparent 10px)',
                           }}
                         />
                       </div>
