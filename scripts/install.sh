@@ -146,7 +146,27 @@ $DC exec -T backend npx prisma db seed \
   || msg_err "Le seed a échoué (non bloquant) — relancer : ${DC} exec backend npx prisma db seed"
 msg_ok "Base initialisée"
 
-# ----- 7. Commande de mise à jour ----------------------------
+# ----- 7. SSH ------------------------------------------------
+msg_info "Installation et configuration de SSH…"
+DEBIAN_FRONTEND=noninteractive apt-get install -y -qq openssh-server >/dev/null 2>&1 \
+  || die "Échec installation openssh-server."
+
+# Autorise login root par mot de passe
+sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+systemctl enable --now ssh >/dev/null 2>&1 || true
+
+# Mot de passe root aléatoire si non défini (sera affiché à la fin)
+if [[ -t 0 ]]; then
+  read -rsp "   Mot de passe root SSH (vide = aléatoire) : " _rootpw; echo
+  ROOT_PW="${_rootpw:-$(openssl rand -base64 12)}"
+else
+  ROOT_PW="${ROOT_PW:-$(openssl rand -base64 12)}"
+fi
+echo "root:${ROOT_PW}" | chpasswd
+msg_ok "SSH prêt — login : root / mot de passe ci-dessous"
+
+# ----- 8. Commande de mise à jour ----------------------------
 cat > /usr/bin/update <<EOF
 #!/usr/bin/env bash
 exec bash ${INSTALL_DIR}/scripts/update.sh "\$@"
@@ -154,12 +174,13 @@ EOF
 chmod +x /usr/bin/update
 msg_ok "Commande 'update' installée (/usr/bin/update)"
 
-# ----- 8. Final ----------------------------------------------
+# ----- 9. Final ----------------------------------------------
 IP=$(hostname -I 2>/dev/null | awk '{print $1}')
 PORT_DISPLAY=$([[ "${APP_PORT}" == "80" ]] && echo "" || echo ":${APP_PORT}")
 echo
 echo -e "${GN}${BOLD}════════════════════════════════════════════${CL}"
 echo -e "  ${GN}${BOLD}FitQuest est en ligne !${CL}"
-echo -e "  ${BOLD}URL :${CL} ${GN}http://${IP}${PORT_DISPLAY}${CL}"
-echo -e "  ${BOLD}Mise à jour :${CL} tape ${YW}update${CL}"
+echo -e "  ${BOLD}URL         :${CL} ${GN}http://${IP}${PORT_DISPLAY}${CL}"
+echo -e "  ${BOLD}SSH         :${CL} root @ ${IP}  /  mdp : ${YW}${ROOT_PW}${CL}"
+echo -e "  ${BOLD}Mise à jour :${CL} tape ${YW}update${CL}  (depuis SSH ou pct enter)"
 echo -e "${GN}${BOLD}════════════════════════════════════════════${CL}"

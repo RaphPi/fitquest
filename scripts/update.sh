@@ -45,6 +45,24 @@ else
 fi
 msg_ok "Schéma à jour"
 
-# 5. Confirmation
+# 5. Auto-réparation : s'assure que les commandes utilitaires sont en place
+if [[ ! -x /usr/bin/update ]]; then
+  cat > /usr/bin/update <<'HEREDOC'
+#!/usr/bin/env bash
+exec bash /opt/fitquest/scripts/update.sh "$@"
+HEREDOC
+  chmod +x /usr/bin/update
+  msg_ok "Commande 'update' réparée dans /usr/bin/update"
+fi
+
+if ! command -v sshd >/dev/null 2>&1; then
+  msg_info "Installation de SSH (absent)…"
+  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq openssh-server >/dev/null 2>&1 && \
+  sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+  systemctl enable --now ssh >/dev/null 2>&1 && \
+  msg_ok "SSH installé — définis un mot de passe root : passwd root"
+fi
+
+# 6. Confirmation
 echo
 msg_ok "${BOLD}Mise à jour terminée.${CL}"
