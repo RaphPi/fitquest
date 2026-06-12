@@ -147,12 +147,12 @@ $DC exec -T backend npx prisma db seed \
 msg_ok "Base initialisée"
 
 # ----- 7. Commande de mise à jour ----------------------------
-cat > /usr/local/bin/update <<EOF
+cat > /usr/bin/update <<EOF
 #!/usr/bin/env bash
 exec bash ${INSTALL_DIR}/scripts/update.sh "\$@"
 EOF
-chmod +x /usr/local/bin/update
-msg_ok "Commande 'update' installée (/usr/local/bin/update)"
+chmod +x /usr/bin/update
+msg_ok "Commande 'update' installée (/usr/bin/update)"
 
 # ----- 8. Final ----------------------------------------------
 IP=$(hostname -I 2>/dev/null | awk '{print $1}')
