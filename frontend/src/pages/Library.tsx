@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Search, X, SlidersHorizontal } from 'lucide-react';
+import { Search, X, SlidersHorizontal, Plus } from 'lucide-react';
 import { useExerciseStore } from '@/stores/exerciseStore';
+import type { ExerciseFormData } from '@/stores/exerciseStore';
 import ExerciseCard from '@/components/exercise/ExerciseCard';
 import ExerciseDetail from '@/components/exercise/ExerciseDetail';
+import ExerciseForm from '@/components/exercise/ExerciseForm';
 import FilterChips from '@/components/exercise/FilterChips';
-import type { Category, Equipment, Level } from '@/types';
+import GlowButton from '@/components/ui/GlowButton';
+import type { Category, Equipment, Level, Exercise } from '@/types';
 
 const categoryOptions: { value: Category; label: string }[] = [
   { value: 'push', label: 'Push' },
@@ -28,14 +31,20 @@ const levelOptions: { value: Level; label: string }[] = [
   { value: 'advanced', label: 'Avancé' },
 ];
 
+type Modal = 'none' | 'detail' | 'create' | 'edit';
+
 export default function Library() {
   const {
     isLoading,
+    isSaving,
     error,
     filters,
     selectedExercise,
     fetchExercises,
     fetchExercise,
+    createExercise,
+    updateExercise,
+    deleteExercise,
     setFilter,
     toggleFilterItem,
     clearFilters,
@@ -43,7 +52,9 @@ export default function Library() {
     filteredExercises,
   } = useExerciseStore();
 
+  const [modal, setModal] = useState<Modal>('none');
   const [showFilters, setShowFilters] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchExercises();
@@ -56,14 +67,52 @@ export default function Library() {
     filters.levels.length > 0 ||
     filters.search.length > 0;
 
+  const openDetail = async (ex: Exercise) => {
+    await fetchExercise(ex.id);
+    setModal('detail');
+  };
+
+  const closeAll = () => {
+    setModal('none');
+    clearSelected();
+  };
+
+  const handleCreate = async (data: ExerciseFormData) => {
+    await createExercise(data);
+    setModal('none');
+  };
+
+  const handleUpdate = async (data: ExerciseFormData) => {
+    if (!selectedExercise) return;
+    await updateExercise(selectedExercise.id, data);
+    setModal('detail');
+  };
+
+  const handleDelete = async () => {
+    if (!selectedExercise) return;
+    setIsDeleting(true);
+    try {
+      await deleteExercise(selectedExercise.id);
+      closeAll();
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <section className="flex flex-col gap-5">
       {/* Header */}
-      <div>
-        <h1 className="font-display text-2xl font-black text-foreground">Bibliothèque</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {isLoading ? 'Chargement…' : `${results.length} exercice${results.length !== 1 ? 's' : ''}`}
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="font-display text-2xl font-black text-foreground">Bibliothèque</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {isLoading ? 'Chargement…' : `${results.length} exercice${results.length !== 1 ? 's' : ''}`}
+          </p>
+        </div>
+        <GlowButton variant="primary" size="sm" onClick={() => setModal('create')}>
+          <Plus className="mr-1.5 h-4 w-4" />
+          Créer
+        </GlowButton>
       </div>
 
       {/* Search + filter toggle */}
@@ -104,33 +153,18 @@ export default function Library() {
         <div className="rounded-xl border border-border bg-card p-4 space-y-4">
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Catégorie</p>
-            <FilterChips
-              options={categoryOptions}
-              selected={filters.categories}
-              onToggle={(v) => toggleFilterItem('categories', v)}
-            />
+            <FilterChips options={categoryOptions} selected={filters.categories} onToggle={(v) => toggleFilterItem('categories', v)} />
           </div>
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Équipement</p>
-            <FilterChips
-              options={equipmentOptions}
-              selected={filters.equipments}
-              onToggle={(v) => toggleFilterItem('equipments', v)}
-            />
+            <FilterChips options={equipmentOptions} selected={filters.equipments} onToggle={(v) => toggleFilterItem('equipments', v)} />
           </div>
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Niveau</p>
-            <FilterChips
-              options={levelOptions}
-              selected={filters.levels}
-              onToggle={(v) => toggleFilterItem('levels', v)}
-            />
+            <FilterChips options={levelOptions} selected={filters.levels} onToggle={(v) => toggleFilterItem('levels', v)} />
           </div>
           {hasFilters && (
-            <button
-              onClick={clearFilters}
-              className="text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-            >
+            <button onClick={clearFilters} className="text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
               Effacer tous les filtres
             </button>
           )}
@@ -151,31 +185,56 @@ export default function Library() {
         </div>
       ) : results.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <p className="text-base font-semibold text-foreground">Aucun exercice trouvé</p>
-          {hasFilters && (
-            <button
-              onClick={clearFilters}
-              className="text-sm text-primary underline-offset-2 hover:underline"
-            >
+          <p className="text-base font-semibold text-foreground">
+            {hasFilters ? 'Aucun exercice trouvé' : 'Aucun exercice dans la base'}
+          </p>
+          {hasFilters ? (
+            <button onClick={clearFilters} className="text-sm text-primary underline-offset-2 hover:underline">
               Effacer les filtres
             </button>
+          ) : (
+            <GlowButton variant="primary" size="sm" onClick={() => setModal('create')}>
+              <Plus className="mr-1.5 h-4 w-4" />
+              Créer le premier exercice
+            </GlowButton>
           )}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {results.map((ex) => (
-            <ExerciseCard
-              key={ex.id}
-              exercise={ex}
-              onClick={() => fetchExercise(ex.id)}
-            />
+            <ExerciseCard key={ex.id} exercise={ex} onClick={() => openDetail(ex)} />
           ))}
         </div>
       )}
 
       {/* Detail modal */}
-      {selectedExercise && (
-        <ExerciseDetail exercise={selectedExercise} onClose={clearSelected} />
+      {modal === 'detail' && selectedExercise && (
+        <ExerciseDetail
+          exercise={selectedExercise}
+          onClose={closeAll}
+          onEdit={() => setModal('edit')}
+          onDelete={handleDelete}
+          isDeleting={isDeleting}
+        />
+      )}
+
+      {/* Create modal */}
+      {modal === 'create' && (
+        <ExerciseForm
+          onSubmit={handleCreate}
+          onClose={() => setModal('none')}
+          isSaving={isSaving}
+        />
+      )}
+
+      {/* Edit modal */}
+      {modal === 'edit' && selectedExercise && (
+        <ExerciseForm
+          initial={selectedExercise}
+          onSubmit={handleUpdate}
+          onClose={() => setModal('detail')}
+          isSaving={isSaving}
+        />
       )}
     </section>
   );

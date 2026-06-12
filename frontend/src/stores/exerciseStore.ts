@@ -10,15 +10,21 @@ export interface ExerciseFilters {
   search: string;
 }
 
+export type ExerciseFormData = Omit<Exercise, 'id' | 'imageUrl' | 'imageAiGen'>;
+
 interface ExerciseState {
   exercises: Exercise[];
   selectedExercise: Exercise | null;
   filters: ExerciseFilters;
   isLoading: boolean;
   isDetailLoading: boolean;
+  isSaving: boolean;
   error: string | null;
   fetchExercises: () => Promise<void>;
   fetchExercise: (id: string) => Promise<void>;
+  createExercise: (data: ExerciseFormData) => Promise<Exercise>;
+  updateExercise: (id: string, data: Partial<ExerciseFormData>) => Promise<Exercise>;
+  deleteExercise: (id: string) => Promise<void>;
   setFilter: <K extends keyof ExerciseFilters>(key: K, value: ExerciseFilters[K]) => void;
   toggleFilterItem: <K extends 'categories' | 'equipments' | 'levels'>(
     key: K,
@@ -36,8 +42,9 @@ const defaultFilters: ExerciseFilters = {
   search: '',
 };
 
-async function apiFetch<T>(path: string): Promise<T> {
-  const res = await fetch(path, { credentials: 'include' });
+async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(path, { credentials: 'include', ...init });
+  if (res.status === 204) return undefined as T;
   const data = await res.json();
   if (!res.ok) throw new Error((data as Record<string, string>).error ?? 'Erreur serveur');
   return data as T;
@@ -49,6 +56,7 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
   filters: { ...defaultFilters },
   isLoading: false,
   isDetailLoading: false,
+  isSaving: false,
   error: null,
 
   fetchExercises: async () => {
@@ -68,6 +76,57 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
       set({ selectedExercise: exercise, isDetailLoading: false });
     } catch (e) {
       set({ error: (e as Error).message, isDetailLoading: false });
+    }
+  },
+
+  createExercise: async (data) => {
+    set({ isSaving: true, error: null });
+    try {
+      const { exercise } = await apiFetch<{ exercise: Exercise }>(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      set((s) => ({ exercises: [...s.exercises, exercise].sort((a, b) => a.nameFr.localeCompare(b.nameFr)), isSaving: false }));
+      return exercise;
+    } catch (e) {
+      set({ isSaving: false, error: (e as Error).message });
+      throw e;
+    }
+  },
+
+  updateExercise: async (id, data) => {
+    set({ isSaving: true, error: null });
+    try {
+      const { exercise } = await apiFetch<{ exercise: Exercise }>(`${API}/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      set((s) => ({
+        exercises: s.exercises.map((ex) => (ex.id === id ? exercise : ex)).sort((a, b) => a.nameFr.localeCompare(b.nameFr)),
+        selectedExercise: s.selectedExercise?.id === id ? exercise : s.selectedExercise,
+        isSaving: false,
+      }));
+      return exercise;
+    } catch (e) {
+      set({ isSaving: false, error: (e as Error).message });
+      throw e;
+    }
+  },
+
+  deleteExercise: async (id) => {
+    set({ isSaving: true, error: null });
+    try {
+      await apiFetch<undefined>(`${API}/${id}`, { method: 'DELETE' });
+      set((s) => ({
+        exercises: s.exercises.filter((ex) => ex.id !== id),
+        selectedExercise: s.selectedExercise?.id === id ? null : s.selectedExercise,
+        isSaving: false,
+      }));
+    } catch (e) {
+      set({ isSaving: false, error: (e as Error).message });
+      throw e;
     }
   },
 
