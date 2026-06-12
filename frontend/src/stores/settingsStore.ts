@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { applyTheme } from '@/lib/theme';
 import type { Lang, ThemeId } from '@/types';
 
 interface SettingsState {
@@ -6,13 +7,6 @@ interface SettingsState {
   lang: Lang;
   setTheme: (theme: ThemeId) => void;
   setLang: (lang: Lang) => void;
-}
-
-// Applique le thème au <html data-theme="…">.
-function applyTheme(theme: ThemeId): void {
-  if (typeof document !== 'undefined') {
-    document.documentElement.dataset.theme = theme;
-  }
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
