@@ -23,8 +23,8 @@ export default function SetsFlow({
 }: SetsFlowProps) {
   const pillValue = isDuration ? `${durationSeconds ?? '?'}s` : `${reps ?? '?'}`;
   const pillClass = isDuration
-    ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-400'
-    : 'border-primary/25 bg-primary/10 text-foreground';
+    ? 'border-cyan-400/40 bg-cyan-400/15 text-cyan-400'
+    : 'border-primary/50 bg-primary/15 text-primary';
 
   const h = compact ? 'h-7 min-w-[32px] text-[11px]' : 'h-8 min-w-[36px] text-xs';
 
@@ -49,10 +49,10 @@ export default function SetsFlow({
                 className="h-px w-5"
                 style={{
                   background:
-                    'repeating-linear-gradient(to right,rgba(99,102,241,.45) 0px,rgba(99,102,241,.45) 3px,transparent 3px,transparent 7px)',
+                    'repeating-linear-gradient(to right,rgba(99,102,241,.7) 0px,rgba(99,102,241,.7) 3px,transparent 3px,transparent 7px)',
                 }}
               />
-              <span className="mt-0.5 text-[9px] font-semibold text-primary/60 whitespace-nowrap">
+              <span className="mt-0.5 text-[9px] font-semibold text-primary/80 whitespace-nowrap">
                 {restBetweenSetsSeconds}s
               </span>
             </div>

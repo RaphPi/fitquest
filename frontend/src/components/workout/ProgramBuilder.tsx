@@ -642,9 +642,9 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
 
             {/* Add exercise */}
             <button type="button" onClick={() => openPicker(session._key)}
-              className="flex w-full items-center justify-center gap-1.5 border-t border-dashed border-border py-2.5 text-xs font-semibold text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors"
+              className="flex w-full items-center justify-center gap-2 border-t border-primary/30 bg-primary/8 py-3 text-sm font-bold text-primary hover:bg-primary/15 transition-colors"
             >
-              <Plus className="h-3.5 w-3.5" />
+              <Plus className="h-4 w-4" />
               Ajouter un exercice
             </button>
           </div>

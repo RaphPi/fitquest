@@ -62,22 +62,22 @@ export default function NumberStepper({
         onClick={dec}
         disabled={value <= min}
         className={cn(
-          'flex h-8 w-7 shrink-0 items-center justify-center text-base font-bold transition-colors disabled:opacity-30',
+          'flex h-10 w-10 shrink-0 items-center justify-center text-lg font-bold transition-colors disabled:opacity-30',
           styles.btn,
         )}
       >
         −
       </button>
-      <div className={cn('flex min-w-[32px] items-center justify-center gap-0.5 text-xs font-display', styles.val)}>
+      <div className={cn('flex flex-1 min-w-[36px] items-center justify-center gap-0.5 text-sm font-display', styles.val)}>
         <span>{value}</span>
-        {suffix && <span className="text-[10px] opacity-70">{suffix}</span>}
+        {suffix && <span className="text-[11px] opacity-70">{suffix}</span>}
       </div>
       <button
         type="button"
         onClick={inc}
         disabled={value >= max}
         className={cn(
-          'flex h-8 w-7 shrink-0 items-center justify-center text-base font-bold transition-colors disabled:opacity-30',
+          'flex h-10 w-10 shrink-0 items-center justify-center text-lg font-bold transition-colors disabled:opacity-30',
           styles.btn,
         )}
       >
