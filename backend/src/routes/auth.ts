@@ -6,10 +6,12 @@ import { requireAuth, type AuthRequest } from '../middleware/requireAuth';
 
 const router = Router();
 
+// COOKIE_SECURE=true uniquement si HTTPS est activé côté reverse proxy.
+// En self-hosted HTTP (LXC sans TLS), laisser à false (défaut).
 const COOKIE_OPTS = {
   httpOnly: true,
   sameSite: 'lax' as const,
-  secure: process.env.NODE_ENV === 'production',
+  secure: process.env.COOKIE_SECURE === 'true',
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 jours
 };
 
