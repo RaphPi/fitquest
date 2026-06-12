@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitQuest — Mode Séance · Direction C · Focus Arena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0a0a0f; --card: #0f1117; --card2: #13151f; --border: #1e2030;
+  --primary: #6366f1; --primary-light: #a78bfa; --gold: #f59e0b;
+  --success: #22c55e; --danger: #ef4444; --cyan: #22d3ee;
+  --text: #f1f5f9; --muted: #64748b; --muted2: #94a3b8;
+}
+body {
+  background: radial-gradient(1000px 700px at 50% 30%, rgba(99,102,241,.10), transparent 60%), var(--bg);
+  color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+}
+.phone { width: 100%; max-width: 430px; min-height: 100vh; position: relative;
+  display: flex; flex-direction: column; border-left: 1px solid var(--border); border-right: 1px solid var(--border); overflow: hidden;
+  transition: background .5s; }
+.phone.resting { background: radial-gradient(1000px 700px at 50% 40%, rgba(245,158,11,.10), transparent 60%); }
+.font-d { font-family: 'Orbitron', sans-serif; }
+
+/* HEADER mince */
+.head { padding: 14px 18px 6px; display: flex; align-items: center; justify-content: space-between; }
+.quit { width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border); background: var(--card); color: var(--muted2); font-size: 17px; display: grid; place-items: center; cursor: pointer; }
+.head-mid .t { font-family: 'Orbitron'; font-size: 12px; font-weight: 700; text-align: center; letter-spacing: .05em; }
+.head-mid .s { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); text-align: center; margin-top: 1px; }
+.head-chrono { font-family: 'Orbitron'; font-size: 13px; color: var(--cyan); }
+
+/* segments exos */
+.segs { display: flex; gap: 4px; padding: 8px 18px 0; }
+.seg { flex: 1; height: 4px; border-radius: 3px; background: var(--border); overflow: hidden; position: relative; }
+.seg.done { background: var(--success); }
+.seg.cur::after { content:''; position: absolute; inset: 0; width: 50%; background: linear-gradient(90deg,var(--primary),var(--primary-light)); }
+
+/* phase label */
+.phase { text-align: center; margin-top: 18px; }
+.phase-tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase;
+  padding: 5px 16px; border-radius: 30px; border: 1px solid; }
+.tag-work { color: var(--primary-light); border-color: rgba(99,102,241,.4); background: rgba(99,102,241,.1); }
+.tag-rest { color: var(--gold); border-color: rgba(245,158,11,.4); background: rgba(245,158,11,.1); }
+
+/* RADIAL central */
+.center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+.radial { width: 290px; height: 290px; position: relative; display: grid; place-items: center; }
+.radial svg { transform: rotate(-90deg); }
+.r-track { stroke: #161826; }
+.r-fill { stroke: var(--primary); stroke-linecap: round; filter: drop-shadow(0 0 10px rgba(99,102,241,.7)); transition: stroke .4s, stroke-dashoffset 1s linear; }
+.resting .r-fill { stroke: var(--gold); filter: drop-shadow(0 0 10px rgba(245,158,11,.7)); }
+.r-inner { position: absolute; display: flex; flex-direction: column; align-items: center; }
+.r-top { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.r-big { font-family: 'Orbitron'; font-size: 62px; font-weight: 700; line-height: 1; margin: 4px 0; }
+.r-big small { font-size: 24px; color: var(--muted2); }
+.r-sub { font-size: 13px; color: var(--muted2); }
+.r-sub b { color: var(--text); }
+
+.ex-title { font-family: 'Orbitron'; font-size: 26px; font-weight: 700; margin-top: 14px; text-align: center; }
+.ex-line { display: flex; gap: 8px; margin-top: 8px; }
+.pill { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; border: 1px solid; }
+.pill-cat { background: rgba(99,102,241,.12); color: var(--primary-light); border-color: rgba(99,102,241,.3); }
+.pill-reps { background: rgba(241,245,249,.06); color: var(--text); border-color: var(--border); }
+
+/* sets row */
+.sets { display: flex; gap: 9px; margin-top: 16px; }
+.set { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-family: 'Orbitron';
+  font-size: 13px; font-weight: 700; border: 1px solid var(--border); background: var(--card2); color: var(--muted); }
+.set.done { background: var(--success); border-color: var(--success); color: #05260f; }
+.set.active { border-color: var(--primary); color: var(--primary-light); box-shadow: 0 0 14px -2px var(--primary); }
+
+/* footer : XP bar live + CTA */
+.foot { padding: 0 18px 22px; }
+.xpbar-wrap { margin-bottom: 14px; }
+.xpbar-top { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+.xpbar-top b { color: var(--gold); font-family: 'Orbitron'; }
+.xpbar { height: 7px; border-radius: 5px; background: var(--border); overflow: hidden; }
+.xpbar-fill { height: 100%; width: 46%; background: linear-gradient(90deg, #b45309, var(--gold)); border-radius: 5px; box-shadow: 0 0 12px rgba(245,158,11,.5); }
+
+.cta { width: 100%; height: 66px; border: none; border-radius: 18px; cursor: pointer; font-family: 'Orbitron';
+  font-weight: 700; font-size: 17px; letter-spacing: .04em; color: #fff; transition: transform .1s, background .4s;
+  background: linear-gradient(135deg, #6366f1, #4338ca); box-shadow: 0 12px 32px -10px rgba(99,102,241,.7), inset 0 1px 0 rgba(255,255,255,.2); }
+.cta:active { transform: scale(.97); }
+.resting .cta { background: linear-gradient(135deg, var(--gold), #b45309); box-shadow: 0 12px 32px -10px rgba(245,158,11,.7), inset 0 1px 0 rgba(255,255,255,.2); color: #2a1a00; }
+.mini { display: flex; gap: 10px; margin-top: 10px; }
+.mini button { flex: 1; height: 44px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--muted2); font-size: 13px; font-weight: 600; cursor: pointer; }
+
+.next-hint { text-align: center; font-size: 12px; color: var(--muted); margin-top: 12px; }
+.next-hint b { color: var(--muted2); }
+
+.switcher { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 99;
+  background: rgba(15,17,23,.9); border: 1px solid var(--border); border-radius: 30px; padding: 6px; }
+.switcher button { font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 20px; border: none; cursor: pointer; background: transparent; color: var(--muted2); }
+.switcher button.on { background: var(--primary); color: #fff; }
+.hide { display: none !important; }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <div class="head">
+    <div class="quit">✕</div>
+    <div class="head-mid"><div class="t">PUSH · JOUR 1</div><div class="s">Exercice 3 / 4</div></div>
+    <div class="head-chrono">12:48</div>
+  </div>
+  <div class="segs">
+    <div class="seg done"></div><div class="seg done"></div><div class="seg cur"></div><div class="seg"></div>
+  </div>
+
+  <div class="phase">
+    <span class="phase-tag tag-work" id="phaseTag">● Effort en cours</span>
+  </div>
+
+  <div class="center">
+    <div class="radial">
+      <svg width="290" height="290">
+        <circle class="r-track" cx="145" cy="145" r="130" stroke-width="14" fill="none"/>
+        <circle class="r-fill" id="ring" cx="145" cy="145" r="130" stroke-width="14" fill="none"
+          stroke-dasharray="817" stroke-dashoffset="350"/>
+      </svg>
+      <div class="r-inner" id="inner">
+        <!-- contenu injecté selon phase -->
+      </div>
+    </div>
+
+    <div class="ex-title" id="exTitle">Pompes déclinées</div>
+    <div class="ex-line">
+      <span class="pill pill-cat">PUSH</span>
+      <span class="pill pill-reps">3 × 10 reps</span>
+    </div>
+
+    <div class="sets" id="sets">
+      <div class="set done">✓</div>
+      <div class="set active">2</div>
+      <div class="set">3</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="xpbar-wrap">
+      <div class="xpbar-top"><span>Niveau 7 → 8</span><span><b>+140 XP</b> cette séance</span></div>
+      <div class="xpbar"><div class="xpbar-fill"></div></div>
+    </div>
+    <button class="cta" id="cta">⚡ SÉRIE TERMINÉE</button>
+    <div class="mini" id="mini">
+      <button>− 1 rép</button>
+      <button>Fiche ℹ</button>
+      <button>Passer ▸</button>
+    </div>
+    <div class="next-hint hide" id="nextHint">Ensuite : <b>Série 3 — Pompes déclinées</b></div>
+  </div>
+
+</div>
+
+<div class="switcher">
+  <button class="on" onclick="render('work',this)">Travail</button>
+  <button onclick="render('rest',this)">Repos</button>
+</div>
+
+<script>
+const inner = document.getElementById('inner');
+const ring = document.getElementById('ring');
+function render(phase, btn){
+  document.querySelectorAll('.switcher button').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  const phone = document.getElementById('phone');
+  const tag = document.getElementById('phaseTag');
+  if(phase === 'rest'){
+    phone.classList.add('resting');
+    tag.className = 'phase-tag tag-rest'; tag.textContent = '⏳ Transition — repos';
+    ring.setAttribute('stroke-dashoffset', '250');
+    inner.innerHTML = `
+      <div class="r-top">Repos</div>
+      <div class="r-big">0:42</div>
+      <div class="r-sub">avant la <b>série 3</b></div>`;
+    document.getElementById('cta').textContent = 'PASSER LE REPOS ▸';
+    document.getElementById('mini').classList.add('hide');
+    document.getElementById('nextHint').classList.remove('hide');
+    document.getElementById('exTitle').textContent = 'Pompes déclinées';
+  } else {
+    phone.classList.remove('resting');
+    tag.className = 'phase-tag tag-work'; tag.textContent = '● Effort en cours';
+    ring.setAttribute('stroke-dashoffset', '350');
+    inner.innerHTML = `
+      <div class="r-top">Objectif série</div>
+      <div class="r-big">10 <small>reps</small></div>
+      <div class="r-sub">Série <b>2 / 3</b></div>`;
+    document.getElementById('cta').textContent = '⚡ SÉRIE TERMINÉE';
+    document.getElementById('mini').classList.remove('hide');
+    document.getElementById('nextHint').classList.add('hide');
+  }
+}
+document.getElementById('cta').addEventListener('click', function(){
+  const resting = document.getElementById('phone').classList.contains('resting');
+  render(resting ? 'work' : 'rest');
+  document.querySelectorAll('.switcher button')[resting?0:1].classList.add('on');
+  document.querySelectorAll('.switcher button')[resting?1:0].classList.remove('on');
+});
+render('work');
+</script>
+</body>
+</html>

@@ -60,6 +60,52 @@ export interface Program {
   sessions: WorkoutSession[];
 }
 
+// ─── Séance active (Sprint 6) ──────────────────────────────
+// Exercice résolu pour le mode séance : fusion SessionExercise + métadonnées Exercise.
+export interface ActiveExercise {
+  sessionExerciseId: string;
+  exerciseId: string;
+  name: string;
+  category: Category;
+  type: ExerciseType;
+  sets: number;
+  /** reps cibles (type reps) ou secondes cibles (type duration), par série */
+  target: number;
+  restBetweenSetsSeconds: number;
+  restAfterExerciseSeconds: number;
+}
+
+export interface CompletedSetRecord {
+  exerciseId: string;
+  exerciseName: string;
+  setNumber: number;
+  reps?: number | null;
+  durationSecs?: number | null;
+  weightKg?: number | null;
+}
+
+export interface WorkoutLogSet extends CompletedSetRecord {
+  id: string;
+}
+
+export interface WorkoutLog {
+  id: string;
+  sessionId?: string | null;
+  sessionName: string;
+  date: string;
+  durationSecs: number;
+  xpEarned: number;
+  completedSets: WorkoutLogSet[];
+}
+
+export interface WorkoutResult {
+  log: WorkoutLog;
+  user: UserProfile;
+  xpEarned: number;
+  leveledUp: boolean;
+  levelsGained: number;
+}
+
 export type DigestFrequency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'NONE';
 
 export interface RegisterPayload {

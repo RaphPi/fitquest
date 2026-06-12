@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitQuest — Boss Fight · Face au boss</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+:root {
+  --bg:#0a0a0f; --card:#0f1117; --card2:#13151f; --border:#1e2030;
+  --primary:#6366f1; --primary-light:#a78bfa; --gold:#f59e0b;
+  --success:#22c55e; --danger:#ef4444; --cyan:#22d3ee;
+  --text:#f1f5f9; --muted:#64748b; --muted2:#94a3b8;
+}
+body { background:#06060a; color:var(--text); font-family:'Inter',system-ui,sans-serif; min-height:100vh; display:flex; flex-direction:column; align-items:center; }
+.font-d { font-family:'Orbitron',sans-serif; }
+.phone {
+  width:100%; max-width:430px; min-height:100vh; position:relative; display:flex; flex-direction:column;
+  border-left:1px solid var(--border); border-right:1px solid var(--border); overflow:hidden;
+  background:
+    radial-gradient(620px 460px at 50% 30%, rgba(239,68,68,.16), transparent 60%),
+    radial-gradient(700px 400px at 50% 95%, rgba(99,102,241,.14), transparent 60%),
+    var(--bg);
+}
+.phone.shake { animation:shake .38s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-7px)} 30%{transform:translateX(6px)} 45%{transform:translateX(-5px)} 60%{transform:translateX(4px)} 80%{transform:translateX(-2px)} }
+.phone.flash::after { content:''; position:absolute; inset:0; background:rgba(255,255,255,.12); z-index:35; pointer-events:none; animation:flash .25s forwards; }
+@keyframes flash { from{opacity:1} to{opacity:0} }
+
+/* HEADER */
+.head { display:flex; align-items:center; justify-content:space-between; padding:13px 16px 8px; z-index:5; }
+.icon-btn { width:36px; height:36px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--muted2); font-size:15px; display:grid; place-items:center; cursor:pointer; }
+.head-mid { text-align:center; }
+.head-mid .t { font-family:'Orbitron'; font-size:12px; font-weight:700; letter-spacing:.06em; }
+.head-mid .s { font-size:11px; margin-top:2px; color:var(--muted); }
+.head-mid .s .dur { color:var(--cyan); font-family:'Orbitron'; }
+.head-right { font-family:'Orbitron'; font-size:11px; color:var(--muted2); text-align:right; }
+.head-right b { color:var(--text); display:block; font-size:14px; }
+.segs { display:flex; gap:4px; padding:4px 16px 0; z-index:5; }
+.seg { flex:1; height:4px; border-radius:3px; background:var(--border); overflow:hidden; position:relative; }
+.seg.done { background:var(--success); }
+.seg.cur::after { content:''; position:absolute; inset:0; width:62%; background:linear-gradient(90deg,var(--danger),#fca5a5); }
+
+/* BOSS HP */
+.bosshp { padding:14px 16px 4px; z-index:5; }
+.bosshp-top { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:5px; }
+.boss-name { font-family:'Orbitron'; font-size:13px; font-weight:700; color:#fca5a5; letter-spacing:.04em; }
+.boss-name .lvl { color:var(--muted); font-size:10px; margin-left:4px; }
+.boss-pv { font-family:'Orbitron'; font-size:12px; color:var(--muted2); }
+.boss-pv b { color:var(--text); }
+.hpbar { height:16px; border-radius:9px; background:#1a0d12; border:1px solid rgba(239,68,68,.45); overflow:hidden; position:relative; box-shadow:inset 0 0 12px rgba(239,68,68,.3); }
+.hpbar-fill { height:100%; width:50%; background:linear-gradient(90deg,#7f1d1d,#ef4444 60%,#f87171); border-radius:9px 0 0 9px; transition:width .7s cubic-bezier(.2,.8,.2,1); box-shadow:0 0 14px rgba(239,68,68,.6); }
+.hpbar-fill::after { content:''; position:absolute; inset:0; background:linear-gradient(0deg,rgba(0,0,0,.28),rgba(255,255,255,.16)); }
+
+/* BOSS central */
+.arena { flex:1; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.boss-aura { position:absolute; top:42%; left:50%; transform:translate(-50%,-50%); width:240px; height:240px; border-radius:50%;
+  background:radial-gradient(circle, rgba(239,68,68,.22), transparent 68%); animation:pulse 3s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{transform:translate(-50%,-50%) scale(1); opacity:.8} 50%{transform:translate(-50%,-50%) scale(1.12); opacity:1} }
+.boss { font-size:130px; line-height:1; position:relative; z-index:2; transition:opacity .6s, filter .6s, transform .3s; animation:bossIdle 3s ease-in-out infinite; }
+@keyframes bossIdle { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-12px) rotate(1.5deg)} }
+.boss.recoil { animation:bossRecoil .45s; }
+@keyframes bossRecoil { 0%{transform:translateY(0) scale(1)} 20%{transform:translateY(6px) scale(.92) rotate(-5deg)} 50%{transform:translateY(2px) scale(.97) rotate(3deg)} 100%{transform:translateY(0) scale(1)} }
+.boss-name-big { font-family:'Orbitron'; font-size:14px; letter-spacing:.1em; text-transform:uppercase; color:#fca5a5; margin-top:8px; z-index:2; }
+
+/* floaters */
+.slash { position:absolute; top:34%; left:50%; transform:translateX(-50%); font-size:96px; opacity:0; pointer-events:none; z-index:3; text-shadow:0 0 22px rgba(167,139,250,.9); }
+.slash.go { animation:slash .5s ease-out; }
+@keyframes slash { 0%{opacity:0; transform:translateX(-50%) scale(.4) rotate(-40deg)} 30%{opacity:1; transform:translateX(-50%) scale(1.15) rotate(0)} 100%{opacity:0; transform:translateX(-50%) scale(1.4) rotate(25deg)} }
+.float { position:absolute; top:24%; left:54%; font-family:'Orbitron'; font-weight:900; font-size:38px; color:var(--gold); text-shadow:0 0 16px rgba(245,158,11,.85); opacity:0; pointer-events:none; z-index:4; }
+.float.go { animation:floatUp 1.1s ease-out; }
+@keyframes floatUp { 0%{opacity:0; transform:translateY(10px) scale(.6)} 25%{opacity:1; transform:translateY(-14px) scale(1.2)} 100%{opacity:0; transform:translateY(-80px) scale(1)} }
+.combo { position:absolute; top:12%; left:50%; transform:translateX(-50%); font-family:'Orbitron'; font-weight:900; font-size:26px; color:var(--primary-light); text-shadow:0 0 18px rgba(167,139,250,.85); opacity:0; pointer-events:none; z-index:4; }
+.combo.go { animation:comboPop 1s ease-out; }
+@keyframes comboPop { 0%{opacity:0; transform:translateX(-50%) scale(.5)} 30%{opacity:1; transform:translateX(-50%) scale(1.15)} 100%{opacity:0; transform:translateX(-50%) scale(1)} }
+
+/* tes armes en bas (POV) */
+.weapons { position:absolute; bottom:-6px; left:0; right:0; display:flex; justify-content:space-between; padding:0 6px; z-index:3; pointer-events:none; }
+.weapon { font-size:62px; filter:drop-shadow(0 0 10px rgba(99,102,241,.5)); }
+.weapon.left { transform:rotate(18deg); } .weapon.right { transform:rotate(-18deg) scaleX(-1); }
+.weapons.lunge .weapon.right { animation:weaponLunge .4s; }
+@keyframes weaponLunge { 0%{transform:rotate(-18deg) scaleX(-1) translateY(0)} 40%{transform:rotate(-55deg) scaleX(-1) translateY(-40px)} 100%{transform:rotate(-18deg) scaleX(-1) translateY(0)} }
+
+/* EXERCISE INFO */
+.exinfo { padding:4px 16px 2px; text-align:center; z-index:5; }
+.ex-title { font-family:'Orbitron'; font-size:21px; font-weight:700; }
+.ex-meta { display:flex; gap:7px; justify-content:center; margin-top:7px; flex-wrap:wrap; }
+.pill { font-size:11px; font-weight:700; padding:4px 11px; border-radius:20px; border:1px solid; }
+.pill-cat { background:rgba(99,102,241,.12); color:var(--primary-light); border-color:rgba(99,102,241,.3); }
+.pill-set { background:rgba(241,245,249,.06); color:var(--text); border-color:var(--border); }
+.sets { display:flex; gap:8px; justify-content:center; margin-top:11px; }
+.set { width:30px; height:30px; border-radius:9px; display:grid; place-items:center; font-family:'Orbitron'; font-size:12px; font-weight:700; border:1px solid var(--border); background:var(--card2); color:var(--muted); }
+.set.done { background:var(--success); border-color:var(--success); color:#05260f; }
+.set.active { border-color:var(--primary); color:var(--primary-light); box-shadow:0 0 12px -2px var(--primary); }
+
+/* FOOTER */
+.foot { padding:12px 16px 20px; z-index:5; }
+.xprow { display:flex; justify-content:space-between; font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:5px; }
+.xprow b { color:var(--gold); font-family:'Orbitron'; }
+.xpbar { height:7px; border-radius:5px; background:var(--border); overflow:hidden; margin-bottom:13px; }
+.xpbar-fill { height:100%; width:46%; background:linear-gradient(90deg,#b45309,var(--gold)); border-radius:5px; box-shadow:0 0 10px rgba(245,158,11,.5); transition:width .8s; }
+.cta { width:100%; height:62px; border:none; border-radius:16px; cursor:pointer; font-family:'Orbitron'; font-weight:700; font-size:16px; letter-spacing:.03em; color:#fff;
+  background:linear-gradient(135deg,var(--danger),#991b1b); box-shadow:0 10px 28px -9px rgba(239,68,68,.6), inset 0 1px 0 rgba(255,255,255,.18); transition:transform .1s; display:flex; align-items:center; justify-content:center; gap:9px; }
+.cta:active { transform:scale(.97); }
+.mini { display:flex; gap:9px; margin-top:9px; }
+.mini button { flex:1; height:42px; border-radius:11px; border:1px solid var(--border); background:var(--card); color:var(--muted2); font-size:12px; font-weight:600; cursor:pointer; }
+
+/* OVERLAYS (mêmes styles que duel) */
+.overlay { position:absolute; inset:0; z-index:40; display:none; flex-direction:column; }
+.overlay.show { display:flex; }
+.ov-blur { background:rgba(8,8,13,.94); backdrop-filter:blur(7px); }
+#confirm { justify-content:flex-end; background:rgba(6,6,10,.55); }
+.sheet { background:linear-gradient(180deg,#12141d,#0c0d14); border-top:1px solid var(--border); border-radius:22px 22px 0 0; padding:20px 18px 24px; box-shadow:0 -20px 50px rgba(0,0,0,.6); }
+.sheet h3 { font-family:'Orbitron'; font-size:15px; font-weight:700; text-align:center; }
+.sheet .hint { text-align:center; color:var(--muted); font-size:12px; margin:4px 0 16px; }
+.stepper { display:flex; align-items:center; justify-content:center; gap:18px; margin-bottom:8px; }
+.step-btn { width:56px; height:56px; border-radius:16px; border:1px solid var(--border); background:var(--card2); color:var(--text); font-size:26px; font-weight:700; cursor:pointer; }
+.step-val { font-family:'Orbitron'; font-size:54px; font-weight:700; min-width:96px; text-align:center; }
+.step-unit { font-size:13px; color:var(--muted); text-align:center; margin-bottom:18px; }
+.target-note { text-align:center; font-size:12px; margin-bottom:16px; }
+.target-note.under { color:var(--gold); } .target-note.ok { color:var(--success); }
+.strike { width:100%; height:60px; border:none; border-radius:15px; cursor:pointer; font-family:'Orbitron'; font-weight:700; font-size:16px; color:#fff;
+  background:linear-gradient(135deg,var(--danger),#991b1b); box-shadow:0 10px 26px -8px rgba(239,68,68,.6); }
+#rest { align-items:center; justify-content:center; }
+.rest-tag { font-size:11px; letter-spacing:.18em; text-transform:uppercase; font-weight:800; color:var(--primary-light); }
+.radial { width:200px; height:200px; position:relative; display:grid; place-items:center; }
+.radial svg { transform:rotate(-90deg); }
+.radial .num { position:absolute; font-family:'Orbitron'; font-size:48px; font-weight:700; }
+.rest-avatar { font-size:40px; animation:breathe 2s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+.rest-do { font-size:12px; color:var(--muted2); }
+.next-card { border:1px solid var(--border); background:var(--card); border-radius:13px; padding:11px 16px; text-align:center; min-width:230px; }
+.next-card .l { font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+.next-card .v { font-family:'Orbitron'; font-size:15px; font-weight:700; margin-top:3px; }
+.rest-btns { display:flex; gap:10px; }
+.rest-btn { padding:10px 20px; border-radius:12px; border:1px solid var(--border); background:var(--card); color:var(--text); font-weight:700; font-size:13px; cursor:pointer; }
+.rest-btn.primary { background:var(--primary); border-color:var(--primary); color:#fff; }
+#pause { align-items:center; justify-content:center; }
+.pause-title { font-family:'Orbitron'; font-size:26px; font-weight:900; letter-spacing:.08em; }
+.pause-chrono { font-family:'Orbitron'; font-size:40px; color:var(--cyan); }
+.pause-sub { color:var(--muted); font-size:12px; }
+.pause-btns { display:flex; flex-direction:column; gap:10px; width:230px; }
+.pause-btn { height:52px; border-radius:14px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'Orbitron'; font-weight:700; font-size:14px; cursor:pointer; }
+.pause-btn.primary { background:var(--success); border-color:var(--success); color:#04250f; }
+.pause-btn.danger { color:#fca5a5; border-color:rgba(239,68,68,.4); }
+#victory, #survived { align-items:center; justify-content:center; text-align:center; }
+.result-boss { font-size:100px; }
+#victory .result-boss { animation:fall 1s forwards; }
+@keyframes fall { 0%{transform:rotate(0) translateY(0); opacity:1} 100%{transform:rotate(92deg) translateY(30px); opacity:.35} }
+#survived .result-boss { animation:limp 1.4s ease-in-out infinite; opacity:.7; }
+@keyframes limp { 0%,100%{transform:rotate(-8deg) translateX(0)} 50%{transform:rotate(-2deg) translateX(-10px)} }
+.result-title { font-family:'Orbitron'; font-size:30px; font-weight:900; }
+#victory .result-title { color:var(--gold); text-shadow:0 0 24px rgba(245,158,11,.6); }
+#survived .result-title { color:var(--primary-light); }
+.result-line { font-size:13px; color:var(--muted2); max-width:280px; font-style:italic; }
+.result-xp { font-family:'Orbitron'; font-size:22px; color:var(--gold); }
+.result-stats { display:flex; gap:14px; margin-top:4px; }
+.rstat { border:1px solid var(--border); background:var(--card); border-radius:11px; padding:8px 16px; }
+.rstat .v { font-family:'Orbitron'; font-size:18px; font-weight:700; }
+.rstat .l { font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:2px; }
+.result-cta { margin-top:6px; padding:13px 28px; border-radius:14px; border:none; font-family:'Orbitron'; font-weight:700; font-size:14px; color:#fff; background:linear-gradient(135deg,#6366f1,#4338ca); cursor:pointer; }
+.gap14 > * + * { margin-top:14px; }
+
+.switcher { position:fixed; bottom:10px; left:50%; transform:translateX(-50%); display:flex; gap:5px; z-index:99; flex-wrap:wrap; justify-content:center; max-width:430px;
+  background:rgba(15,17,23,.92); border:1px solid var(--border); border-radius:14px; padding:6px; }
+.switcher button { font-size:10px; font-weight:700; padding:6px 10px; border-radius:9px; border:none; cursor:pointer; background:transparent; color:var(--muted2); }
+.switcher button.on { background:var(--primary); color:#fff; }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <div class="head">
+    <div class="icon-btn" onclick="show('pause')">⏸</div>
+    <div class="head-mid">
+      <div class="t">PUSH · JOUR 1</div>
+      <div class="s"><span class="dur">⏱ 04:12</span> · <span id="clock">18:42</span></div>
+    </div>
+    <div class="head-right">Boss<b>1/4</b></div>
+  </div>
+  <div class="segs"><div class="seg cur"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div></div>
+
+  <div class="bosshp">
+    <div class="bosshp-top">
+      <span class="boss-name">👹 Gardien des Pompes <span class="lvl">Nv.1</span></span>
+      <span class="boss-pv"><b id="hpNum">24</b> / 48 PV</span>
+    </div>
+    <div class="hpbar"><div class="hpbar-fill" id="hpFill" style="width:50%"></div></div>
+  </div>
+
+  <div class="arena">
+    <div class="boss-aura"></div>
+    <div class="combo" id="combo">COMBO ×12</div>
+    <div class="slash" id="slash">⚔️</div>
+    <div class="float" id="float">-12</div>
+    <div class="boss" id="boss">👹</div>
+    <div class="boss-name-big">⚔ adversaire ⚔</div>
+    <div class="weapons" id="weapons">
+      <div class="weapon left">🛡️</div>
+      <div class="weapon right">⚔️</div>
+    </div>
+  </div>
+
+  <div class="exinfo">
+    <div class="ex-title">Pompes classiques</div>
+    <div class="ex-meta">
+      <span class="pill pill-cat">PUSH</span>
+      <span class="pill pill-set">Série 3 / 4 · cible 12</span>
+    </div>
+    <div class="sets"><div class="set done">✓</div><div class="set done">✓</div><div class="set active">3</div><div class="set">4</div></div>
+  </div>
+
+  <div class="foot">
+    <div class="xprow"><span>Niveau 7 → 8</span><span><b id="xpTxt">+140 XP</b></span></div>
+    <div class="xpbar"><div class="xpbar-fill" id="xpFill"></div></div>
+    <button class="cta" onclick="show('confirm')">⚔️ SÉRIE TERMINÉE</button>
+    <div class="mini">
+      <button onclick="adjustQuick()">− 1 rép</button>
+      <button>Fiche ℹ</button>
+      <button onclick="show('rest')">Passer ▸</button>
+    </div>
+  </div>
+
+  <!-- CONFIRM -->
+  <div class="overlay" id="confirm">
+    <div style="flex:1" onclick="hideAll()"></div>
+    <div class="sheet">
+      <h3>Combien de répétitions ?</h3>
+      <div class="hint">Chaque répétition = un coup porté au boss</div>
+      <div class="stepper">
+        <button class="step-btn" onclick="stepReps(-1)">−</button>
+        <div class="step-val" id="repVal">12</div>
+        <button class="step-btn" onclick="stepReps(1)">+</button>
+      </div>
+      <div class="step-unit">répétitions</div>
+      <div class="target-note ok" id="targetNote">🎯 Objectif atteint (cible 12)</div>
+      <button class="strike" onclick="doStrike()">⚔️ PORTER LE COUP</button>
+    </div>
+  </div>
+
+  <!-- REST -->
+  <div class="overlay ov-blur" id="rest">
+    <div class="gap14" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+      <div class="rest-tag">⏳ Transition · reprends ton souffle</div>
+      <div class="radial">
+        <svg width="200" height="200">
+          <circle cx="100" cy="100" r="88" stroke="#1e2030" stroke-width="12" fill="none"/>
+          <circle cx="100" cy="100" r="88" stroke="#a78bfa" stroke-width="12" fill="none" stroke-linecap="round"
+            stroke-dasharray="553" stroke-dashoffset="200" style="filter:drop-shadow(0 0 8px rgba(167,139,250,.7))"/>
+        </svg>
+        <div class="num">0:42</div>
+      </div>
+      <div class="rest-avatar">🛡️</div>
+      <div class="rest-do">Ton héros reprend son souffle et réaffûte sa lame…</div>
+      <div class="next-card">
+        <div class="l">Prochaine attaque</div>
+        <div class="v">Série 4 — Pompes classiques · cible 12</div>
+      </div>
+      <div class="rest-btns">
+        <button class="rest-btn">+ 15s</button>
+        <button class="rest-btn primary" onclick="show('fight')">Reprendre le combat ⚔️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAUSE -->
+  <div class="overlay ov-blur" id="pause">
+    <div class="gap14" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+      <div class="pause-title">⏸ EN PAUSE</div>
+      <div class="pause-chrono">04:12</div>
+      <div class="pause-sub">Chrono &amp; durée figés — prends ton temps</div>
+      <div class="pause-btns">
+        <button class="pause-btn primary" onclick="show('fight')">▶ Reprendre</button>
+        <button class="pause-btn">Voir la séance</button>
+        <button class="pause-btn danger" onclick="show('survived')">Abandonner la séance</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VICTORY -->
+  <div class="overlay ov-blur" id="victory">
+    <div class="gap14" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+      <div class="result-boss">👹</div>
+      <div class="result-title">BOSS VAINCU !</div>
+      <div class="result-xp">+100 XP</div>
+      <div class="result-line">« Impossible… si fort… » — le Gardien des Pompes s'effondre.</div>
+      <div class="result-stats">
+        <div class="rstat"><div class="v">48</div><div class="l">reps portées</div></div>
+        <div class="rstat"><div class="v">×4</div><div class="l">séries</div></div>
+      </div>
+      <button class="result-cta" onclick="show('rest')">Boss suivant ▸ Dips sur chaise</button>
+    </div>
+  </div>
+
+  <!-- SURVIVED -->
+  <div class="overlay ov-blur" id="survived">
+    <div class="gap14" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+      <div class="result-boss">👹</div>
+      <div class="result-title">Tu t'es bien battu !</div>
+      <div class="result-line">« Je pars… mais on se reverra ! » — le boss s'enfuit en boitant.</div>
+      <div class="result-stats">
+        <div class="rstat"><div class="v">31 / 48</div><div class="l">reps portées</div></div>
+        <div class="rstat"><div class="v">+62 XP</div><div class="l">gagnés</div></div>
+      </div>
+      <button class="result-cta" onclick="show('fight')">Continuer</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="switcher">
+  <button class="on" onclick="show('fight',this)">Combat</button>
+  <button onclick="show('confirm',this)">Valider reps</button>
+  <button onclick="show('rest',this)">Repos</button>
+  <button onclick="show('pause',this)">Pause</button>
+  <button onclick="show('victory',this)">Victoire</button>
+  <button onclick="show('survived',this)">Survie</button>
+</div>
+
+<script>
+const TARGET=12, MAXHP=48;
+let reps=TARGET, hp=24;
+function tick(){ document.getElementById('clock').textContent = new Date().toTimeString().slice(0,5); }
+tick(); setInterval(tick,10000);
+
+function hideAll(){ document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('show')); }
+function show(state, btn){
+  if(btn){ document.querySelectorAll('.switcher button').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); }
+  hideAll();
+  if(state==='fight') return;
+  document.getElementById(state).classList.add('show');
+}
+function stepReps(d){
+  reps=Math.max(0,reps+d);
+  document.getElementById('repVal').textContent=reps;
+  const note=document.getElementById('targetNote');
+  if(reps>=TARGET){ note.className='target-note ok'; note.textContent='🎯 Objectif atteint (cible '+TARGET+')'; }
+  else { note.className='target-note under'; note.textContent='⚠️ Sous la cible — le boss encaisse moins (cible '+TARGET+')'; }
+}
+function adjustQuick(){ stepReps(-1); }
+function doStrike(){
+  hideAll();
+  const phone=document.getElementById('phone'), boss=document.getElementById('boss');
+  const slash=document.getElementById('slash'), float=document.getElementById('float'), combo=document.getElementById('combo'), weapons=document.getElementById('weapons');
+  weapons.classList.remove('lunge'); void weapons.offsetWidth; weapons.classList.add('lunge');
+  setTimeout(()=>{
+    phone.classList.remove('shake','flash'); void phone.offsetWidth; phone.classList.add('shake','flash');
+    boss.classList.remove('recoil'); void boss.offsetWidth; boss.classList.add('recoil');
+    slash.classList.remove('go'); void slash.offsetWidth; slash.classList.add('go');
+    float.textContent='-'+reps; float.classList.remove('go'); void float.offsetWidth; float.classList.add('go');
+    combo.textContent='COMBO ×'+reps; combo.classList.remove('go'); void combo.offsetWidth; combo.classList.add('go');
+    hp=Math.max(0,hp-reps);
+    document.getElementById('hpFill').style.width=(hp/MAXHP*100)+'%';
+    document.getElementById('hpNum').textContent=hp;
+    const frac=hp/MAXHP;
+    boss.style.opacity=(0.45+0.55*frac).toFixed(2);
+    boss.style.filter=`grayscale(${((1-frac)*0.55).toFixed(2)}) brightness(${(1-(1-frac)*0.25).toFixed(2)})`;
+    document.getElementById('xpFill').style.width=Math.min(96,46+reps)+'%';
+    document.getElementById('xpTxt').textContent='+'+(140+reps*2)+' XP';
+  },180);
+  setTimeout(()=>{ show(hp<=0?'victory':'rest'); },1150);
+}
+show('fight');
+</script>
+</body>
+</html>

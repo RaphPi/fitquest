@@ -12,6 +12,7 @@ interface UserState {
   register: (payload: RegisterPayload) => Promise<void>;
   login: (payload: LoginPayload) => Promise<void>;
   logout: () => Promise<void>;
+  setUser: (user: UserProfile) => void;
   clearError: () => void;
 }
 
@@ -81,6 +82,8 @@ export const useUserStore = create<UserState>((set) => ({
     await apiFetch(`${API}/logout`, { method: 'POST' }).catch(() => null);
     set({ user: null, isAuthenticated: false });
   },
+
+  setUser: (user) => set({ user, isAuthenticated: true }),
 
   clearError: () => set({ error: null }),
 }));

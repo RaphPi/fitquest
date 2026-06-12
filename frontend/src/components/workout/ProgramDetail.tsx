@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, ChevronDown, ChevronRight, Clock, Dumbbell,
-  Layers, Calendar, Pencil, Trash2, Plus, Info,
+  Layers, Calendar, Pencil, Trash2, Plus, Info, Swords,
 } from 'lucide-react';
 import { useProgramStore } from '@/stores/programStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
-import type { Program, WorkoutSession, Exercise, Level } from '@/types';
+import { useWorkoutStore } from '@/stores/workoutStore';
+import { bossTitle } from '@/lib/bossFight';
+import type { Program, WorkoutSession, Exercise, Level, ActiveExercise } from '@/types';
 import GlowButton from '@/components/ui/GlowButton';
 import SetsFlow from '@/components/workout/SetsFlow';
 import ExerciseInfoModal from '@/components/workout/ExerciseInfoModal';
@@ -30,7 +33,9 @@ const levelLabels: Record<Level, string> = {
 };
 
 export default function ProgramDetail({ program, onBack, onEdit, onDelete }: ProgramDetailProps) {
+  const navigate = useNavigate();
   const { exercises, fetchExercises } = useExerciseStore();
+  const startSession = useWorkoutStore((s) => s.start);
   const { isSaving } = useProgramStore();
   const [openSession, setOpenSession] = useState<string | null>(program.sessions[0]?.id ?? null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
@@ -48,6 +53,36 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
 
   const toggleSession = (id: string) =>
     setOpenSession((prev) => (prev === id ? null : id));
+
+  const launchSession = (session: WorkoutSession) => {
+    const resolved: ActiveExercise[] = session.exercises
+      .filter((se) => se.sets > 0)
+      .map((se) => {
+        const ex = exMap.get(se.exerciseId);
+        const type = ex?.type ?? (se.durationSeconds ? 'duration' : 'reps');
+        const target = type === 'duration' ? (se.durationSeconds ?? 30) : (se.reps ?? 10);
+        return {
+          sessionExerciseId: se.id,
+          exerciseId: se.exerciseId,
+          name: ex?.nameFr ?? se.exerciseId,
+          category: ex?.category ?? 'core',
+          type,
+          sets: se.sets,
+          target,
+          restBetweenSetsSeconds: se.restBetweenSetsSeconds,
+          restAfterExerciseSeconds: se.restAfterExerciseSeconds,
+        };
+      });
+    if (resolved.length === 0) return;
+    startSession({
+      programId: program.id,
+      sessionId: session.id,
+      sessionName: session.nameFr,
+      exercises: resolved,
+      bossTitle: bossTitle(resolved),
+    });
+    navigate('/workout/active');
+  };
 
   return (
     <div className="flex flex-col gap-5">
@@ -252,7 +287,16 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
                         </div>
                       );
                     })}
-                    <div className="h-2" />
+                    <div className="p-4 pt-2">
+                      <button
+                        onClick={() => launchSession(session)}
+                        className="flex w-full items-center justify-center gap-2 rounded-xl border-2 py-3 font-display text-sm font-bold uppercase tracking-wide text-white transition-transform active:scale-[0.98]"
+                        style={{ borderColor: '#fca5a5', background: 'linear-gradient(180deg,#ef4444,#991b1b)', boxShadow: '0 5px 0 #5b1212' }}
+                      >
+                        <Swords className="h-4 w-4" />
+                        Lancer la séance
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

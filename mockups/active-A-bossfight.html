@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitQuest — Mode Séance · Direction A · Boss Fight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0a0a0f;
+  --card: #0f1117;
+  --card2: #13151f;
+  --border: #1e2030;
+  --primary: #6366f1;
+  --primary-light: #a78bfa;
+  --gold: #f59e0b;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --cyan: #22d3ee;
+  --text: #f1f5f9;
+  --muted: #64748b;
+  --muted2: #94a3b8;
+}
+body {
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(99,102,241,.10), transparent 60%),
+    radial-gradient(800px 500px at 50% 110%, rgba(239,68,68,.08), transparent 60%),
+    var(--bg);
+  color: var(--text); font-family: 'Inter', system-ui, sans-serif;
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+}
+.phone {
+  width: 100%; max-width: 430px; min-height: 100vh; position: relative;
+  display: flex; flex-direction: column;
+  border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+.font-d { font-family: 'Orbitron', sans-serif; }
+
+/* ── TOP BAR : progression séance ── */
+.topbar { padding: 14px 18px 10px; }
+.topbar-row { display: flex; align-items: center; justify-content: space-between; }
+.quit { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--border);
+  background: var(--card); color: var(--muted2); font-size: 18px; display: grid; place-items: center; cursor: pointer; }
+.session-name { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); text-align: center; }
+.session-time { font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 700; color: var(--cyan); text-align: center; margin-top: 1px; }
+.chrono { font-size: 10px; color: var(--muted); text-align: right; }
+.chrono b { font-family: 'Orbitron'; color: var(--text); font-size: 14px; display: block; }
+
+/* segments d'exercices */
+.segments { display: flex; gap: 4px; margin-top: 12px; }
+.seg { flex: 1; height: 5px; border-radius: 3px; background: var(--border); position: relative; overflow: hidden; }
+.seg.done { background: var(--success); }
+.seg.current { background: rgba(99,102,241,.25); }
+.seg.current::after { content:''; position: absolute; inset: 0; width: 55%; background: linear-gradient(90deg,var(--primary),var(--primary-light)); border-radius: 3px; }
+
+/* ── BOSS HEALTH ── */
+.arena { flex: 1; display: flex; flex-direction: column; padding: 8px 18px 0; }
+.boss-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+.boss-label { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--danger); font-weight: 800; }
+.boss-hp-text { font-family: 'Orbitron'; font-size: 12px; color: var(--muted2); }
+.boss-hp { height: 16px; border-radius: 9px; background: #1a0d12; border: 1px solid rgba(239,68,68,.4); overflow: hidden; position: relative; box-shadow: inset 0 0 12px rgba(239,68,68,.25); }
+.boss-hp-fill { height: 100%; width: 62%; background: linear-gradient(90deg,#7f1d1d,#ef4444 60%,#f87171); border-radius: 9px 0 0 9px;
+  transition: width .6s cubic-bezier(.2,.8,.2,1); box-shadow: 0 0 14px rgba(239,68,68,.6); position: relative; }
+.boss-hp-fill::after { content:''; position:absolute; inset:0; background: linear-gradient(0deg, rgba(0,0,0,.25), rgba(255,255,255,.18)); }
+
+/* ── ENNEMI / EXERCICE ── */
+.enemy-zone { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; position: relative; }
+.enemy {
+  width: 168px; height: 168px; border-radius: 50%;
+  background: radial-gradient(circle at 50% 35%, rgba(99,102,241,.30), rgba(13,11,30,.9) 70%);
+  border: 1px solid rgba(99,102,241,.4); display: grid; place-items: center; font-size: 78px;
+  box-shadow: 0 0 50px -8px rgba(99,102,241,.5), inset 0 0 40px rgba(99,102,241,.15);
+  position: relative; animation: float 3.2s ease-in-out infinite;
+}
+@keyframes float { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-10px) } }
+.enemy.hit { animation: hit .4s; }
+@keyframes hit { 0%{ transform: translateX(0) } 20%{ transform: translateX(-12px) rotate(-4deg) } 40%{ transform: translateX(10px) rotate(3deg) } 60%{ transform: translateX(-6px) } 100%{ transform: translateX(0) } }
+.dmg { position: absolute; top: 18%; font-family: 'Orbitron'; font-weight: 900; font-size: 30px; color: var(--gold);
+  text-shadow: 0 0 14px rgba(245,158,11,.8); opacity: 0; pointer-events: none; }
+.dmg.go { animation: dmgUp 1s ease-out; }
+@keyframes dmgUp { 0%{ opacity:0; transform: translateY(10px) scale(.6) } 25%{ opacity:1; transform: translateY(-12px) scale(1.15) } 100%{ opacity:0; transform: translateY(-60px) scale(1) } }
+
+.ex-name { font-family: 'Orbitron'; font-size: 24px; font-weight: 700; text-align: center; letter-spacing: .02em; }
+.ex-meta { display: flex; gap: 8px; }
+.pill { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; border: 1px solid; }
+.pill-reps { background: rgba(241,245,249,.06); color: var(--text); border-color: var(--border); }
+.pill-cat { background: rgba(99,102,241,.12); color: var(--primary-light); border-color: rgba(99,102,241,.3); }
+
+/* ── SET DOTS (séries) ── */
+.sets-track { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 16px 0 6px; }
+.set-dot { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center;
+  font-family: 'Orbitron'; font-size: 13px; font-weight: 700; border: 1px solid var(--border); background: var(--card2); color: var(--muted); }
+.set-dot.done { background: var(--success); border-color: var(--success); color: #062b13; }
+.set-dot.active { border-color: var(--primary); color: var(--primary-light); box-shadow: 0 0 14px -2px var(--primary); }
+
+/* ── ACTION BAR ── */
+.actions { padding: 4px 18px 22px; }
+.reps-line { text-align: center; color: var(--muted2); font-size: 13px; margin-bottom: 12px; }
+.reps-line b { color: var(--text); font-family: 'Orbitron'; }
+.attack { width: 100%; height: 64px; border: none; border-radius: 16px; cursor: pointer;
+  font-family: 'Orbitron'; font-weight: 700; font-size: 17px; letter-spacing: .04em; color: #fff;
+  background: linear-gradient(135deg, #6366f1, #4338ca); box-shadow: 0 10px 30px -8px rgba(99,102,241,.7), inset 0 1px 0 rgba(255,255,255,.2);
+  display: flex; align-items: center; justify-content: center; gap: 10px; transition: transform .1s; }
+.attack:active { transform: scale(.97); }
+.subactions { display: flex; gap: 10px; margin-top: 10px; }
+.sub { flex: 1; height: 44px; border-radius: 12px; border: 1px solid var(--border); background: var(--card);
+  color: var(--muted2); font-size: 13px; font-weight: 600; cursor: pointer; }
+
+/* ── ÉTAT REPOS (overlay) ── */
+.rest { position: absolute; inset: 0; background: rgba(10,10,15,.92); backdrop-filter: blur(6px);
+  display: none; flex-direction: column; align-items: center; justify-content: center; gap: 18px; z-index: 30; }
+.rest.show { display: flex; }
+.rest-label { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); font-weight: 800; }
+.radial { width: 200px; height: 200px; position: relative; display: grid; place-items: center; }
+.radial svg { transform: rotate(-90deg); }
+.radial-num { position: absolute; font-family: 'Orbitron'; font-size: 52px; font-weight: 700; color: var(--text); }
+.rest-next { color: var(--muted2); font-size: 13px; text-align: center; }
+.rest-next b { color: var(--text); }
+.rest-btns { display: flex; gap: 10px; }
+.rest-btn { padding: 10px 20px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-weight: 700; font-size: 13px; cursor: pointer; }
+.rest-btn.primary { background: var(--gold); border-color: var(--gold); color: #2a1a00; }
+
+/* state switcher (hors maquette) */
+.switcher { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 99;
+  background: rgba(15,17,23,.9); border: 1px solid var(--border); border-radius: 30px; padding: 6px; }
+.switcher button { font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 20px; border: none; cursor: pointer; background: transparent; color: var(--muted2); }
+.switcher button.on { background: var(--primary); color: #fff; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-row">
+      <div class="quit">✕</div>
+      <div>
+        <div class="session-name">Push · Jour 1</div>
+        <div class="session-time font-d">EXERCICE 1 / 4</div>
+      </div>
+      <div class="chrono">Durée<b>04:12</b></div>
+    </div>
+    <div class="segments">
+      <div class="seg current"></div>
+      <div class="seg"></div>
+      <div class="seg"></div>
+      <div class="seg"></div>
+    </div>
+  </div>
+
+  <!-- ARÈNE -->
+  <div class="arena">
+    <div class="boss-head">
+      <span class="boss-label">⚔ Adversaire</span>
+      <span class="boss-hp-text" id="hpTxt">2 / 4 séries</span>
+    </div>
+    <div class="boss-hp"><div class="boss-hp-fill" id="hpFill"></div></div>
+
+    <div class="enemy-zone">
+      <div class="dmg" id="dmg">-1</div>
+      <div class="enemy" id="enemy">🥊</div>
+      <div class="ex-name">Pompes classiques</div>
+      <div class="ex-meta">
+        <span class="pill pill-cat">PUSH</span>
+        <span class="pill pill-reps">4 × 12 reps</span>
+      </div>
+    </div>
+
+    <div class="sets-track">
+      <div class="set-dot done">✓</div>
+      <div class="set-dot done">✓</div>
+      <div class="set-dot active">3</div>
+      <div class="set-dot">4</div>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <div class="reps-line">Série 3 — vise <b>12 répétitions</b></div>
+    <button class="attack" id="attackBtn">⚡ SÉRIE TERMINÉE</button>
+    <div class="subactions">
+      <button class="sub">− 1 rép</button>
+      <button class="sub">Voir la fiche ℹ</button>
+      <button class="sub">Passer ▸</button>
+    </div>
+  </div>
+
+  <!-- OVERLAY REPOS -->
+  <div class="rest" id="rest">
+    <div class="rest-label">⏳ Transition · reprends ton souffle</div>
+    <div class="radial">
+      <svg width="200" height="200">
+        <circle cx="100" cy="100" r="88" stroke="#1e2030" stroke-width="12" fill="none"/>
+        <circle id="ring" cx="100" cy="100" r="88" stroke="#a78bfa" stroke-width="12" fill="none"
+          stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="180"
+          style="filter: drop-shadow(0 0 8px rgba(167,139,250,.7))"/>
+      </svg>
+      <div class="radial-num">0:42</div>
+    </div>
+    <div class="rest-next">Prochaine : <b>Série 4 — Pompes classiques</b></div>
+    <div class="rest-btns">
+      <button class="rest-btn">+ 15s</button>
+      <button class="rest-btn primary">Passer le repos ▸</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="switcher">
+  <button class="on" onclick="setState('work',this)">Travail</button>
+  <button onclick="setState('rest',this)">Repos</button>
+  <button onclick="hitBoss()">Frapper 💥</button>
+</div>
+
+<script>
+function setState(s, btn){
+  document.querySelectorAll('.switcher button').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  document.getElementById('rest').classList.toggle('show', s==='rest');
+}
+let sets = 2;
+function hitBoss(){
+  const enemy = document.getElementById('enemy');
+  const dmg = document.getElementById('dmg');
+  enemy.classList.remove('hit'); void enemy.offsetWidth; enemy.classList.add('hit');
+  dmg.classList.remove('go'); void dmg.offsetWidth; dmg.classList.add('go');
+  sets = Math.min(4, sets+1);
+  document.getElementById('hpFill').style.width = (100 - sets*25) + '%';
+  document.getElementById('hpTxt').textContent = sets + ' / 4 séries';
+}
+document.getElementById('attackBtn').addEventListener('click', ()=>{ hitBoss(); setTimeout(()=>setState('rest'), 450); });
+</script>
+</body>
+</html>

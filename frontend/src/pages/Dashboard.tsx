@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@/stores/userStore';
+import { useWorkoutStore } from '@/stores/workoutStore';
 import { Flame, Zap, Trophy, Calendar } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
 import XPBar from '@/components/ui/XPBar';
+import WorkoutHistory from '@/components/workout/WorkoutHistory';
 
 function xpRequired(level: number) {
   return level * 150;
@@ -11,6 +13,7 @@ function xpRequired(level: number) {
 export default function Dashboard() {
   const { t } = useTranslation();
   const { user } = useUserStore();
+  const history = useWorkoutStore((s) => s.history);
 
   return (
     <section className="space-y-6">
@@ -36,15 +39,16 @@ export default function Dashboard() {
             <StatCard icon={Flame} value={user.streak} label="Streak" accent={user.streak > 0} />
             <StatCard icon={Zap} value={user.totalXP} label="XP total" />
             <StatCard icon={Trophy} value={user.level} label="Niveau" />
-            <StatCard icon={Calendar} value="—" label="Séances" />
+            <StatCard icon={Calendar} value={history.length} label="Séances" />
           </div>
         </>
       )}
 
-      <div className="rounded-lg border border-border bg-card p-6">
-        <p className="text-sm text-muted-foreground">
-          Sprint 3 — Design system en place. Streak animé, prochaine séance et feed arrivent au Sprint 8.
-        </p>
+      <div>
+        <h2 className="mb-3 font-display text-sm font-bold uppercase tracking-widest text-muted-foreground">
+          Activité récente
+        </h2>
+        <WorkoutHistory limit={5} />
       </div>
     </section>
   );
