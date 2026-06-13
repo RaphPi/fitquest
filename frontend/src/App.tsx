@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import OverflowProbe from '@/components/dev/OverflowProbe'; // TEMPORAIRE — diagnostic overflow iOS
 import Dashboard from '@/pages/Dashboard';
 import Workout from '@/pages/Workout';
 import ActiveWorkout from '@/pages/ActiveWorkout';
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <OverflowProbe />
     </AppLayout>
   );
 }

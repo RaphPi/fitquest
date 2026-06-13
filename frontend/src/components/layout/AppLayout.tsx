@@ -151,9 +151,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <MobileHeader />
-        <main className="flex-1 p-4 pt-[calc(env(safe-area-inset-top)_+_70px)] pb-24 md:p-6 md:pt-6 md:pb-6 lg:p-8">
+        <main className="min-w-0 flex-1 p-4 pt-[calc(env(safe-area-inset-top)_+_70px)] pb-24 md:p-6 md:pt-6 md:pb-6 lg:p-8">
           {children}
         </main>
       </div>
