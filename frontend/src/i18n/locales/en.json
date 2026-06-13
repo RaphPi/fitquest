@@ -10,6 +10,13 @@
     "profile": "Profile",
     "settings": "Settings"
   },
+  "navShort": {
+    "dashboard": "Home",
+    "workout": "Programs",
+    "library": "Library",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Ready to level up?"

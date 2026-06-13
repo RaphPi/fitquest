@@ -10,6 +10,13 @@
     "profile": "Profil",
     "settings": "Paramètres"
   },
+  "navShort": {
+    "dashboard": "Accueil",
+    "workout": "Programmes",
+    "library": "Biblio",
+    "profile": "Profil",
+    "settings": "Réglages"
+  },
   "dashboard": {
     "title": "Tableau de bord",
     "welcome": "Prêt à monter de niveau ?"

@@ -26,7 +26,10 @@ function MobileHeader() {
   const { user } = useUserStore();
   if (!user) return null;
   return (
-    <header className="fixed inset-x-0 top-0 z-20 flex h-14 items-center justify-between border-b border-border bg-card px-4 md:hidden">
+    <header
+      className="fixed inset-x-0 top-0 z-20 flex items-center justify-between border-b border-border bg-card px-4 md:hidden"
+      style={{ height: 'calc(3.5rem + env(safe-area-inset-top))', paddingTop: 'env(safe-area-inset-top)' }}
+    >
       <div className="flex items-center gap-2">
         <FitQuestIcon className="h-7 w-7" />
         <span className="font-display text-base font-thin tracking-[0.2em] text-white">
@@ -111,7 +114,10 @@ function Sidebar() {
 function BottomNav() {
   const { t } = useTranslation();
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-20 flex justify-around border-t border-border bg-card py-2 md:hidden">
+    <nav
+      className="fixed inset-x-0 bottom-0 z-20 flex border-t border-border bg-card pt-2 md:hidden"
+      style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.5rem)' }}
+    >
       {NAV.map(({ to, key, icon: Icon }) => (
         <NavLink
           key={to}
@@ -119,13 +125,13 @@ function BottomNav() {
           end={to === '/'}
           className={({ isActive }) =>
             cn(
-              'flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] transition',
+              'flex min-w-0 flex-1 flex-col items-center gap-0.5 px-1 py-1 text-[10px] transition',
               isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
             )
           }
         >
-          <Icon className="h-5 w-5" />
-          <span>{t(`nav.${key}`)}</span>
+          <Icon className="h-5 w-5 shrink-0" />
+          <span className="max-w-full truncate whitespace-nowrap leading-tight">{t(`navShort.${key}`)}</span>
         </NavLink>
       ))}
     </nav>
@@ -147,7 +153,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <Sidebar />
       <div className="flex flex-1 flex-col">
         <MobileHeader />
-        <main className="flex-1 p-4 pt-[70px] pb-24 md:p-6 md:pt-6 md:pb-6 lg:p-8">
+        <main className="flex-1 p-4 pt-[calc(env(safe-area-inset-top)_+_70px)] pb-24 md:p-6 md:pt-6 md:pb-6 lg:p-8">
           {children}
         </main>
       </div>

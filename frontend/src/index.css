@@ -39,6 +39,12 @@
   * {
     @apply border-border;
   }
+  html,
+  body {
+    /* iOS standalone : empêche tout débordement horizontal qui force à pincer */
+    max-width: 100%;
+    overflow-x: hidden;
+  }
   body {
     @apply bg-background text-foreground font-body antialiased;
     min-height: 100vh;

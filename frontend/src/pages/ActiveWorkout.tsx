@@ -224,7 +224,10 @@ export default function ActiveWorkout() {
       <style>{CSS}</style>
 
       {/* HEADER */}
-      <header className="z-20 flex items-center justify-between px-4 pt-4 pb-2">
+      <header
+        className="z-20 flex items-center justify-between px-4 pb-2"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}
+      >
         <button onClick={pause} className="grid h-9 w-9 place-items-center rounded-lg border border-border bg-card text-muted-foreground">
           <Pause className="h-4 w-4" />
         </button>
@@ -363,7 +366,10 @@ export default function ActiveWorkout() {
       </div>
 
       {/* FOOTER : XP + CTA */}
-      <footer className="z-20 px-4 pb-5 pt-3">
+      <footer
+        className="z-20 px-4 pt-3"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.25rem)' }}
+      >
         <div className="mb-1 flex justify-between text-[10px] uppercase tracking-wide text-muted-foreground">
           <span>Niveau {user?.level ?? 1}</span>
           <span className="font-display text-xp">{dealt} pts d'effort</span>
