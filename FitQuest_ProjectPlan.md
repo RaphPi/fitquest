@@ -371,17 +371,14 @@ interface AIProvider {
 
 ## 9. Système de Gamification
 
-### XP
-- Séance complète : 100 XP base
-- Bonus durée : +1 XP/min > 20 min
-- Bonus streak : +10%/jour consécutif (max +50%)
-- Courbe niveau : `xpRequired = level * 150`
+### XP  ⚠️ révisé au Sprint 7 — voir `Sprint7_Plan.md`
+- XP étagée par **type d'exercice** : coefficients distincts reps vs durée (`XP_PER_REP` / `XP_PER_SEC`) pour que le gainage ne domine pas (l'ancien « 1 rép = 1 s = 1 XP » est abandonné).
+- Bonus streak : +10%/jour consécutif (max +50%).
+- Courbe de niveaux : retravaillée au Sprint 7 (l'ancienne `level * 150` linéaire est remplacée — formule + table dans `Sprint7_Plan.md`).
+- Couleurs par palier de niveau (Bronze/Argent/Or/… ) sur jauge XP + badge.
 
-### XP dépensable (boutique)
-- Thème supplémentaire : 500 XP
-- Cadre avatar : 300 XP
-- Badge cosmétique : 200-800 XP
-- Titre personnalisé : 400 XP
+### Boutique d'XP — ABANDONNÉE
+Décision de cadrage (utilisateur) : pas de dépense d'XP. `xpBalance` reste au schéma mais inexploité. (Éventuellement reconsidéré bien plus tard.)
 
 ### Badges
 | Badge | Condition |
@@ -460,7 +457,7 @@ Export A4 via Puppeteer, template HTML dans `backend/src/export/templates/charac
 | S4 | Bibliothèque exercices (liste, filtres, détail, CRUD) |
 | S5 | Programmes + builder séance (sets/reps/durée/repos) |
 | S6 | Mode guidé (timer Page Visibility API) + mode libre |
-| S7 | XP, niveaux, boutique, badges, avatar SVG évolutif |
+| S7 | Gamification : XP étagé reps/durée + courbe niveaux + couleurs par palier, badges, avatar évolutif (boutique XP abandonnée) — **découpé en 5 étapes : voir `Sprint7_Plan.md`** |
 | S8 | Dashboard, historique, métriques corporelles, photos |
 | S9 | Thèmes, responsive mobile/tablette/desktop |
 | S10 | Scripts install/update, tests, README, GitHub release |
