@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import type { Program, WorkoutSession } from '@/types';
+import type { BadgeDef, Program, WorkoutSession } from '@/types';
+import { useBadgeStore } from '@/stores/badgeStore';
 
 const API = '/api/v1/programs';
 
@@ -87,12 +88,14 @@ export const useProgramStore = create<ProgramState>((set, get) => ({
   createProgram: async (data) => {
     set({ isSaving: true, error: null });
     try {
-      const { program } = await apiFetch<{ program: Program }>(API, {
+      const { program, newBadges } = await apiFetch<{ program: Program; newBadges?: BadgeDef[] }>(API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
       set((s) => ({ programs: [...s.programs, program], isSaving: false }));
+      // Badge « Architecte » (1er programme custom) : déblocage animé via l'overlay global.
+      if (newBadges && newBadges.length > 0) useBadgeStore.getState().enqueueUnlocks(newBadges);
       return program;
     } catch (e) {
       set({ isSaving: false, error: (e as Error).message });

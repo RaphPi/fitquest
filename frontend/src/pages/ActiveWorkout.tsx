@@ -11,6 +11,7 @@ import { playSound } from '@/lib/sound';
 import { renderBoss, drawSprite, WEAPONS, SHIELD, ANVIL, HAMMER } from '@/lib/pixelSprites';
 import PixelCanvas from '@/components/workout/active/PixelCanvas';
 import ExerciseInfoModal from '@/components/workout/ExerciseInfoModal';
+import BadgeUnlockOverlay from '@/components/badge/BadgeUnlockOverlay';
 
 const CSS = `
 @keyframes fq-bossIdle { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
@@ -70,6 +71,7 @@ export default function ActiveWorkout() {
   const [hitKey, setHitKey] = useState(0);
   const [particles, setParticles] = useState<Particle[]>([]);
   const [restRemaining, setRestRemaining] = useState(0);
+  const [showBadges, setShowBadges] = useState(false);
   const restTotalRef = useRef(1);
 
   const cur = session?.exercises[exerciseIndex];
@@ -128,10 +130,16 @@ export default function ActiveWorkout() {
   }, [phase]);
 
   // Sons à l'apparition du résultat : victoire/fuite, puis level-up en bonus.
+  // Les badges débloqués s'enchaînent APRÈS le level-up (séquençage des animations).
   useEffect(() => {
     if (!result) return;
     playSound(result.user ? (bossHp <= 0 ? 'victory' : 'flee') : 'victory');
     if (result.leveledUp) setTimeout(() => playSound('levelup'), 650);
+    if (result.newBadges.length > 0) {
+      const delay = result.leveledUp ? 2000 : 850;
+      const id = setTimeout(() => setShowBadges(true), delay);
+      return () => clearTimeout(id);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result]);
 
@@ -487,6 +495,11 @@ export default function ActiveWorkout() {
             </button>
           </div>
         </Overlay>
+      )}
+
+      {/* DÉBLOCAGE DE BADGES (après le level-up le cas échéant) */}
+      {showBadges && result && result.newBadges.length > 0 && (
+        <BadgeUnlockOverlay badges={result.newBadges} onClose={() => setShowBadges(false)} />
       )}
     </div>
   );

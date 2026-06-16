@@ -8,6 +8,7 @@ import { useUserStore } from '@/stores/userStore';
 import XPBar from '@/components/ui/XPBar';
 import LevelBadge from '@/components/ui/LevelBadge';
 import FitQuestIcon from '@/assets/logo/FitQuestIcon';
+import GlobalBadgeUnlock from '@/components/badge/GlobalBadgeUnlock';
 import type { ReactNode } from 'react';
 
 const NAV = [
@@ -159,6 +160,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         </main>
       </div>
       <BottomNav />
+      <GlobalBadgeUnlock />
     </div>
   );
 }

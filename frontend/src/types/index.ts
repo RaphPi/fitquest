@@ -98,12 +98,47 @@ export interface WorkoutLog {
   completedSets: WorkoutLogSet[];
 }
 
+// ─── Badges (Sprint 7C/7D) — miroir de backend/src/lib/badges.ts ──
+export type BadgeRarity = 'common' | 'rare' | 'epic' | 'legendary';
+
+export type BadgeConditionType =
+  | 'session_count'
+  | 'streak'
+  | 'perfect_week'
+  | 'level'
+  | 'first_custom_program';
+
+export type BadgeCategory = 'sessions' | 'streak' | 'level' | 'program';
+
+/** Définition catalogue d'un badge (telle que renvoyée dans `newBadges`). */
+export interface BadgeDef {
+  id: string;
+  nameFr: string;
+  nameEn: string;
+  descFr: string;
+  descEn: string;
+  rarity: BadgeRarity;
+  iconType: string;
+  category: BadgeCategory;
+  conditionType: BadgeConditionType;
+  threshold: number | null;
+  order: number;
+}
+
+/** État d'un badge pour l'utilisateur (vitrine), renvoyé par GET /api/v1/badges. */
+export interface BadgeState extends BadgeDef {
+  obtained: boolean;
+  unlockedAt: string | null;
+  progress: { current: number; target: number } | null;
+}
+
 export interface WorkoutResult {
   log: WorkoutLog;
   user: UserProfile;
   xpEarned: number;
   leveledUp: boolean;
   levelsGained: number;
+  newBadges: BadgeDef[];
 }
 
 export type DigestFrequency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'NONE';

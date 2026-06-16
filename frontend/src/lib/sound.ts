@@ -2,7 +2,7 @@
 // Tout passe par playSound() qui respecte le réglage « son activé » des paramètres.
 import { useSettingsStore } from '@/stores/settingsStore';
 
-type SoundName = 'victory' | 'levelup' | 'resume' | 'flee';
+type SoundName = 'victory' | 'levelup' | 'resume' | 'flee' | 'badge';
 
 interface Note { freq: number; t: number; dur: number; type?: OscillatorType; gain?: number; }
 
@@ -34,6 +34,14 @@ const SCORES: Record<SoundName, Note[]> = {
   flee: [
     { freq: 440.0, t: 0.0, dur: 0.14, type: 'sawtooth', gain: 0.12 },
     { freq: 311.13, t: 0.14, dur: 0.24, type: 'sawtooth', gain: 0.12 },
+  ],
+  // Badge débloqué : carillon « trophée » — quinte montante + accord cristallin tenu.
+  badge: [
+    { freq: 587.33, t: 0.0, dur: 0.12, type: 'triangle' },
+    { freq: 880.0, t: 0.1, dur: 0.12, type: 'triangle' },
+    { freq: 1174.66, t: 0.22, dur: 0.4, type: 'triangle' },
+    { freq: 1760.0, t: 0.26, dur: 0.36, type: 'sine', gain: 0.1 },
+    { freq: 2349.32, t: 0.3, dur: 0.32, type: 'sine', gain: 0.07 },
   ],
 };
 
