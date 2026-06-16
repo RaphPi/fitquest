@@ -7,6 +7,7 @@
  */
 import { PrismaClient } from '@prisma/client';
 import seedJson from './exercises_seed.json';
+import { BADGES } from '../src/lib/badges';
 
 const prisma = new PrismaClient();
 
@@ -136,6 +137,30 @@ async function main(): Promise<void> {
     });
   }
   console.log(`  ✔ ${seed.programs.length} programmes`);
+
+  // ----- Badges (catalogue) ----------------------------------
+  // Source de vérité = backend/src/lib/badges.ts. Upsert idempotent.
+  for (const b of BADGES) {
+    await prisma.badge.upsert({
+      where: { id: b.id },
+      update: {
+        nameFr: b.nameFr, nameEn: b.nameEn,
+        descFr: b.descFr, descEn: b.descEn,
+        rarity: b.rarity, iconType: b.iconType,
+        category: b.category, conditionType: b.conditionType,
+        threshold: b.threshold, order: b.order,
+      },
+      create: {
+        id: b.id,
+        nameFr: b.nameFr, nameEn: b.nameEn,
+        descFr: b.descFr, descEn: b.descEn,
+        rarity: b.rarity, iconType: b.iconType,
+        category: b.category, conditionType: b.conditionType,
+        threshold: b.threshold, order: b.order,
+      },
+    });
+  }
+  console.log(`  ✔ ${BADGES.length} badges`);
   console.log('✅ Seed terminé.');
 }
 

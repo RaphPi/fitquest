@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { prisma } from '../lib/prisma';
 import { requireAuth } from '../middleware/requireAuth';
 import type { AuthRequest } from '../middleware/requireAuth';
+import { detectBadges } from '../lib/badges';
 
 const router = Router();
 
@@ -63,7 +64,14 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
       },
       include,
     });
-    res.status(201).json({ program });
+    // Badge "Architecte" : 1er programme custom. On lit niveau/streak pour évaluer aussi
+    // les autres conditions (sans effet de bord si déjà obtenues).
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId! },
+      select: { level: true, streak: true },
+    });
+    const newBadges = user ? await detectBadges(req.userId!, user.level, user.streak) : [];
+    res.status(201).json({ program, newBadges });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Erreur serveur' });

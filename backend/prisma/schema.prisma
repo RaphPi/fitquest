@@ -144,10 +144,31 @@ model BodyPhoto {
   note     String?
 }
 
+// Catalogue des badges (trophées). id = clé symbolique stable (ex. "first_step").
+// Source de vérité = backend/src/lib/badges.ts ; ce table est peuplée par le seed
+// pour exposer le catalogue + l'état via l'API et lier les UserBadge.
+model Badge {
+  id            String      @id // clé symbolique stable
+  nameFr        String
+  nameEn        String
+  descFr        String // "comment l'obtenir"
+  descEn        String
+  rarity        String // common | rare | epic | legendary
+  iconType      String // clé de rendu pixel (cf. 7D) : boots | medal | crown | flame | calendar | star | helm | crystal | scroll
+  category      String // sessions | streak | level | program
+  conditionType String // session_count | streak | perfect_week | level | first_custom_program
+  threshold     Int? // valeur cible (10, 100, 7, 50…) pour la progression — null si non quantifiable
+  order         Int         @default(0)
+  userBadges    UserBadge[]
+}
+
 model UserBadge {
   id         String   @id @default(cuid())
   userId     String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   badgeId    String
+  badge      Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
   unlockedAt DateTime @default(now())
+
+  @@unique([userId, badgeId])
 }

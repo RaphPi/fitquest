@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { prisma } from '../lib/prisma';
 import { requireAuth, type AuthRequest } from '../middleware/requireAuth';
 import { applyXp, computeStreak, computeWorkoutXp, xpFromSets } from '../lib/xp';
+import { detectBadges } from '../lib/badges';
 
 const router = Router();
 
@@ -84,12 +85,16 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
       }),
     ]);
 
+    // Détection des badges après mise à jour XP/niveau/streak (le log valide est déjà compté).
+    const newBadges = await detectBadges(user.id, xp.level, newStreak);
+
     res.status(201).json({
       log,
       user: updatedUser,
       xpEarned,
       leveledUp: xp.leveledUp,
       levelsGained: xp.levelsGained,
+      newBadges,
     });
   } catch (e) {
     console.error(e);
