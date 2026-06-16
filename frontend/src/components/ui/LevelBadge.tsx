@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { getLevelTier } from '@/lib/levelTier';
 
 interface LevelBadgeProps {
   level: number;
@@ -13,15 +14,21 @@ const sizes = {
 };
 
 export default function LevelBadge({ level, size = 'md', className }: LevelBadgeProps) {
+  const tier = getLevelTier(level);
+
   return (
     <div
       className={cn(
-        'inline-grid shrink-0 place-items-center rounded-full border-2 border-primary bg-card-shield font-display font-black text-primary shadow-glow',
+        'inline-grid shrink-0 place-items-center rounded-full border-2 bg-card-shield font-display font-black',
         sizes[size],
         className,
       )}
+      style={{
+        borderColor: tier.color,
+        color: tier.color,
+        boxShadow: `0 0 12px ${tier.glowColor}`,
+      }}
     >
-      {/* line-height et font-metrics Orbitron forcés sur le span pour un centrage pixel-perfect */}
       <span style={{ lineHeight: 1, display: 'block', marginTop: '1px' }}>
         {level}
       </span>

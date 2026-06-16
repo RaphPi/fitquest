@@ -3,6 +3,7 @@ import { LayoutDashboard, Dumbbell, BookOpen, User, Settings as SettingsIcon } f
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { xpRequiredForLevel } from '@/lib/xp';
+import { getLevelTier } from '@/lib/levelTier';
 import { useUserStore } from '@/stores/userStore';
 import XPBar from '@/components/ui/XPBar';
 import LevelBadge from '@/components/ui/LevelBadge';
@@ -23,6 +24,8 @@ const AUTH_ROUTES = ['/login', '/register'];
 function MobileHeader() {
   const { user } = useUserStore();
   if (!user) return null;
+  const tier = getLevelTier(user.level);
+
   return (
     <header
       className="fixed inset-x-0 top-0 z-20 flex items-center justify-between border-b border-border bg-card px-4 md:hidden"
@@ -36,7 +39,7 @@ function MobileHeader() {
       </div>
       <div className="flex items-center gap-2.5">
         <div className="text-right">
-          <p className="font-display text-[11px] font-bold leading-none text-primary">
+          <p className="font-display text-[11px] font-bold leading-none" style={{ color: tier.color }}>
             LVL {user.level}
           </p>
           <p className="mt-0.5 text-[10px] leading-none text-muted-foreground">
