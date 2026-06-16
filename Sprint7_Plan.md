@@ -36,6 +36,39 @@
 
 ---
 
+### ✅ 7A — Décisions actées (2026-06-16)
+
+**Coefficients XP (Option B — équilibré) :**
+- `XP_PER_REP = 1.0` — 1 répétition = 1 XP
+- `XP_PER_SEC = 0.2` — 1 seconde de gainage = 0.2 XP → 60 s ≈ 12 XP ≈ 1 série standard de 12 reps
+- ⚠️ `SECONDS_PER_POINT = 3` reste inchangé (boss HP uniquement, cf. `lib/bossFight.ts`)
+
+**Courbe quadratique :**
+```
+xpRequiredForLevel(level) = round(10 × level² + 90 × level)
+```
+
+| Niveau | XP pour ce palier | XP cumulé pour atteindre ce niveau |
+|--------|-------------------|------------------------------------|
+| 1 → 2  | 100               | 100                                |
+| 2 → 3  | 220               | 320                                |
+| 3 → 4  | 360               | 680                                |
+| 4 → 5  | 520               | 1 200                              |
+| 5 → 6  | 700               | 1 900                              |
+| 10 → 11| 1 900             | 6 900  (~25 sessions ≈ 2 mois)     |
+| 15 → 16| 3 600             | 19 600 (~78 sessions)              |
+| 20 → 21| 5 800             | 41 800 (~167 sessions ≈ 1 an)      |
+| 25 → 26| 8 500             | 76 000                             |
+| 30 → 31| 11 700            | 124 700 (~3 ans)                   |
+| 40 → 41| 19 600            | 275 600                            |
+| 50 → 51| 29 500            | 514 500 (légendaire)               |
+
+*Hypothèse : session moyenne ≈ 250 XP (≈ 200 reps + 1 plank + bonus endurance + streak ×1.2)*
+
+**Fichiers modifiés :** `backend/src/lib/xp.ts`, `backend/src/routes/workouts.ts`, `frontend/src/lib/xp.ts`, `frontend/src/components/layout/AppLayout.tsx`, `frontend/src/pages/Dashboard.tsx`
+
+---
+
 ## Étape 7B — Couleurs par niveau (paliers visuels)
 **Modèle conseillé : Haiku** (petit, visuel, bien cadré ; Sonnet si on ajoute des effets).
 

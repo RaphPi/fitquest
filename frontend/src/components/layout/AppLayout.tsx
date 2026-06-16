@@ -2,6 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Dumbbell, BookOpen, User, Settings as SettingsIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
+import { xpRequiredForLevel } from '@/lib/xp';
 import { useUserStore } from '@/stores/userStore';
 import XPBar from '@/components/ui/XPBar';
 import LevelBadge from '@/components/ui/LevelBadge';
@@ -18,9 +19,6 @@ const NAV = [
 
 const AUTH_ROUTES = ['/login', '/register'];
 
-function xpRequired(level: number) {
-  return level * 150;
-}
 
 function MobileHeader() {
   const { user } = useUserStore();
@@ -42,7 +40,7 @@ function MobileHeader() {
             LVL {user.level}
           </p>
           <p className="mt-0.5 text-[10px] leading-none text-muted-foreground">
-            {user.currentXP} / {xpRequired(user.level)} XP
+            {user.currentXP} / {xpRequiredForLevel(user.level)} XP
           </p>
         </div>
         <LevelBadge level={user.level} size="sm" />
@@ -99,7 +97,7 @@ function Sidebar() {
               <p className="mb-1.5 text-xs font-medium text-foreground">{user.username}</p>
               <XPBar
                 current={user.currentXP}
-                required={xpRequired(user.level)}
+                required={xpRequiredForLevel(user.level)}
                 level={user.level}
                 animated={false}
               />

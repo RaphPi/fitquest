@@ -9,8 +9,8 @@ interface GamificationState {
   setStats: (stats: Partial<Omit<GamificationState, 'setStats'>>) => void;
 }
 
-// XP, niveaux, boutique, badges ajoutés au Sprint 7.
-// Courbe : xpRequired = level * 150 (cf. plan §9).
+// XP, niveaux, badges ajoutés au Sprint 7.
+// Courbe (7A) : xpRequired = 10·level² + 90·level (cf. lib/xp.ts).
 export const useGamificationStore = create<GamificationState>((set) => ({
   level: 1,
   totalXP: 0,

@@ -1,14 +1,11 @@
 import { useTranslation } from 'react-i18next';
+import { xpRequiredForLevel } from '@/lib/xp';
 import { useUserStore } from '@/stores/userStore';
 import { useWorkoutStore } from '@/stores/workoutStore';
 import { Flame, Zap, Trophy, Calendar } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
 import XPBar from '@/components/ui/XPBar';
 import WorkoutHistory from '@/components/workout/WorkoutHistory';
-
-function xpRequired(level: number) {
-  return level * 150;
-}
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -30,7 +27,7 @@ export default function Dashboard() {
         <>
           <XPBar
             current={user.currentXP}
-            required={xpRequired(user.level)}
+            required={xpRequiredForLevel(user.level)}
             level={user.level}
             className="max-w-sm"
           />

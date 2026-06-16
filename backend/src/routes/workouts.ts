@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma';
 import { requireAuth, type AuthRequest } from '../middleware/requireAuth';
-import { applyXp, computeStreak, computeWorkoutXp, effortFromSets } from '../lib/xp';
+import { applyXp, computeStreak, computeWorkoutXp, xpFromSets } from '../lib/xp';
 
 const router = Router();
 
@@ -40,12 +40,12 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
 
     const now = new Date();
     const sets = completedSets ?? [];
-    const effortDealt = effortFromSets(sets);
+    const rawXP = xpFromSets(sets);
     // Une séance sans effort (abandon immédiat / tout passé) n'est pas une vraie séance :
     // ni XP, ni streak, ni mise à jour de lastWorkout. Le log est conservé pour l'historique.
-    const counts = effortDealt > 0;
+    const counts = rawXP > 0;
     const newStreak = counts ? computeStreak(user.streak, user.lastWorkout, now) : user.streak;
-    const xpEarned = computeWorkoutXp(effortDealt, Number(durationSecs), newStreak);
+    const xpEarned = computeWorkoutXp(rawXP, Number(durationSecs), newStreak);
     const xp = applyXp(user.level, user.currentXP, user.totalXP, xpEarned);
 
     const [log, updatedUser] = await prisma.$transaction([
