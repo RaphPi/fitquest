@@ -142,6 +142,34 @@ export interface WorkoutResult {
   newBadges: BadgeDef[];
 }
 
+// ─── Métriques corporelles (Sprint 8) ──────────────────────────────────────
+export interface CustomMetric {
+  name: string;
+  value: number;
+  unit: string;
+}
+
+export interface BodyMetric {
+  id: string;
+  userId: string;
+  date: string;
+  weightKg: number | null;
+  waistCm: number | null;
+  chestCm: number | null;
+  bicepCm: number | null;
+  thighCm: number | null;
+  customMetrics: CustomMetric[] | null;
+}
+
+export interface MetricPayload {
+  weightKg?: number | null;
+  waistCm?: number | null;
+  chestCm?: number | null;
+  bicepCm?: number | null;
+  thighCm?: number | null;
+  customMetrics?: CustomMetric[];
+}
+
 export type DigestFrequency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'NONE';
 
 export interface RegisterPayload {

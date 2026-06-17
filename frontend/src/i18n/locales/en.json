@@ -6,6 +6,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "workout": "Programs",
+    "body": "Body",
     "library": "Library",
     "profile": "Profile",
     "settings": "Settings"
@@ -13,6 +14,7 @@
   "navShort": {
     "dashboard": "Home",
     "workout": "Programs",
+    "body": "Body",
     "library": "Library",
     "profile": "Profile",
     "settings": "Settings"

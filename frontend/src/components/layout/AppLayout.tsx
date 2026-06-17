@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Dumbbell, BookOpen, User, Settings as SettingsIcon } from 'lucide-react';
+import { LayoutDashboard, Dumbbell, BookOpen, User, Settings as SettingsIcon, Scale } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { xpRequiredForLevel } from '@/lib/xp';
@@ -13,12 +13,23 @@ import FitQuestIcon from '@/assets/logo/FitQuestIcon';
 import GlobalBadgeUnlock from '@/components/badge/GlobalBadgeUnlock';
 import type { ReactNode } from 'react';
 
-const NAV = [
+// Sidebar : toutes les sections (6)
+const SIDEBAR_NAV = [
   { to: '/', key: 'dashboard', icon: LayoutDashboard },
   { to: '/workout', key: 'workout', icon: Dumbbell },
+  { to: '/body', key: 'body', icon: Scale },
   { to: '/library', key: 'library', icon: BookOpen },
   { to: '/profile', key: 'profile', icon: User },
   { to: '/settings', key: 'settings', icon: SettingsIcon },
+] as const;
+
+// BottomNav mobile : 5 entrées (Réglages = sidebar uniquement)
+const BOTTOM_NAV = [
+  { to: '/', key: 'dashboard', icon: LayoutDashboard },
+  { to: '/workout', key: 'workout', icon: Dumbbell },
+  { to: '/body', key: 'body', icon: Scale },
+  { to: '/library', key: 'library', icon: BookOpen },
+  { to: '/profile', key: 'profile', icon: User },
 ] as const;
 
 const AUTH_ROUTES = ['/login', '/register'];
@@ -74,7 +85,7 @@ function Sidebar() {
 
       {/* Nav links */}
       <nav className="flex flex-1 flex-col gap-1 p-2 lg:p-3">
-        {NAV.map(({ to, key, icon: Icon }) => (
+        {SIDEBAR_NAV.map(({ to, key, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
@@ -136,7 +147,7 @@ function BottomNav() {
       className="fixed inset-x-0 bottom-0 z-20 flex border-t border-border bg-card pt-2 md:hidden"
       style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.5rem)' }}
     >
-      {NAV.map(({ to, key, icon: Icon }) => (
+      {BOTTOM_NAV.map(({ to, key, icon: Icon }) => (
         <NavLink
           key={to}
           to={to}

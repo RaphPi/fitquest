@@ -6,6 +6,7 @@
   "nav": {
     "dashboard": "Tableau de bord",
     "workout": "Programmes",
+    "body": "Corps",
     "library": "Bibliothèque",
     "profile": "Profil",
     "settings": "Paramètres"
@@ -13,6 +14,7 @@
   "navShort": {
     "dashboard": "Accueil",
     "workout": "Programmes",
+    "body": "Corps",
     "library": "Biblio",
     "profile": "Profil",
     "settings": "Réglages"
