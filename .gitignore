@@ -27,3 +27,6 @@ npm-debug.log*
 # Uploads (runtime volume)
 backend/src/uploads/*
 !backend/src/uploads/.gitkeep
+
+# Archives locales (artefacts de construction Phase 1 — non versionnés)
+Archives/
