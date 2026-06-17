@@ -20,11 +20,19 @@ export default function StatCard({ icon: Icon, value, label, accent = false, com
         className,
       )}
     >
-      <Icon className={cn(compact ? 'h-4 w-4' : 'h-5 w-5', accent ? 'text-primary' : 'text-muted-foreground')} />
+      {/* Wrapper hauteur fixe pour aligner sur StreakCard (h-5) */}
+      <div className={cn('flex items-center justify-center', compact ? 'h-5' : 'h-6')}>
+        <Icon className={cn(compact ? 'h-4 w-4' : 'h-5 w-5', accent ? 'text-primary' : 'text-muted-foreground')} />
+      </div>
       <span className={cn('font-display font-black', compact ? 'text-xl' : 'text-2xl', accent ? 'text-primary' : 'text-foreground')}>
         {value}
       </span>
-      <span className="text-xs uppercase tracking-widest text-muted-foreground">{label}</span>
+      <span className={cn(
+        'uppercase tracking-widest text-muted-foreground',
+        compact ? 'text-[10px] whitespace-nowrap' : 'text-xs',
+      )}>
+        {label}
+      </span>
     </div>
   );
 }

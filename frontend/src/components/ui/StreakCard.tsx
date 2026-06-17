@@ -27,13 +27,13 @@ export default function StreakCard({ streak }: Props) {
     >
       <style>{STYLES}</style>
 
-      {/* Flame SVG */}
-      <div style={{ position: 'relative', width: 28, height: 36 }}>
+      {/* Flame — même hauteur (h-5 = 20px) que l'icône h-4 w-4 des StatCard */}
+      <div className="flex h-5 items-center justify-center" style={{ position: 'relative', width: 13 }}>
         {animated && (
           <div
             style={{
               position: 'absolute',
-              inset: -10,
+              inset: -8,
               borderRadius: '50%',
               background: `radial-gradient(circle, ${glow} 0%, transparent 68%)`,
               animation: 'fq-glow-pulse 1.6s ease-in-out infinite',
@@ -41,40 +41,22 @@ export default function StreakCard({ streak }: Props) {
             }}
           />
         )}
-        <div
-          style={{
-            animation: animated ? 'fq-flame 1.4s ease-in-out infinite' : 'none',
-            transformOrigin: 'bottom center',
-          }}
-        >
-          <svg width="28" height="36" viewBox="0 0 32 42" fill="none">
-            <path
-              d="M16 2C20 9 27 15 27 23C27 33 22 41 16 41C10 41 5 33 5 23C5 15 12 9 16 2Z"
-              fill={outer}
-            />
+        <div style={{ animation: animated ? 'fq-flame 1.4s ease-in-out infinite' : 'none', transformOrigin: 'bottom center' }}>
+          <svg width="13" height="17" viewBox="0 0 32 42" fill="none">
+            <path d="M16 2C20 9 27 15 27 23C27 33 22 41 16 41C10 41 5 33 5 23C5 15 12 9 16 2Z" fill={outer} />
             <path
               d="M16 15C18 19 21 22 21 27C21 33 18 39 16 39C14 39 11 33 11 27C11 22 14 19 16 15Z"
               fill={inner}
-              style={{
-                transformBox: 'fill-box',
-                transformOrigin: '50% 80%',
-                animation: animated ? 'fq-inner-fl .9s ease-in-out infinite .12s' : 'none',
-              }}
+              style={{ transformBox: 'fill-box', transformOrigin: '50% 80%', animation: animated ? 'fq-inner-fl .9s ease-in-out infinite .12s' : 'none' }}
             />
           </svg>
         </div>
       </div>
 
-      <span
-        className="font-display text-xl font-black"
-        style={{ color: animated ? outer : '' }}
-      >
+      <span className="font-display text-xl font-black" style={{ color: animated ? outer : '' }}>
         {streak}
       </span>
-      <span className="text-[10px] text-muted-foreground leading-none">
-        jours d'affilée
-      </span>
-      <span className="text-[9px] uppercase tracking-widest text-muted-foreground">
+      <span className="text-[10px] uppercase tracking-widest text-muted-foreground whitespace-nowrap">
         {animated ? badge : 'SÉRIE'}
       </span>
     </div>

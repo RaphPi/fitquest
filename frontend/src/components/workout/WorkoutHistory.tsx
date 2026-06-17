@@ -137,55 +137,52 @@ function HistoryItem({
 
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-card">
-      <div className="flex items-start gap-3 px-4 py-3.5">
+      <div className="px-4 py-3">
+        {/* Ligne 1 : icône + titre/sous-titre + chevron */}
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className="flex min-w-0 flex-1 items-start gap-3 text-left transition-colors"
+          className="flex w-full min-w-0 items-start gap-3 text-left"
         >
           <div className="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-primary/30 bg-primary/10">
             <Swords className="h-5 w-5 text-primary-soft" />
           </div>
-
           <div className="min-w-0 flex-1">
             <div className="line-clamp-2 font-display text-sm font-bold leading-snug">{log.sessionName}</div>
             {programName && (
-              <div className="line-clamp-1 text-[11px] font-semibold text-primary-soft/80">{programName}</div>
+              <div className="mt-0.5 line-clamp-1 text-[11px] font-semibold text-primary-soft/80">{programName}</div>
             )}
-            <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-              <span>{formatDate(log.date)} · {formatTime(log.date)}</span>
-              <span className="inline-flex items-center gap-1" style={{ color: 'rgba(34,211,238,1)' }}>
-                <Clock className="h-3 w-3" /> {formatDuration(log.durationSecs)}
-              </span>
-              <span>{setCount} série{setCount > 1 ? 's' : ''}</span>
-            </div>
           </div>
+          <ChevronDown
+            className={`mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`}
+          />
         </button>
 
-        <div className="flex shrink-0 items-center gap-1.5 self-start pt-0.5">
-          <div className="text-right">
-            <div className="inline-flex items-center gap-1 font-display text-sm font-black text-xp">
-              <Zap className="h-3.5 w-3.5" /> +{log.xpEarned}
-            </div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">XP</div>
+        {/* Ligne 2 : date/durée/séries · XP · Relancer */}
+        <div className="mt-2 flex items-center justify-between gap-x-2 pl-[52px] text-xs text-muted-foreground">
+          <div className="flex min-w-0 flex-wrap gap-x-3 gap-y-0.5">
+            <span className="whitespace-nowrap">{formatDate(log.date)} · {formatTime(log.date)}</span>
+            <span className="inline-flex items-center gap-1 whitespace-nowrap" style={{ color: 'rgba(34,211,238,1)' }}>
+              <Clock className="h-3 w-3" /> {formatDuration(log.durationSecs)}
+            </span>
+            <span className="whitespace-nowrap">{setCount} série{setCount > 1 ? 's' : ''}</span>
           </div>
-
-          {canRelaunch && (
-            <button
-              type="button"
-              onClick={onRelaunch}
-              title="Relancer cette séance"
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-primary/40 bg-primary/10 text-primary-soft transition-all hover:shadow-glow"
-            >
-              <RotateCcw className="h-4 w-4" />
-            </button>
-          )}
-
-          <button type="button" onClick={() => setOpen((o) => !o)} className="p-1">
-            <ChevronDown
-              className={`h-4 w-4 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`}
-            />
-          </button>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <div className="inline-flex items-center gap-0.5 font-display text-sm font-black text-xp">
+              <Zap className="h-3 w-3" /> +{log.xpEarned}
+              <span className="ml-0.5 text-[9px] font-normal uppercase tracking-widest text-muted-foreground">XP</span>
+            </div>
+            {canRelaunch && (
+              <button
+                type="button"
+                onClick={onRelaunch}
+                title="Relancer cette séance"
+                className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-primary/40 bg-primary/10 text-primary-soft transition-all hover:shadow-glow"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
