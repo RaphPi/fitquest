@@ -7,7 +7,6 @@ import { getLevelTier } from '@/lib/levelTier';
 import { avatarClassFromStage, getAvatarStageMeta } from '@/lib/avatar';
 import { useUserStore } from '@/stores/userStore';
 import XPBar from '@/components/ui/XPBar';
-import LevelBadge from '@/components/ui/LevelBadge';
 import Avatar from '@/components/avatar/Avatar';
 import FitQuestIcon from '@/assets/logo/FitQuestIcon';
 import GlobalBadgeUnlock from '@/components/badge/GlobalBadgeUnlock';
@@ -23,12 +22,13 @@ const SIDEBAR_NAV = [
   { to: '/settings', key: 'settings', icon: SettingsIcon },
 ] as const;
 
-// BottomNav mobile : 5 entrées (Réglages = sidebar uniquement)
+// BottomNav mobile : 5 entrées (Réglages = sidebar + header uniquement)
+// Ordre : Accueil / Programmes / Biblio / Corps / Profil
 const BOTTOM_NAV = [
   { to: '/', key: 'dashboard', icon: LayoutDashboard },
   { to: '/workout', key: 'workout', icon: Dumbbell },
-  { to: '/body', key: 'body', icon: Scale },
   { to: '/library', key: 'library', icon: BookOpen },
+  { to: '/body', key: 'body', icon: Scale },
   { to: '/profile', key: 'profile', icon: User },
 ] as const;
 
@@ -39,30 +39,41 @@ function MobileHeader() {
   const { user } = useUserStore();
   if (!user) return null;
   const tier = getLevelTier(user.level);
+  const xpRequired = xpRequiredForLevel(user.level);
+  const xpPct = Math.min(100, (user.currentXP / xpRequired) * 100);
 
   return (
-    <header
-      className="fixed inset-x-0 top-0 z-20 flex items-center justify-between border-b border-border bg-card px-4 md:hidden"
-      style={{ height: 'calc(3.5rem + env(safe-area-inset-top))', paddingTop: 'env(safe-area-inset-top)' }}
-    >
-      <div className="flex items-center gap-2">
-        <FitQuestIcon className="h-7 w-7" />
-        <span className="font-display text-base font-thin tracking-[0.2em] text-white">
-          FIT<span className="font-black text-primary-soft">QUEST</span>
-        </span>
-      </div>
-      <div className="flex items-center gap-2.5">
-        <div className="text-right">
-          <p className="font-display text-[11px] font-bold leading-none" style={{ color: tier.color }}>
-            LVL {user.level}
-          </p>
-          <p className="mt-0.5 text-[10px] leading-none text-muted-foreground">
-            {user.currentXP} / {xpRequiredForLevel(user.level)} XP
-          </p>
+    <div className="fixed inset-x-0 top-0 z-20 md:hidden">
+      <header
+        className="flex items-center justify-between border-b border-border bg-card px-4"
+        style={{ height: 'calc(3.5rem + env(safe-area-inset-top))', paddingTop: 'env(safe-area-inset-top)' }}
+      >
+        <div className="flex items-center gap-2">
+          <FitQuestIcon className="h-7 w-7" />
+          <span className="font-display text-base font-thin tracking-[0.2em] text-white">
+            FIT<span className="font-black text-primary-soft">QUEST</span>
+          </span>
         </div>
-        <LevelBadge level={user.level} size="sm" />
+        <div className="flex items-center gap-2.5">
+          <p
+            className="max-w-[140px] truncate text-[11px] font-semibold leading-none"
+            style={{ color: tier.color }}
+          >
+            Niv.&nbsp;{user.level}&nbsp;·&nbsp;{user.username}
+          </p>
+          <NavLink to="/settings" className="text-muted-foreground transition hover:text-foreground">
+            <SettingsIcon className="h-5 w-5" />
+          </NavLink>
+        </div>
+      </header>
+      {/* XP bar fine full-width, juste sous le header */}
+      <div className="h-1 w-full bg-muted">
+        <div
+          className="h-full transition-[width] duration-500"
+          style={{ width: `${xpPct}%`, backgroundColor: tier.color }}
+        />
       </div>
-    </header>
+    </div>
   );
 }
 
@@ -71,9 +82,9 @@ function Sidebar() {
   const { user } = useUserStore();
 
   return (
-    <aside className="hidden md:flex md:flex-col md:border-r md:border-border md:bg-card">
+    <aside className="hidden md:sticky md:top-0 md:flex md:h-screen md:flex-col md:border-r md:border-border md:bg-card">
       {/* Logo */}
-      <div className="flex items-center gap-3 border-b border-border p-4 lg:p-5">
+      <div className="flex shrink-0 items-center gap-3 border-b border-border p-4 lg:p-5">
         <FitQuestIcon className="h-8 w-8 shrink-0" />
         <div className="hidden lg:block">
           <p className="font-display text-lg font-thin tracking-[0.2em] text-white leading-none">
@@ -83,8 +94,8 @@ function Sidebar() {
         </div>
       </div>
 
-      {/* Nav links */}
-      <nav className="flex flex-1 flex-col gap-1 p-2 lg:p-3">
+      {/* Nav links — scrollable si viewport trop petit */}
+      <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-2 lg:p-3">
         {SIDEBAR_NAV.map(({ to, key, icon: Icon }) => (
           <NavLink
             key={to}
@@ -105,12 +116,12 @@ function Sidebar() {
         ))}
       </nav>
 
-      {/* Bloc héros (avatar-forward) */}
+      {/* Bloc héros — sticky bas de sidebar, masque le contenu qui défile */}
       {user && (() => {
         const tier = getLevelTier(user.level);
         const meta = getAvatarStageMeta(user.level);
         return (
-          <div className="border-t border-border p-2 lg:p-4">
+          <div className="shrink-0 border-t border-border bg-card p-2 lg:p-4">
             <div className="flex items-center justify-center gap-3 lg:justify-start">
               <Avatar
                 classKey={avatarClassFromStage(user.avatarStage)}
@@ -182,7 +193,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <MobileHeader />
-        <main className="min-w-0 flex-1 p-4 pt-[calc(env(safe-area-inset-top)_+_70px)] pb-24 md:p-6 md:pt-6 md:pb-6 lg:p-8">
+        {/* pt = safe-area + header 3.5rem + XPBar h-1 (4px) + buffer ≃ 74px */}
+        <main className="min-w-0 flex-1 p-4 pt-[calc(env(safe-area-inset-top)_+_74px)] pb-24 md:p-6 md:pt-6 md:pb-6 lg:p-8">
           {children}
         </main>
       </div>
