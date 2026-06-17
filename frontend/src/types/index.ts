@@ -106,9 +106,10 @@ export type BadgeConditionType =
   | 'streak'
   | 'perfect_week'
   | 'level'
-  | 'first_custom_program';
+  | 'first_custom_program'
+  | 'body_metric_count';
 
-export type BadgeCategory = 'sessions' | 'streak' | 'level' | 'program';
+export type BadgeCategory = 'sessions' | 'streak' | 'level' | 'program' | 'body';
 
 /** Définition catalogue d'un badge (telle que renvoyée dans `newBadges`). */
 export interface BadgeDef {

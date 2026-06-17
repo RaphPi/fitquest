@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { prisma } from '../lib/prisma';
 import authRouter from './auth';
 import badgeRouter from './badges';
+import bodyRouter from './body';
 import exerciseRouter from './exercises';
 import programRouter from './programs';
 import workoutRouter from './workouts';
@@ -28,6 +29,7 @@ router.get('/health', async (_req, res) => {
 
 router.use('/auth', authRouter);
 router.use('/badges', badgeRouter);
+router.use('/body', bodyRouter);
 router.use('/exercises', exerciseRouter);
 router.use('/programs', programRouter);
 router.use('/workouts', workoutRouter);
