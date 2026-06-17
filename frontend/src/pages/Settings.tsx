@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Volume2, VolumeX, Plus, Lock, LogOut, Mail } from 'lucide-react';
+import { Volume2, VolumeX, Plus, Lock, LogOut, Mail, ChevronDown } from 'lucide-react';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useUserStore } from '@/stores/userStore';
 import { cn } from '@/lib/utils';
@@ -23,6 +24,8 @@ const THEME_LIST: { id: ThemeId; label: string }[] = [
 
 const BOSS_KEYS = Object.keys(BOSSES) as BossKey[];
 const WEAPON_KEYS = Object.keys(WEAPONS) as WeaponKey[];
+
+type SectionId = 'apparence' | 'combat' | 'compte';
 
 /** Interrupteur on/off. */
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
@@ -47,36 +50,56 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
   );
 }
 
-/** Carte de section avec titre en en-tête. */
+/** Section accordéon — une seule ouverte à la fois. */
 function SectionCard({
+  id,
   title,
   hint,
+  open,
+  onToggle,
   children,
 }: {
+  id: SectionId;
   title: string;
   hint?: string;
+  open: boolean;
+  onToggle: () => void;
   children: React.ReactNode;
 }) {
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
-      <div className="border-b border-border px-5 py-3.5">
-        <h2 className="font-display text-sm font-bold uppercase tracking-widest">{title}</h2>
-        {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
-      </div>
-      <div className="p-5">{children}</div>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        aria-controls={`section-${id}`}
+        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-card-shield/30"
+      >
+        <div>
+          <h2 className="font-display text-sm font-bold uppercase tracking-widest">{title}</h2>
+          {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
+        </div>
+        <ChevronDown
+          className={cn(
+            'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
+            open && 'rotate-180',
+          )}
+        />
+      </button>
+
+      {open && (
+        <div id={`section-${id}`} className="border-t border-border p-5">
+          {children}
+        </div>
+      )}
     </div>
   );
 }
 
-/** Sous-label à l'intérieur d'une SectionCard. */
+/** Sous-label à l'intérieur d'une section. */
 function SubLabel({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <p
-      className={cn(
-        'mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground',
-        className,
-      )}
-    >
+    <p className={cn('mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground', className)}>
       {children}
     </p>
   );
@@ -105,6 +128,8 @@ function AddPackTile() {
 export default function Settings() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [open, setOpen] = useState<SectionId | null>(null);
+
   const {
     theme, setTheme, boss, weapon, setBoss, setWeapon,
     soundEnabled, setSoundEnabled, autoAdvanceRest, setAutoAdvanceRest,
@@ -112,20 +137,27 @@ export default function Settings() {
   const user = useUserStore((s) => s.user);
   const logout = useUserStore((s) => s.logout);
 
+  const toggle = (id: SectionId) => setOpen((prev) => (prev === id ? null : id));
+
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
 
   return (
-    <section className="space-y-5">
-      <div>
+    <section className="space-y-3">
+      <div className="mb-5">
         <h1 className="font-display text-2xl font-bold">{t('nav.settings')}</h1>
         <p className="mt-1 text-muted-foreground">Personnalise ton expérience de combat.</p>
       </div>
 
       {/* ── Apparence ─────────────────────────────────────────────────── */}
-      <SectionCard title="Apparence">
+      <SectionCard
+        id="apparence"
+        title="Apparence"
+        open={open === 'apparence'}
+        onToggle={() => toggle('apparence')}
+      >
         <div className="flex flex-wrap gap-3">
           {THEME_LIST.map((th) => (
             <button
@@ -146,7 +178,13 @@ export default function Settings() {
       </SectionCard>
 
       {/* ── Combat ───────────────────────────────────────────────────── */}
-      <SectionCard title="Combat" hint="Réglages du mode séance actif.">
+      <SectionCard
+        id="combat"
+        title="Combat"
+        hint="Réglages du mode séance actif."
+        open={open === 'combat'}
+        onToggle={() => toggle('combat')}
+      >
         {/* Adversaire */}
         <SubLabel>Adversaire</SubLabel>
         <p className="mb-3 text-xs text-muted-foreground">Le boss que tu affrontes pendant tes séances.</p>
@@ -199,7 +237,7 @@ export default function Settings() {
           <AddPackTile />
         </div>
 
-        {/* Toggles son + enchaînement */}
+        {/* Toggles */}
         <div className="mt-6 divide-y divide-border rounded-lg border border-border">
           <div className="flex items-center justify-between gap-4 p-4">
             <div className="flex items-center gap-3">
@@ -228,7 +266,12 @@ export default function Settings() {
       </SectionCard>
 
       {/* ── Compte ───────────────────────────────────────────────────── */}
-      <SectionCard title="Compte">
+      <SectionCard
+        id="compte"
+        title="Compte"
+        open={open === 'compte'}
+        onToggle={() => toggle('compte')}
+      >
         <div className="flex items-center justify-between gap-4 py-1">
           <div className="flex items-center gap-3">
             <Mail className="h-5 w-5 shrink-0 text-muted-foreground" />

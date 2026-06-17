@@ -7,7 +7,7 @@
     "dashboard": "Tableau de bord",
     "workout": "Programmes",
     "body": "Corps",
-    "library": "Bibliothèque",
+    "library": "Exercices",
     "profile": "Profil",
     "settings": "Paramètres"
   },
@@ -15,7 +15,7 @@
     "dashboard": "Accueil",
     "workout": "Programmes",
     "body": "Corps",
-    "library": "Biblio",
+    "library": "Exercices",
     "profile": "Profil",
     "settings": "Réglages"
   },

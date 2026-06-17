@@ -16,8 +16,8 @@ import type { ReactNode } from 'react';
 const SIDEBAR_NAV = [
   { to: '/', key: 'dashboard', icon: LayoutDashboard },
   { to: '/workout', key: 'workout', icon: Dumbbell },
-  { to: '/body', key: 'body', icon: Scale },
   { to: '/library', key: 'library', icon: BookOpen },
+  { to: '/body', key: 'body', icon: Scale },
   { to: '/profile', key: 'profile', icon: User },
   { to: '/settings', key: 'settings', icon: SettingsIcon },
 ] as const;
