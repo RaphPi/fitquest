@@ -22,6 +22,8 @@ RUN npm run build
 
 EXPOSE 3001
 
-# Le conteneur ne fait que lancer l'API ; le schéma (db push / migrate deploy)
-# et le seed sont gérés par scripts/install.sh et scripts/update.sh.
-CMD ["node", "dist/index.js"]
+# L'entrypoint applique le schéma Prisma (db push) avant de démarrer l'API.
+# Le seed reste géré par install.sh / update.sh (idempotent, données initiales).
+COPY entrypoint.sh ./
+RUN chmod +x entrypoint.sh
+CMD ["./entrypoint.sh"]

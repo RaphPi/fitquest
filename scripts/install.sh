@@ -131,34 +131,27 @@ for i in $(seq 1 60); do
 done
 [[ "${DB_READY:-0}" == "1" ]] || die "La base n'est pas prête après 60s."
 
-# ----- 6. Schéma + seed --------------------------------------
+# ----- 6. Attente du backend (schema + API, max 90s) ---------
 DC="docker compose -f docker-compose.prod.yml"
-# Migrations présentes → migrate deploy ; sinon → db push (création directe du schéma).
-if $DC exec -T backend sh -c '[ -d prisma/migrations ] && [ -n "$(ls -A prisma/migrations 2>/dev/null)" ]'; then
-  msg_info "Application des migrations Prisma…"
-  $DC exec -T backend npx prisma migrate deploy || die "prisma migrate deploy a échoué."
-else
-  msg_info "Synchronisation du schéma (prisma db push)…"
-  $DC exec -T backend npx prisma db push --accept-data-loss || die "prisma db push a échoué."
-fi
-msg_info "Seed des données (exercices + programmes)…"
-$DC exec -T backend npx prisma db seed \
-  || msg_err "Le seed a échoué (non bloquant) — relancer : ${DC} exec backend npx prisma db seed"
-msg_ok "Base initialisée"
-
-# ----- 7. Attente du backend (max 60s) -----------------------
-msg_info "Vérification du backend via /api/v1/health…"
+msg_info "Attente du backend (prisma db push + démarrage API)…"
 BACKEND_OK=0
-for i in $(seq 1 30); do
-  if curl -sf "http://localhost:${APP_PORT:-80}/api/v1/health" >/dev/null 2>&1; then
+for i in $(seq 1 45); do
+  if $DC exec -T backend wget -q -O /dev/null http://localhost:3001/api/v1/health >/dev/null 2>&1; then
     msg_ok "Backend opérationnel (${i}0s)"; BACKEND_OK=1; break
   fi
   sleep 2
 done
 if [[ "${BACKEND_OK:-0}" != "1" ]]; then
-  msg_err "Backend non confirmé après 60s — vérifiez avec :"
+  msg_err "Backend non confirmé après 90s — vérifiez avec :"
   echo "   docker compose -f docker-compose.prod.yml logs backend"
+  die "Arrêt de l'installation — corrigez l'erreur backend avant de relancer."
 fi
+
+# ----- 7. Seed des données -----------------------------------
+msg_info "Seed des données (exercices + programmes)…"
+$DC exec -T backend npx prisma db seed \
+  || msg_err "Le seed a échoué (non bloquant) — relancer : ${DC} exec -T backend npx prisma db seed"
+msg_ok "Base initialisée"
 
 # ----- 8. SSH ------------------------------------------------
 msg_info "Installation et configuration de SSH…"

@@ -30,21 +30,17 @@ msg_info "Reconstruction et redémarrage…"
 docker compose -f docker-compose.prod.yml up -d --build || die "Redéploiement échoué."
 msg_ok "Conteneurs redéployés"
 
-# 4. Schéma à jour (migrations si présentes, sinon db push)
+# 4. Attente du backend (l'entrypoint gère le schéma avant de démarrer l'API)
 DC="docker compose -f docker-compose.prod.yml"
-msg_info "Attente de la base…"
-for i in $(seq 1 60); do
-  $DC exec -T db pg_isready -U fitquest >/dev/null 2>&1 && break
-  sleep 1
+msg_info "Attente du backend (prisma db push + API)…"
+BACKEND_OK=0
+for i in $(seq 1 45); do
+  $DC exec -T backend wget -q -O /dev/null http://localhost:3001/api/v1/health >/dev/null 2>&1 \
+    && BACKEND_OK=1 && break
+  sleep 2
 done
-if $DC exec -T backend sh -c '[ -d prisma/migrations ] && [ -n "$(ls -A prisma/migrations 2>/dev/null)" ]'; then
-  msg_info "Application des migrations…"
-  $DC exec -T backend npx prisma migrate deploy || die "prisma migrate deploy a échoué."
-else
-  msg_info "Synchronisation du schéma (prisma db push)…"
-  $DC exec -T backend npx prisma db push --accept-data-loss || die "prisma db push a échoué."
-fi
-msg_ok "Schéma à jour"
+[[ "${BACKEND_OK:-0}" == "1" ]] && msg_ok "Backend opérationnel" \
+  || { msg_err "Backend non confirmé après 90s."; die "Vérifiez : ${DC} logs backend"; }
 
 # 5. Seed (idempotent — upsert exercices, reset programmes seed)
 msg_info "Seed de la base…"
