@@ -30,3 +30,6 @@ backend/src/uploads/*
 
 # Archives locales (artefacts de construction Phase 1 — non versionnés)
 Archives/
+
+# Guide projet local (contient des informations personnelles)
+CLAUDE.md
