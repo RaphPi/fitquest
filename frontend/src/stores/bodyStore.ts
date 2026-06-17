@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { BadgeDef, BodyMetric, MetricPayload } from '@/types';
+import type { BadgeDef, BodyMetric, BodyPhoto, MetricPayload } from '@/types';
 import { useBadgeStore } from '@/stores/badgeStore';
 
 const API = '/api/v1/body';
@@ -17,16 +17,26 @@ interface BodyState {
   isLoading: boolean;
   error: string | null;
 
+  photos: BodyPhoto[];
+  photosLoading: boolean;
+
   fetchMetrics: () => Promise<void>;
   addMetric: (payload: MetricPayload) => Promise<void>;
   updateMetric: (id: string, payload: MetricPayload) => Promise<void>;
   deleteMetric: (id: string) => Promise<void>;
+
+  fetchPhotos: () => Promise<void>;
+  addPhoto: (file: File, type: string, note: string) => Promise<void>;
+  deletePhoto: (id: string) => Promise<void>;
 }
 
 export const useBodyStore = create<BodyState>((set) => ({
   metrics: [],
   isLoading: false,
   error: null,
+
+  photos: [],
+  photosLoading: false,
 
   fetchMetrics: async () => {
     set({ isLoading: true, error: null });
@@ -66,5 +76,33 @@ export const useBodyStore = create<BodyState>((set) => ({
   deleteMetric: async (id) => {
     await apiFetch<void>(`${API}/metrics/${id}`, { method: 'DELETE' });
     set((s) => ({ metrics: s.metrics.filter((m) => m.id !== id) }));
+  },
+
+  fetchPhotos: async () => {
+    set({ photosLoading: true });
+    try {
+      const { photos } = await apiFetch<{ photos: BodyPhoto[] }>(`${API}/photos`);
+      set({ photos, photosLoading: false });
+    } catch {
+      set({ photosLoading: false });
+    }
+  },
+
+  addPhoto: async (file, type, note) => {
+    const form = new FormData();
+    form.append('photo', file);
+    form.append('type', type);
+    if (note.trim()) form.append('note', note.trim());
+    const { photo, newBadges } = await apiFetch<{ photo: BodyPhoto; newBadges: BadgeDef[] }>(
+      `${API}/photos`,
+      { method: 'POST', body: form },
+    );
+    set((s) => ({ photos: [photo, ...s.photos] }));
+    if (newBadges?.length) useBadgeStore.getState().enqueueUnlocks(newBadges);
+  },
+
+  deletePhoto: async (id) => {
+    await apiFetch<void>(`${API}/photos/${id}`, { method: 'DELETE' });
+    set((s) => ({ photos: s.photos.filter((p) => p.id !== id) }));
   },
 }));

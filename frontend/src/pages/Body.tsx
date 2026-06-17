@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Scale, Camera, Plus, Trash2, Pencil, X, Check } from 'lucide-react';
+import { Scale, Camera, Plus, Trash2, Pencil, X, Check, Upload, ArrowLeftRight } from 'lucide-react';
 import {
   LineChart,
   Line,
@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 import { useBodyStore } from '@/stores/bodyStore';
 import NumberStepper from '@/components/ui/NumberStepper';
-import type { BodyMetric, CustomMetric, MetricPayload } from '@/types';
+import type { BodyMetric, BodyPhoto, CustomMetric, MetricPayload } from '@/types';
 
 // ─── Color system ─────────────────────────────────────────────────────────────
 
@@ -154,6 +154,36 @@ function getMeasureUnit(key: string, metrics: BodyMetric[]): string {
 
 function getMeasureLabel(key: string): string {
   return STD.find((s) => s.key === key)?.label ?? key;
+}
+
+// ─── Photo constants & helpers ────────────────────────────────────────────────
+
+const PHOTO_TYPES = [
+  { value: 'front', label: 'Avant' },
+  { value: 'back',  label: 'Arrière' },
+  { value: 'side',  label: 'Profil' },
+  { value: 'arm',   label: 'Bras' },
+  { value: 'leg',   label: 'Jambe' },
+  { value: 'full',  label: 'Corps entier' },
+  { value: 'other', label: 'Autre' },
+] as const;
+
+const PHOTO_TYPE_LABEL: Record<string, string> = Object.fromEntries(
+  PHOTO_TYPES.map(({ value, label }) => [value, label]),
+);
+
+function fmtMonth(isoDate: string): string {
+  return new Date(isoDate).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+}
+
+function groupPhotosByMonth(photos: BodyPhoto[]): { key: string; label: string; items: BodyPhoto[] }[] {
+  const map = new Map<string, { key: string; label: string; items: BodyPhoto[] }>();
+  for (const p of photos) {
+    const key = p.date.slice(0, 7);
+    if (!map.has(key)) map.set(key, { key, label: fmtMonth(p.date), items: [] });
+    map.get(key)!.items.push(p);
+  }
+  return Array.from(map.values());
 }
 
 // ─── ColorRow ─────────────────────────────────────────────────────────────────
@@ -758,14 +788,500 @@ function MetricsTab() {
   );
 }
 
+// ─── PhotoCard ────────────────────────────────────────────────────────────────
+
+interface PhotoCardProps {
+  photo: BodyPhoto;
+  onClick: () => void;
+  onDelete: (id: string) => Promise<void>;
+}
+
+function PhotoCard({ photo, onClick, onDelete }: PhotoCardProps) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirmDelete) { setConfirmDelete(true); return; }
+    setDeleting(true);
+    try { await onDelete(photo.id); } catch { /* ignore */ } finally { setDeleting(false); }
+  };
+
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-border bg-card">
+      <button type="button" onClick={onClick} className="block w-full">
+        <div className="aspect-square overflow-hidden">
+          <img
+            src={photo.url}
+            alt={PHOTO_TYPE_LABEL[photo.type] ?? photo.type}
+            className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+          />
+        </div>
+      </button>
+
+      {/* Gradient overlay with type + date */}
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-2 pb-1.5 pt-6">
+        <p className="text-[11px] font-semibold leading-tight text-white/90">
+          {PHOTO_TYPE_LABEL[photo.type] ?? photo.type}
+        </p>
+        <p className="text-[10px] leading-tight text-white/60">{fmtShort(photo.date)}</p>
+      </div>
+
+      {/* Delete button top-right */}
+      <div className="absolute right-1.5 top-1.5">
+        {confirmDelete ? (
+          <div
+            className="flex gap-1 rounded-lg bg-black/80 px-1.5 py-1 backdrop-blur-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={handleDeleteClick}
+              disabled={deleting}
+              className="text-[10px] font-medium text-red-400 hover:text-red-300 disabled:opacity-40"
+            >
+              {deleting ? '…' : 'Oui'}
+            </button>
+            <span className="text-[10px] text-white/30">|</span>
+            <button
+              onClick={(e) => { e.stopPropagation(); setConfirmDelete(false); }}
+              className="text-[10px] text-white/60 hover:text-white"
+            >
+              Non
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={handleDeleteClick}
+            className="rounded-lg bg-black/40 p-1.5 text-white/60 backdrop-blur-sm transition hover:bg-red-500/30 hover:text-red-400"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── PhotoModal ───────────────────────────────────────────────────────────────
+
+interface PhotoModalProps {
+  photo: BodyPhoto;
+  onClose: () => void;
+  onDelete: (id: string) => Promise<void>;
+}
+
+function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handler);
+    };
+  }, [onClose]);
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try { await onDelete(photo.id); onClose(); } catch { setDeleting(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col bg-black/95">
+      {/* Header */}
+      <div
+        className="flex shrink-0 items-center justify-between px-4 py-4"
+        style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
+      >
+        <div className="flex items-center gap-2">
+          <span className="rounded-md bg-primary/20 px-2 py-1 text-xs font-medium text-primary">
+            {PHOTO_TYPE_LABEL[photo.type] ?? photo.type}
+          </span>
+          <span className="text-sm text-white/60">{fmtLong(photo.date)}</span>
+        </div>
+        <button
+          onClick={onClose}
+          className="rounded-xl p-2 text-white/60 transition hover:bg-white/10 hover:text-white"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Image */}
+      <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden px-4">
+        <img
+          src={photo.url}
+          alt={PHOTO_TYPE_LABEL[photo.type] ?? photo.type}
+          className="max-h-full max-w-full rounded-xl object-contain"
+        />
+      </div>
+
+      {/* Footer */}
+      <div
+        className="shrink-0 space-y-3 px-4 py-4"
+        style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+      >
+        {photo.note && (
+          <p className="text-center text-sm italic text-white/70">{photo.note}</p>
+        )}
+        <div className="flex justify-center">
+          {confirmDelete ? (
+            <div className="flex gap-3">
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="rounded-lg bg-red-500/20 px-4 py-2 text-sm text-red-400 transition hover:bg-red-500/30 disabled:opacity-40"
+              >
+                {deleting ? 'Suppression…' : 'Confirmer la suppression'}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="rounded-lg border border-white/20 px-4 py-2 text-sm text-white/60 transition hover:text-white"
+              >
+                Annuler
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2 text-sm text-white/50 transition hover:border-red-400/40 hover:text-red-400"
+            >
+              <Trash2 className="h-4 w-4" />
+              Supprimer
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── CompareModal ─────────────────────────────────────────────────────────────
+
+interface CompareModalProps {
+  photos: BodyPhoto[];
+  onClose: () => void;
+}
+
+function CompareModal({ photos, onClose }: CompareModalProps) {
+  const [photoAId, setPhotoAId] = useState<string>(photos[photos.length - 1]?.id ?? '');
+  const [photoBId, setPhotoBId] = useState<string>(photos[0]?.id ?? '');
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handler);
+    };
+  }, [onClose]);
+
+  const photoA = photos.find((p) => p.id === photoAId);
+  const photoB = photos.find((p) => p.id === photoBId);
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col bg-black/95">
+      {/* Header */}
+      <div
+        className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-4"
+        style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
+      >
+        <span className="text-sm font-semibold text-white">Comparaison avant / après</span>
+        <button
+          onClick={onClose}
+          className="rounded-xl p-2 text-white/60 transition hover:bg-white/10 hover:text-white"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Selectors */}
+      <div className="grid shrink-0 grid-cols-2 gap-3 px-4 py-3">
+        {([
+          { id: photoAId, setId: setPhotoAId, label: 'Avant' },
+          { id: photoBId, setId: setPhotoBId, label: 'Après' },
+        ] as const).map(({ id, setId, label }) => (
+          <div key={label}>
+            <p className="mb-1 text-[11px] text-white/40">{label}</p>
+            <select
+              value={id}
+              onChange={(e) => setId(e.target.value)}
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-white focus:border-primary/60 focus:outline-none"
+            >
+              {photos.map((p) => (
+                <option key={p.id} value={p.id} className="bg-gray-900">
+                  {fmtShort(p.date)} — {PHOTO_TYPE_LABEL[p.type] ?? p.type}
+                </option>
+              ))}
+            </select>
+          </div>
+        ))}
+      </div>
+
+      {/* Side-by-side images */}
+      <div
+        className="flex min-h-0 flex-1 gap-3 overflow-hidden px-4"
+        style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+      >
+        {[photoA, photoB].map((photo, i) =>
+          photo ? (
+            <div key={photo.id} className="flex flex-1 flex-col gap-2 overflow-hidden">
+              <div className="flex min-h-0 flex-1 overflow-hidden rounded-xl bg-white/5">
+                <img
+                  src={photo.url}
+                  alt={PHOTO_TYPE_LABEL[photo.type] ?? photo.type}
+                  className="h-full w-full object-contain"
+                />
+              </div>
+              <p className="shrink-0 text-center text-xs text-white/50">
+                {fmtShort(photo.date)} · {PHOTO_TYPE_LABEL[photo.type] ?? photo.type}
+              </p>
+            </div>
+          ) : (
+            <div
+              key={i}
+              className="flex flex-1 items-center justify-center rounded-xl border border-white/10 text-white/30"
+            >
+              <p className="text-xs">Aucune photo</p>
+            </div>
+          ),
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── PhotosTab ────────────────────────────────────────────────────────────────
 
 function PhotosTab() {
+  const { photos, photosLoading, fetchPhotos, addPhoto, deletePhoto } = useBodyStore();
+  const [selectedType, setSelectedType] = useState<string>('front');
+  const [note, setNote] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [activePhoto, setActivePhoto] = useState<BodyPhoto | null>(null);
+  const [showCompare, setShowCompare] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Revoke previous blob URL when previewUrl changes or on unmount
+  useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
+
+  useEffect(() => { fetchPhotos(); }, [fetchPhotos]);
+
+  const groups = useMemo(() => groupPhotosByMonth(photos), [photos]);
+
+  const handleFileChange = (file: File) => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    setUploadError(null);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file?.type.startsWith('image/')) handleFileChange(file);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedFile) return;
+    setUploading(true);
+    setUploadError(null);
+    try {
+      await addPhoto(selectedFile, selectedType, note);
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      setNote('');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    } catch (err) {
+      setUploadError((err as Error).message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    await deletePhoto(id);
+    if (activePhoto?.id === id) setActivePhoto(null);
+  };
+
+  const clearPreview = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
-      <Camera className="mb-4 h-16 w-16 opacity-20" />
-      <p className="text-base font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Photos de progression</p>
-      <p className="mt-1 text-sm">Bientôt disponible ✦</p>
+    <div className="space-y-5">
+      {/* Zone d'upload */}
+      <div className="rounded-xl border border-border bg-card p-4">
+        <h3 className="mb-4 text-sm font-semibold text-foreground">Nouvelle photo</h3>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Sélecteur de type */}
+          <div>
+            <p className="mb-2 text-xs text-muted-foreground">Type de photo</p>
+            <div className="flex flex-wrap gap-2">
+              {PHOTO_TYPES.map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setSelectedType(value)}
+                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+                    selectedType === value
+                      ? 'bg-primary/15 text-primary ring-1 ring-primary/40'
+                      : 'border border-border text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Drop zone */}
+          <label
+            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={handleDrop}
+            className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed p-6 transition ${
+              dragOver
+                ? 'border-primary bg-primary/10'
+                : selectedFile
+                ? 'border-primary/40 bg-primary/5'
+                : 'border-border hover:border-primary/40'
+            }`}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileChange(f); }}
+            />
+            {previewUrl ? (
+              <div className="relative">
+                <img
+                  src={previewUrl}
+                  alt="Aperçu"
+                  className="max-h-52 max-w-full rounded-lg object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={clearPreview}
+                  className="absolute -right-2 -top-2 rounded-full bg-card p-1 text-muted-foreground shadow ring-1 ring-border transition hover:text-foreground"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ) : (
+              <>
+                <Upload className="h-8 w-8 text-muted-foreground/50" />
+                <div className="text-center">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Glisse une photo ou{' '}
+                    <span className="text-primary">clique pour choisir</span>
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground/60">
+                    JPG, PNG, HEIC — max 10 Mo
+                  </p>
+                </div>
+              </>
+            )}
+          </label>
+
+          {/* Note optionnelle */}
+          <input
+            type="text"
+            placeholder="Note optionnelle…"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            className="h-10 w-full rounded-lg border border-border bg-card/50 px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+          />
+
+          {uploadError && <p className="text-sm text-red-400">{uploadError}</p>}
+
+          <button
+            type="submit"
+            disabled={!selectedFile || uploading}
+            className="h-10 w-full rounded-lg bg-primary text-sm font-medium text-white transition hover:bg-primary/90 disabled:opacity-40"
+          >
+            {uploading ? 'Envoi en cours…' : 'Enregistrer la photo'}
+          </button>
+        </form>
+      </div>
+
+      {/* Bouton comparer (≥ 2 photos) */}
+      {photos.length >= 2 && (
+        <button
+          type="button"
+          onClick={() => setShowCompare(true)}
+          className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
+        >
+          <ArrowLeftRight className="h-4 w-4" />
+          Comparer avant / après
+        </button>
+      )}
+
+      {/* Chargement */}
+      {photosLoading && (
+        <p className="py-4 text-center text-sm text-muted-foreground">Chargement…</p>
+      )}
+
+      {/* État vide */}
+      {!photosLoading && photos.length === 0 && (
+        <div className="flex flex-col items-center py-10 text-center text-muted-foreground">
+          <Camera className="mb-3 h-12 w-12 opacity-20" />
+          <p className="text-sm">Aucune photo — enregistre ton premier cliché !</p>
+        </div>
+      )}
+
+      {/* Galerie groupée par mois */}
+      {groups.map(({ key, label, items }) => (
+        <div key={key}>
+          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            {label}
+          </h3>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {items.map((photo) => (
+              <PhotoCard
+                key={photo.id}
+                photo={photo}
+                onClick={() => setActivePhoto(photo)}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {/* Modale plein écran */}
+      {activePhoto && (
+        <PhotoModal
+          photo={activePhoto}
+          onClose={() => setActivePhoto(null)}
+          onDelete={handleDelete}
+        />
+      )}
+
+      {/* Modale comparaison */}
+      {showCompare && (
+        <CompareModal
+          photos={photos}
+          onClose={() => setShowCompare(false)}
+        />
+      )}
     </div>
   );
 }
