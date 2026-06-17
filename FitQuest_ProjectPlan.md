@@ -459,15 +459,50 @@ Export A4 via Puppeteer, template HTML dans `backend/src/export/templates/charac
 | S6 | Mode guidé (timer Page Visibility API) + mode libre |
 | S7 | Gamification : XP étagé reps/durée + courbe niveaux + couleurs par palier, badges, avatar évolutif (boutique XP abandonnée) — **découpé en 5 étapes : voir `Sprint7_Plan.md`** |
 | S8 | Dashboard, historique, métriques corporelles, photos — **découpé en 5 étapes : voir `Sprint8_Plan.md`** |
+| **S8.5** | **Polish & Cohérence UX — 4 étapes (voir détail ci-dessous)** |
 | S9 | Thèmes, responsive mobile/tablette/desktop |
 | S10 | Scripts install/update, tests, README, GitHub release |
 
-### Phase 2 (6 sprints)
+#### Sprint 8.5 — Polish & Cohérence UX (sprint intermédiaire, découpé en 4 étapes)
+
+**8.5A — Dashboard refonte**
+1. Terme FR pour "streak" (`Jours d'affilée` ou `Série`)
+2. En-tête réorganisé : titre "Tableau de bord" / nom+grade / tagline en plus petit
+3. 4 tuiles en une ligne horizontale compacte (plus de grille 2×2 mobile)
+4. Graphe fréquence + bloc poids : côte à côte, hauteur réduite
+5. Card "Prochaine séance" → lien vers le détail du programme
+6. Activités récentes : cards mobile plus aérées, titre et sous-titre lisibles sans troncature
+
+**8.5B — Navigation sidebar + mobile**
+1. Sidebar desktop : bloc bas-gauche `sticky bottom-0` (toujours visible même en page longue)
+2. MobileHeader : nom + XP + niveau (cohérence avec le bloc sidebar desktop)
+3. Settings accessible en mobile : icône `Settings` discrète dans le MobileHeader
+
+**8.5C — Programmes & Exercices UI**
+1. Pastilles niveau dans les cartes programme : couleur correcte (Débutant=vert, Intermédiaire=orange, Avancé=rouge)
+2. Cohérence édition/suppression : retirer edit/delete des tuiles `ProgramCard`, garder uniquement dans la vue détail (même principe pour exercices)
+3. Tuiles exercices : hauteur normalisée / grid aligné même quand titre sur 2 lignes
+
+**8.5D — Profil, Badges & Paramètres**
+1. Profil : `LevelBadge` en haut de page agrandi, chiffre ne touche plus la bordure
+2. Badges/Trophées : remplacer la vitrine complète du Profil par une tuile résumée (3 derniers + progression du prochain) + bouton "Salle des trophées →" vers page complète
+3. Paramètres : sections thématiques (Compte / Apparence / Combat / Notifications) avec en-têtes de section
+
+#### Fonctionnalités exclues du Sprint 8.5 → Phase 2
+- **Widgets sidebar desktop configurables** (mini-graphes, lancement séance direct, choix dans paramètres) → S17
+- **Changement de personnage dans les paramètres** (PATCH /me backend + sélecteur classe post-inscription) → S17
+
+### Phase 2 (6+ sprints)
 - S11-12 : IA multi-provider, génération programme + images
 - S13 : Notifications (FreeSMS, HA, webhook)
 - S14 : PDF fiche personnage
 - S15 : i18n FR/EN complet, export CSV/JSON, email digest
 - S16 : Polish, perf, accessibilité
+- S17 : Widgets sidebar configurables + changement de personnage post-inscription
+- S18 : Administration & gestion de compte
+  - **Panel admin** (rôle `ADMIN` sur `User`) : liste des utilisateurs, suppression compte, réinitialisation BDD (purge sélective), visualisation stats globales
+  - **Export/import profil admin** : dump JSON d'un utilisateur (profil + historique + métriques + photos) + import pour migration
+  - **Côté utilisateur (Paramètres)** : suppression de son propre compte (cascade Prisma), export de son profil en JSON (données personnelles RGPD), import profil (restauration)
 
 ---
 
