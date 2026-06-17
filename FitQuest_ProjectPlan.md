@@ -458,7 +458,7 @@ Export A4 via Puppeteer, template HTML dans `backend/src/export/templates/charac
 | S5 | Programmes + builder séance (sets/reps/durée/repos) |
 | S6 | Mode guidé (timer Page Visibility API) + mode libre |
 | S7 | Gamification : XP étagé reps/durée + courbe niveaux + couleurs par palier, badges, avatar évolutif (boutique XP abandonnée) — **découpé en 5 étapes : voir `Sprint7_Plan.md`** |
-| S8 | Dashboard, historique, métriques corporelles, photos |
+| S8 | Dashboard, historique, métriques corporelles, photos — **découpé en 5 étapes : voir `Sprint8_Plan.md`** |
 | S9 | Thèmes, responsive mobile/tablette/desktop |
 | S10 | Scripts install/update, tests, README, GitHub release |
 
