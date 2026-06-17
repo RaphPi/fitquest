@@ -16,7 +16,7 @@ export default function Profile() {
   const nextLevel = user ? nextTierLevel(user.level) : null;
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-5">
       <div>
         <h1 className="font-display text-2xl font-bold">{t('nav.profile')}</h1>
         {user && (
@@ -28,11 +28,13 @@ export default function Profile() {
       </div>
 
       {user && meta && (
-        <div className="flex flex-col items-center gap-4 rounded-2xl border border-border bg-card p-6 sm:flex-row sm:items-center sm:gap-8">
-          {/* Grand avatar évolutif */}
-          <Avatar classKey={avatarClassFromStage(user.avatarStage)} level={user.level} size={150} />
+        <div className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 sm:gap-8 sm:p-6">
+          {/* Avatar mobile (petit) */}
+          <Avatar classKey={avatarClassFromStage(user.avatarStage)} level={user.level} size={80} className="shrink-0 sm:hidden" />
+          {/* Avatar desktop (grand) */}
+          <Avatar classKey={avatarClassFromStage(user.avatarStage)} level={user.level} size={150} className="hidden shrink-0 sm:block" />
 
-          <div className="flex-1 space-y-3 text-center sm:text-left">
+          <div className="min-w-0 flex-1 space-y-2 sm:space-y-3">
             <div>
               <p className="font-display text-xl font-bold" style={{ color: meta.tier.color }}>
                 {meta.name}
@@ -42,13 +44,13 @@ export default function Profile() {
               </p>
             </div>
 
-            <div className="flex items-center justify-center gap-3 sm:justify-start">
+            <div className="flex items-center gap-3">
               <LevelBadge level={user.level} size="xl" />
               <XPBar
                 current={user.currentXP}
                 required={xpRequiredForLevel(user.level)}
                 level={user.level}
-                className="max-w-xs flex-1"
+                className="flex-1"
               />
             </div>
 

@@ -126,7 +126,7 @@ function AddPackTile() {
 }
 
 export default function Settings() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [open, setOpen] = useState<SectionId | null>(null);
 
@@ -138,6 +138,11 @@ export default function Settings() {
   const logout = useUserStore((s) => s.logout);
 
   const toggle = (id: SectionId) => setOpen((prev) => (prev === id ? null : id));
+
+  const handleLang = (lang: string) => {
+    void i18n.changeLanguage(lang);
+    localStorage.setItem('fq_lang', lang);
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -158,6 +163,7 @@ export default function Settings() {
         open={open === 'apparence'}
         onToggle={() => toggle('apparence')}
       >
+        <SubLabel>Thème</SubLabel>
         <div className="flex flex-wrap gap-3">
           {THEME_LIST.map((th) => (
             <button
@@ -172,6 +178,25 @@ export default function Settings() {
               )}
             >
               {th.label}
+            </button>
+          ))}
+        </div>
+
+        <SubLabel className="mt-5">Langue</SubLabel>
+        <div className="flex gap-3">
+          {([{ id: 'fr', label: 'Français' }, { id: 'en', label: 'English' }] as const).map(({ id, label }) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => handleLang(id)}
+              className={cn(
+                'rounded-lg border px-5 py-2.5 font-display text-sm font-bold uppercase tracking-widest transition-all',
+                i18n.language === id
+                  ? 'border-primary text-primary shadow-glow'
+                  : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground',
+              )}
+            >
+              {label}
             </button>
           ))}
         </div>

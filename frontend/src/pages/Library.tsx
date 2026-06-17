@@ -104,7 +104,7 @@ export default function Library() {
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-black text-foreground">Bibliothèque</h1>
+          <h1 className="font-display text-2xl font-black text-foreground">Exercices</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {isLoading ? 'Chargement…' : `${results.length} exercice${results.length !== 1 ? 's' : ''}`}
           </p>
