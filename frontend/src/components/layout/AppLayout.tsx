@@ -4,9 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { xpRequiredForLevel } from '@/lib/xp';
 import { getLevelTier } from '@/lib/levelTier';
+import { avatarClassFromStage, getAvatarStageMeta } from '@/lib/avatar';
 import { useUserStore } from '@/stores/userStore';
 import XPBar from '@/components/ui/XPBar';
 import LevelBadge from '@/components/ui/LevelBadge';
+import Avatar from '@/components/avatar/Avatar';
 import FitQuestIcon from '@/assets/logo/FitQuestIcon';
 import GlobalBadgeUnlock from '@/components/badge/GlobalBadgeUnlock';
 import type { ReactNode } from 'react';
@@ -92,23 +94,37 @@ function Sidebar() {
         ))}
       </nav>
 
-      {/* XP summary desktop */}
-      {user && (
-        <div className="border-t border-border p-3 lg:p-4">
-          <div className="flex items-start gap-3">
-            <LevelBadge level={user.level} size="sm" className="mt-0.5" />
-            <div className="hidden flex-1 lg:block">
-              <p className="mb-1.5 text-xs font-medium text-foreground">{user.username}</p>
-              <XPBar
-                current={user.currentXP}
-                required={xpRequiredForLevel(user.level)}
+      {/* Bloc héros (avatar-forward) */}
+      {user && (() => {
+        const tier = getLevelTier(user.level);
+        const meta = getAvatarStageMeta(user.level);
+        return (
+          <div className="border-t border-border p-2 lg:p-4">
+            <div className="flex items-center justify-center gap-3 lg:justify-start">
+              <Avatar
+                classKey={avatarClassFromStage(user.avatarStage)}
                 level={user.level}
-                animated={false}
+                size={36}
+                animate={false}
+                className="shrink-0"
               />
+              <div className="hidden min-w-0 flex-1 lg:block">
+                <p className="truncate text-sm font-semibold leading-tight text-foreground">{user.username}</p>
+                <p className="mb-1.5 text-[11px] font-medium leading-tight" style={{ color: tier.color }}>
+                  {meta.name} · Niv {user.level}
+                </p>
+                <XPBar
+                  current={user.currentXP}
+                  required={xpRequiredForLevel(user.level)}
+                  level={user.level}
+                  animated={false}
+                  showLevel={false}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </aside>
   );
 }

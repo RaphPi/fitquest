@@ -1,20 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '@/stores/userStore';
+import { AVATAR_CLASSES } from '@/lib/avatar';
+import Avatar from '@/components/avatar/Avatar';
 import type { DigestFrequency } from '@/types';
-
-/* ── Avatar choices ─────────────────────────────────────────── */
-import warriorSvg from '@/assets/avatars/warrior.svg';
-import archerSvg from '@/assets/avatars/archer.svg';
-import mageSvg from '@/assets/avatars/mage.svg';
-import knightSvg from '@/assets/avatars/knight.svg';
-
-const AVATARS = [
-  { id: 0, label: 'Guerrier', src: warriorSvg },
-  { id: 1, label: 'Archer', src: archerSvg },
-  { id: 2, label: 'Mage', src: mageSvg },
-  { id: 3, label: 'Chevalier', src: knightSvg },
-];
 
 const LEVELS = [
   { value: 'novice', label: 'Novice', desc: 'Je débute, tout est nouveau pour moi' },
@@ -181,7 +170,7 @@ export default function Register() {
             </h2>
             <p className="mb-6 text-sm text-[#64748b]">Qui représente le mieux ton style ?</p>
             <div className="grid grid-cols-4 gap-3">
-              {AVATARS.map((av) => (
+              {AVATAR_CLASSES.map((av) => (
                 <button
                   key={av.id}
                   type="button"
@@ -194,16 +183,23 @@ export default function Register() {
                     transform: avatarStage === av.id ? 'scale(1.06)' : undefined,
                   }}
                 >
-                  <img
-                    src={av.src}
-                    alt={av.label}
-                    className="h-16 w-auto drop-shadow-lg"
+                  <Avatar
+                    classKey={av.key}
+                    level={1}
+                    bare
+                    size={40}
+                    className="drop-shadow-lg"
+                    style={{
+                      filter: avatarStage === av.id ? 'none' : 'grayscale(0.7) brightness(0.7)',
+                      opacity: avatarStage === av.id ? 1 : 0.65,
+                      transition: 'filter .2s, opacity .2s',
+                    }}
                   />
                   <span
                     className="text-[10px] font-bold uppercase tracking-wider"
                     style={{ color: avatarStage === av.id ? '#a78bfa' : '#64748b' }}
                   >
-                    {av.label}
+                    {av.labelFr}
                   </span>
                 </button>
               ))}

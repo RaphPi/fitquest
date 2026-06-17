@@ -9,9 +9,11 @@ import { effortPoints, typeCopy } from '@/lib/bossFight';
 import { levelProgressPct } from '@/lib/xp';
 import { playSound } from '@/lib/sound';
 import { renderBoss, drawSprite, WEAPONS, SHIELD, ANVIL, HAMMER } from '@/lib/pixelSprites';
+import { getAvatarStage, avatarClassFromStage } from '@/lib/avatar';
 import PixelCanvas from '@/components/workout/active/PixelCanvas';
 import ExerciseInfoModal from '@/components/workout/ExerciseInfoModal';
 import BadgeUnlockOverlay from '@/components/badge/BadgeUnlockOverlay';
+import AvatarEvolveOverlay from '@/components/avatar/AvatarEvolveOverlay';
 
 const CSS = `
 @keyframes fq-bossIdle { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
@@ -72,7 +74,11 @@ export default function ActiveWorkout() {
   const [particles, setParticles] = useState<Particle[]>([]);
   const [restRemaining, setRestRemaining] = useState(0);
   const [showBadges, setShowBadges] = useState(false);
+  const [showEvolve, setShowEvolve] = useState(false);
   const restTotalRef = useRef(1);
+
+  // Évolution d'avatar : le stade a-t-il franchi un palier sur cette séance ?
+  const stageUp = !!result && getAvatarStage(result.user.level) > getAvatarStage(result.user.level - result.levelsGained);
 
   const cur = session?.exercises[exerciseIndex];
   const copy = cur ? typeCopy(cur.type) : typeCopy('reps');
@@ -135,8 +141,13 @@ export default function ActiveWorkout() {
     if (!result) return;
     playSound(result.user ? (bossHp <= 0 ? 'victory' : 'flee') : 'victory');
     if (result.leveledUp) setTimeout(() => playSound('levelup'), 650);
+    // Séquence : level-up inline → évolution d'avatar (si palier franchi) → badges.
+    const delay = result.leveledUp ? 2000 : 850;
+    if (stageUp) {
+      const id = setTimeout(() => setShowEvolve(true), delay);
+      return () => clearTimeout(id);
+    }
     if (result.newBadges.length > 0) {
-      const delay = result.leveledUp ? 2000 : 850;
       const id = setTimeout(() => setShowBadges(true), delay);
       return () => clearTimeout(id);
     }
@@ -497,7 +508,19 @@ export default function ActiveWorkout() {
         </Overlay>
       )}
 
-      {/* DÉBLOCAGE DE BADGES (après le level-up le cas échéant) */}
+      {/* ÉVOLUTION D'AVATAR (palier franchi) — avant les badges */}
+      {showEvolve && result && user && (
+        <AvatarEvolveOverlay
+          classKey={avatarClassFromStage(user.avatarStage)}
+          level={result.user.level}
+          onClose={() => {
+            setShowEvolve(false);
+            if (result.newBadges.length > 0) setShowBadges(true);
+          }}
+        />
+      )}
+
+      {/* DÉBLOCAGE DE BADGES (après le level-up / l'évolution le cas échéant) */}
       {showBadges && result && result.newBadges.length > 0 && (
         <BadgeUnlockOverlay badges={result.newBadges} onClose={() => setShowBadges(false)} />
       )}

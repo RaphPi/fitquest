@@ -64,10 +64,28 @@ const TIERS: Record<string, LevelTier> = {
   },
 };
 
+// Ordre des paliers (= stades d'avatar 7E). Source unique des seuils.
+export const TIER_KEYS = ['bronze', 'silver', 'gold', 'emerald', 'diamond'] as const;
+export const TIER_MIN_LEVELS = [1, 10, 20, 35, 50];
+const TIER_BY_INDEX: LevelTier[] = [
+  TIERS.bronze, TIERS.silver, TIERS.gold, TIERS.emerald, TIERS.diamond,
+];
+
+/** Index du palier (0 = Bronze … 4 = Diamant) pour un niveau donné. */
+export function getLevelTierIndex(level: number): number {
+  if (level < 10) return 0;
+  if (level < 20) return 1;
+  if (level < 35) return 2;
+  if (level < 50) return 3;
+  return 4;
+}
+
 export function getLevelTier(level: number): LevelTier {
-  if (level < 10) return TIERS.bronze;
-  if (level < 20) return TIERS.silver;
-  if (level < 35) return TIERS.gold;
-  if (level < 50) return TIERS.emerald;
-  return TIERS.diamond;
+  return TIER_BY_INDEX[getLevelTierIndex(level)];
+}
+
+/** Niveau auquel le prochain palier s'ouvre, ou null si déjà au palier max. */
+export function nextTierLevel(level: number): number | null {
+  const i = getLevelTierIndex(level);
+  return i >= TIER_MIN_LEVELS.length - 1 ? null : TIER_MIN_LEVELS[i + 1];
 }

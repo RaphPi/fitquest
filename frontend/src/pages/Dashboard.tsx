@@ -1,10 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { xpRequiredForLevel } from '@/lib/xp';
+import { avatarClassFromStage, getAvatarStageMeta } from '@/lib/avatar';
 import { useUserStore } from '@/stores/userStore';
 import { useWorkoutStore } from '@/stores/workoutStore';
 import { Flame, Zap, Trophy, Calendar } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
 import XPBar from '@/components/ui/XPBar';
+import Avatar from '@/components/avatar/Avatar';
 import WorkoutHistory from '@/components/workout/WorkoutHistory';
 
 export default function Dashboard() {
@@ -14,13 +16,28 @@ export default function Dashboard() {
 
   return (
     <section className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold">{t('dashboard.title')}</h1>
+      <div className="flex items-center gap-3">
         {user && (
-          <p className="mt-1 text-muted-foreground">
-            {t('dashboard.welcome')}, <span className="text-primary-soft font-semibold">{user.username}</span>
-          </p>
+          <Avatar
+            classKey={avatarClassFromStage(user.avatarStage)}
+            level={user.level}
+            size={56}
+            animate={false}
+            className="shrink-0"
+          />
         )}
+        <div>
+          <h1 className="font-display text-2xl font-bold">{t('dashboard.title')}</h1>
+          {user && (
+            <p className="mt-1 text-muted-foreground">
+              {t('dashboard.welcome')}, <span className="text-primary-soft font-semibold">{user.username}</span>
+              {' · '}
+              <span style={{ color: getAvatarStageMeta(user.level).tier.color }}>
+                {getAvatarStageMeta(user.level).name}
+              </span>
+            </p>
+          )}
+        </div>
       </div>
 
       {user && (

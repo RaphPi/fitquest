@@ -5,19 +5,23 @@ interface XPBarProps {
   required: number;
   level: number;
   animated?: boolean;
+  /** Masque le label « LVL N » (ex. sidebar où le niveau est déjà affiché). */
+  showLevel?: boolean;
   className?: string;
 }
 
-export default function XPBar({ current, required, level, animated = true, className }: XPBarProps) {
+export default function XPBar({ current, required, level, animated = true, showLevel = true, className }: XPBarProps) {
   const pct = Math.min(100, Math.round((current / required) * 100));
   const tier = getLevelTier(level);
 
   return (
     <div className={className}>
-      <div className="mb-1 flex items-center justify-between">
-        <span className="font-display text-xs font-bold" style={{ color: tier.color }}>
-          LVL {level}
-        </span>
+      <div className={`mb-1 flex items-center ${showLevel ? 'justify-between' : 'justify-end'}`}>
+        {showLevel && (
+          <span className="font-display text-xs font-bold" style={{ color: tier.color }}>
+            LVL {level}
+          </span>
+        )}
         <span className="text-xs text-muted-foreground">
           {current} / {required} XP
         </span>
