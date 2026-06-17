@@ -67,11 +67,19 @@ function MobileHeader() {
         </div>
       </header>
       {/* XP bar fine full-width, juste sous le header */}
-      <div className="h-1 w-full bg-muted">
+      <div className="relative h-1 w-full overflow-hidden bg-card-shield">
         <div
-          className="h-full transition-[width] duration-500"
-          style={{ width: `${xpPct}%`, backgroundColor: tier.color }}
-        />
+          className="relative h-full overflow-hidden transition-[width] duration-500"
+          style={{
+            width: `${xpPct}%`,
+            background: `linear-gradient(to right, ${tier.gradient.from}, ${tier.gradient.to})`,
+          }}
+        >
+          <div
+            className="absolute inset-y-0 w-16 animate-xp-shimmer"
+            style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent)' }}
+          />
+        </div>
       </div>
     </div>
   );
