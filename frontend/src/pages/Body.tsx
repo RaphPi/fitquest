@@ -305,7 +305,7 @@ function MetricForm({
             form.weightEnabled ? 'border-xp bg-xp/20' : 'border-border'
           }`}
         >
-          {form.weightEnabled && <Check className="h-3 w-3" style={{ color: '#f59e0b' }} />}
+          {form.weightEnabled && <Check className="h-3 w-3 text-xp" />}
         </button>
         <span className={`w-28 shrink-0 text-sm font-medium ${form.weightEnabled ? 'text-foreground' : 'text-muted-foreground'}`}>
           Poids

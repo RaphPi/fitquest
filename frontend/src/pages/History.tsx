@@ -123,7 +123,7 @@ export default function History() {
             icon={<Zap className="h-4 w-4" />}
             value={String(stats.xp)}
             label="XP gagnés"
-            color="#f59e0b"
+            color="var(--xp)"
           />
           <SummaryTile
             icon={<Flame className="h-4 w-4" />}
@@ -147,8 +147,8 @@ export default function History() {
                 className="rounded-md px-2.5 py-1 font-display text-[11px] font-bold uppercase tracking-wide transition-all"
                 style={
                   period === p
-                    ? { background: 'rgba(99,102,241,0.2)', color: 'rgba(167,139,250,1)', border: '1px solid rgba(99,102,241,0.5)' }
-                    : { color: '#64748b', border: '1px solid transparent' }
+                    ? { background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-soft)', border: '1px solid color-mix(in srgb, var(--accent) 50%, transparent)' }
+                    : { color: 'var(--text-secondary)', border: '1px solid transparent' }
                 }
               >
                 {PERIOD_LABELS[p]}

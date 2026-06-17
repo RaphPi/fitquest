@@ -90,7 +90,7 @@ function Sidebar() {
   const { user } = useUserStore();
 
   return (
-    <aside className="hidden md:sticky md:top-0 md:flex md:h-screen md:flex-col md:border-r md:border-border md:bg-card">
+    <aside className="hidden md:sticky md:top-0 md:flex md:h-screen md:w-16 md:flex-col md:border-r md:border-border md:bg-card lg:w-56">
       {/* Logo */}
       <div className="flex shrink-0 items-center gap-3 border-b border-border p-4 lg:p-5">
         <FitQuestIcon className="h-8 w-8 shrink-0" />

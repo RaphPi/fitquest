@@ -150,11 +150,10 @@ export default function Dashboard() {
             current={user.currentXP}
             required={xpRequiredForLevel(user.level)}
             level={user.level}
-            className="max-w-sm"
           />
 
           {/* ── 4 tuiles compact homogènes ── */}
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             <StreakCard streak={user.streak} />
             <StatCard icon={Zap} value={user.totalXP} label="XP total" compact />
             <StatCard icon={Trophy} value={user.level} label="Niveau" compact />
@@ -173,19 +172,19 @@ export default function Dashboard() {
                     <BarChart data={weeklyData} margin={{ top: 2, right: 0, left: -32, bottom: 0 }}>
                       <XAxis
                         dataKey="label"
-                        tick={{ fontSize: 7, fill: '#64748b' }}
+                        tick={{ fontSize: 7, fill: 'var(--text-secondary)' }}
                         axisLine={false}
                         tickLine={false}
                         interval="preserveStartEnd"
                       />
                       <Tooltip
-                        contentStyle={{ background: '#0f1117', border: '1px solid #1e2030', borderRadius: 8, padding: '4px 10px' }}
-                        labelStyle={{ color: '#64748b', fontSize: 10 }}
-                        itemStyle={{ color: 'rgba(99,102,241,1)', fontSize: 11 }}
+                        contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, padding: '4px 10px' }}
+                        labelStyle={{ color: 'var(--text-secondary)', fontSize: 10 }}
+                        itemStyle={{ color: 'var(--accent)', fontSize: 11 }}
                         formatter={(v: number) => [v, v !== 1 ? 'séances' : 'séance']}
                         cursor={{ fill: 'rgba(99,102,241,0.08)' }}
                       />
-                      <Bar dataKey="count" fill="rgba(99,102,241,0.7)" radius={[3, 3, 0, 0]} maxBarSize={20} />
+                      <Bar dataKey="count" fill="var(--accent)" fillOpacity={0.7} radius={[3, 3, 0, 0]} maxBarSize={20} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -196,7 +195,7 @@ export default function Dashboard() {
                   <h2 className="mb-1 font-display text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                     Poids actuel
                   </h2>
-                  <p className="font-display text-xl font-black" style={{ color: '#f59e0b' }}>
+                  <p className="font-display text-xl font-black text-xp">
                     {weightData.current.toFixed(1)}{' '}
                     <span className="text-xs font-normal text-muted-foreground">kg</span>
                   </p>
@@ -204,7 +203,7 @@ export default function Dashboard() {
                     <div className="mt-1.5">
                       <ResponsiveContainer width="100%" height={36}>
                         <LineChart data={weightData.sparkline} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
-                          <Line type="monotone" dataKey="v" stroke="#f59e0b" dot={false} strokeWidth={2} />
+                          <Line type="monotone" dataKey="v" stroke="var(--xp)" dot={false} strokeWidth={2} />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>

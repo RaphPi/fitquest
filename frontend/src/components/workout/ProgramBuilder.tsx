@@ -658,7 +658,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
       )}
 
       {/* ── Sticky save bar ────────────────────────────── */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur-sm px-4 py-3 flex gap-3">
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur-sm px-4 py-3 flex gap-3 md:left-16 lg:left-56">
         <button type="button" onClick={onBack}
           className="flex-1 rounded-lg border border-border py-2.5 text-sm font-semibold text-foreground hover:bg-white/5 transition-colors"
         >
