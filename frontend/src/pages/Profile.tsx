@@ -6,7 +6,7 @@ import { xpRequiredForLevel } from '@/lib/xp';
 import LevelBadge from '@/components/ui/LevelBadge';
 import XPBar from '@/components/ui/XPBar';
 import Avatar from '@/components/avatar/Avatar';
-import BadgeShowcase from '@/components/badge/BadgeShowcase';
+import BadgeSummaryTile from '@/components/badge/BadgeSummaryTile';
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -43,7 +43,7 @@ export default function Profile() {
             </div>
 
             <div className="flex items-center justify-center gap-3 sm:justify-start">
-              <LevelBadge level={user.level} size="lg" />
+              <LevelBadge level={user.level} size="xl" />
               <XPBar
                 current={user.currentXP}
                 required={xpRequiredForLevel(user.level)}
@@ -61,7 +61,7 @@ export default function Profile() {
         </div>
       )}
 
-      <BadgeShowcase />
+      <BadgeSummaryTile />
     </section>
   );
 }

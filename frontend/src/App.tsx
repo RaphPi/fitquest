@@ -8,6 +8,7 @@ import Workout from '@/pages/Workout';
 import ActiveWorkout from '@/pages/ActiveWorkout';
 import Library from '@/pages/Library';
 import Profile from '@/pages/Profile';
+import Trophees from '@/pages/Trophees';
 import Settings from '@/pages/Settings';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/workout/active" element={<ProtectedRoute><ActiveWorkout /></ProtectedRoute>} />
         <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/trophees" element={<ProtectedRoute><Trophees /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

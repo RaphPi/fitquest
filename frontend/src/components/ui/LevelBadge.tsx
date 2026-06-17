@@ -3,7 +3,7 @@ import { getLevelTier } from '@/lib/levelTier';
 
 interface LevelBadgeProps {
   level: number;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }
 
@@ -11,6 +11,7 @@ const sizes = {
   sm: 'h-8 w-8 text-xs',
   md: 'h-10 w-10 text-sm',
   lg: 'h-13 w-13 text-base',
+  xl: 'h-16 w-16 text-xl',
 };
 
 export default function LevelBadge({ level, size = 'md', className }: LevelBadgeProps) {
