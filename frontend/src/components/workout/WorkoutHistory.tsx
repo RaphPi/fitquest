@@ -10,6 +10,8 @@ import type { Exercise, Program, WorkoutLog, WorkoutSession } from '@/types';
 interface Props {
   /** Nombre max de séances affichées (le reste est résumé en pied de liste). */
   limit?: number;
+  /** Si fourni, remplace l'historique du store (page History). */
+  overrideLogs?: WorkoutLog[];
 }
 
 function formatDate(iso: string): string {
@@ -32,7 +34,7 @@ function formatDuration(secs: number): string {
 }
 
 /** Retrouve le programme + la séance d'origine d'un log via son sessionId. */
-function resolveSession(
+export function resolveSession(
   programs: Program[],
   sessionId: string | null | undefined,
 ): { program: Program; session: WorkoutSession } | null {
@@ -45,7 +47,7 @@ function resolveSession(
 }
 
 /** Liste de l'historique des séances terminées (récentes d'abord). */
-export default function WorkoutHistory({ limit }: Props) {
+export default function WorkoutHistory({ limit, overrideLogs }: Props) {
   const navigate = useNavigate();
   const { history, isLoadingHistory, fetchHistory, start } = useWorkoutStore();
   const { programs, fetchPrograms } = useProgramStore();
@@ -69,7 +71,9 @@ export default function WorkoutHistory({ limit }: Props) {
     navigate('/workout/active');
   }
 
-  if (isLoadingHistory && history.length === 0) {
+  const displayHistory = overrideLogs ?? history;
+
+  if (!overrideLogs && isLoadingHistory && history.length === 0) {
     return (
       <div className="rounded-lg border border-border bg-card p-6 text-center text-sm text-muted-foreground">
         Chargement de l'historique…
@@ -77,7 +81,7 @@ export default function WorkoutHistory({ limit }: Props) {
     );
   }
 
-  if (history.length === 0) {
+  if (displayHistory.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-border bg-card p-6 text-center">
         <Swords className="mx-auto mb-2 h-6 w-6 text-muted-foreground" />
@@ -94,8 +98,8 @@ export default function WorkoutHistory({ limit }: Props) {
     );
   }
 
-  const shown = limit ? history.slice(0, limit) : history;
-  const remaining = history.length - shown.length;
+  const shown = limit ? displayHistory.slice(0, limit) : displayHistory;
+  const remaining = displayHistory.length - shown.length;
 
   return (
     <div className="space-y-2.5">

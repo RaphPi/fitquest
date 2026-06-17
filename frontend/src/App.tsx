@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Dashboard from '@/pages/Dashboard';
+import History from '@/pages/History';
 import Body from '@/pages/Body';
 import Workout from '@/pages/Workout';
 import ActiveWorkout from '@/pages/ActiveWorkout';
@@ -21,6 +22,7 @@ export default function App() {
 
         {/* Protected */}
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
         <Route path="/body" element={<ProtectedRoute><Body /></ProtectedRoute>} />
         <Route path="/workout" element={<ProtectedRoute><Workout /></ProtectedRoute>} />
         <Route path="/workout/active" element={<ProtectedRoute><ActiveWorkout /></ProtectedRoute>} />
