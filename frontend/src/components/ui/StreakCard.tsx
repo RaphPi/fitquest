@@ -22,13 +22,13 @@ export default function StreakCard({ streak }: Props) {
 
   return (
     <div
-      className="flex flex-col items-center gap-1 rounded-lg border bg-card p-4"
+      className="flex flex-col items-center gap-1 rounded-lg border bg-card p-3"
       style={animated ? { borderColor: outer + '66', boxShadow: `0 0 14px ${glow}` } : {}}
     >
       <style>{STYLES}</style>
 
       {/* Flame SVG */}
-      <div style={{ position: 'relative', width: 32, height: 42 }}>
+      <div style={{ position: 'relative', width: 28, height: 36 }}>
         {animated && (
           <div
             style={{
@@ -47,13 +47,11 @@ export default function StreakCard({ streak }: Props) {
             transformOrigin: 'bottom center',
           }}
         >
-          <svg width="32" height="42" viewBox="0 0 32 42" fill="none">
-            {/* Outer flame */}
+          <svg width="28" height="36" viewBox="0 0 32 42" fill="none">
             <path
               d="M16 2C20 9 27 15 27 23C27 33 22 41 16 41C10 41 5 33 5 23C5 15 12 9 16 2Z"
               fill={outer}
             />
-            {/* Inner flame */}
             <path
               d="M16 15C18 19 21 22 21 27C21 33 18 39 16 39C14 39 11 33 11 27C11 22 14 19 16 15Z"
               fill={inner}
@@ -68,13 +66,16 @@ export default function StreakCard({ streak }: Props) {
       </div>
 
       <span
-        className="font-display text-2xl font-black"
+        className="font-display text-xl font-black"
         style={{ color: animated ? outer : '' }}
       >
         {streak}
       </span>
-      <span className="text-xs uppercase tracking-widest text-muted-foreground">
-        {animated ? badge : 'Streak'}
+      <span className="text-[10px] text-muted-foreground leading-none">
+        jours d'affilée
+      </span>
+      <span className="text-[9px] uppercase tracking-widest text-muted-foreground">
+        {animated ? badge : 'SÉRIE'}
       </span>
     </div>
   );

@@ -112,10 +112,11 @@ export default function Dashboard() {
   }
 
   const hasWeeklyActivity = weeklyData.some((w) => w.count > 0);
+  const stageMeta = user ? getAvatarStageMeta(user.level) : null;
 
   return (
-    <section className="space-y-6">
-      {/* Header avatar */}
+    <section className="space-y-5">
+      {/* ── En-tête ── */}
       <div className="flex items-center gap-3">
         {user && (
           <Avatar
@@ -128,15 +129,17 @@ export default function Dashboard() {
         )}
         <div>
           <h1 className="font-display text-2xl font-bold">Tableau de bord</h1>
-          {user && (
-            <p className="mt-1 text-muted-foreground">
-              Prêt à monter de niveau ?,{' '}
-              <span className="text-primary-soft font-semibold">{user.username}</span>
-              {' · '}
-              <span style={{ color: getAvatarStageMeta(user.level).tier.color }}>
-                {getAvatarStageMeta(user.level).name}
-              </span>
-            </p>
+          {user && stageMeta && (
+            <>
+              <p className="mt-0.5 text-sm">
+                <span className="font-semibold text-primary-soft">{user.username}</span>
+                {' · '}
+                <span style={{ color: stageMeta.tier.color }}>
+                  {stageMeta.name}
+                </span>
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Prêt à monter de niveau ?</p>
+            </>
           )}
         </div>
       </div>
@@ -150,51 +153,49 @@ export default function Dashboard() {
             className="max-w-sm"
           />
 
-          {/* Stats grid */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {/* ── 4 tuiles compact en ligne ── */}
+          <div className="grid grid-cols-4 gap-2">
             <StreakCard streak={user.streak} />
-            <StatCard icon={Zap} value={user.totalXP} label="XP total" />
-            <StatCard icon={Trophy} value={user.level} label="Niveau" />
-            <StatCard icon={Calendar} value={history.length} label="Séances" />
+            <StatCard icon={Zap} value={user.totalXP} label="XP total" compact />
+            <StatCard icon={Trophy} value={user.level} label="Niveau" compact />
+            <StatCard icon={Calendar} value={history.length} label="Séances" compact />
           </div>
 
-          {/* Weekly frequency chart */}
-          {hasWeeklyActivity && (
-            <div className="rounded-lg border border-border bg-card p-4">
-              <h2 className="mb-3 font-display text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                Fréquence hebdomadaire
-              </h2>
-              <ResponsiveContainer width="100%" height={110}>
-                <BarChart data={weeklyData} margin={{ top: 4, right: 0, left: -30, bottom: 0 }}>
-                  <XAxis
-                    dataKey="label"
-                    tick={{ fontSize: 8, fill: '#64748b' }}
-                    axisLine={false}
-                    tickLine={false}
-                    interval={1}
-                  />
-                  <Tooltip
-                    contentStyle={{ background: '#0f1117', border: '1px solid #1e2030', borderRadius: 8, padding: '4px 10px' }}
-                    labelStyle={{ color: '#64748b', fontSize: 10 }}
-                    itemStyle={{ color: 'rgba(99,102,241,1)', fontSize: 11 }}
-                    formatter={(v: number) => [v, v !== 1 ? 'séances' : 'séance']}
-                    cursor={{ fill: 'rgba(99,102,241,0.08)' }}
-                  />
-                  <Bar
-                    dataKey="count"
-                    fill="rgba(99,102,241,0.7)"
-                    radius={[3, 3, 0, 0]}
-                    maxBarSize={28}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          )}
+          {/* ── Fréquence hebdo + Poids côte à côte ── */}
+          {(hasWeeklyActivity || weightData) && (
+            <div className="grid gap-3 md:grid-cols-2">
+              {hasWeeklyActivity && (
+                <div className="rounded-lg border border-border bg-card p-4">
+                  <h2 className="mb-3 font-display text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    Fréquence hebdomadaire
+                  </h2>
+                  <ResponsiveContainer width="100%" height={100}>
+                    <BarChart data={weeklyData} margin={{ top: 4, right: 0, left: -30, bottom: 0 }}>
+                      <XAxis
+                        dataKey="label"
+                        tick={{ fontSize: 8, fill: '#64748b' }}
+                        axisLine={false}
+                        tickLine={false}
+                        interval={1}
+                      />
+                      <Tooltip
+                        contentStyle={{ background: '#0f1117', border: '1px solid #1e2030', borderRadius: 8, padding: '4px 10px' }}
+                        labelStyle={{ color: '#64748b', fontSize: 10 }}
+                        itemStyle={{ color: 'rgba(99,102,241,1)', fontSize: 11 }}
+                        formatter={(v: number) => [v, v !== 1 ? 'séances' : 'séance']}
+                        cursor={{ fill: 'rgba(99,102,241,0.08)' }}
+                      />
+                      <Bar
+                        dataKey="count"
+                        fill="rgba(99,102,241,0.7)"
+                        radius={[3, 3, 0, 0]}
+                        maxBarSize={28}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
 
-          {/* Metrics summary + Next session */}
-          {(weightData || nextSession !== undefined) && (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {/* Weight sparkline */}
               {weightData && (
                 <div className="rounded-lg border border-border bg-card p-4">
                   <h2 className="mb-1 font-display text-xs font-bold uppercase tracking-widest text-muted-foreground">
@@ -221,51 +222,55 @@ export default function Dashboard() {
                   )}
                 </div>
               )}
-
-              {/* Next session */}
-              <div className="rounded-lg border border-border bg-card p-4">
-                <h2 className="mb-2 font-display text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  Prochaine séance
-                </h2>
-                {nextSession ? (
-                  <div className="flex flex-col gap-3">
-                    <div>
-                      <p className="font-display text-sm font-bold leading-tight">{nextSession.session.nameFr}</p>
-                      <p className="mt-0.5 text-[11px] font-semibold text-primary-soft/80">
-                        {nextSession.program.nameFr}
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {nextSession.session.exercises.length} exercice
-                        {nextSession.session.exercises.length !== 1 ? 's' : ''}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={launchNext}
-                      className="flex items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 font-display text-xs font-bold uppercase tracking-widest text-primary-soft transition-all hover:shadow-glow"
-                    >
-                      <Play className="h-3.5 w-3.5" /> Lancer
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-3 py-2 text-center">
-                    <Swords className="h-5 w-5 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground">Aucun programme actif.</p>
-                    <Link
-                      to="/workout"
-                      className="rounded-lg border border-primary px-3 py-1.5 font-display text-[10px] font-bold uppercase tracking-widest text-primary transition-all hover:shadow-glow"
-                    >
-                      Lancer un programme
-                    </Link>
-                  </div>
-                )}
-              </div>
             </div>
           )}
+
+          {/* ── Prochaine séance ── */}
+          <div className="rounded-lg border border-border bg-card p-4">
+            <h2 className="mb-2 font-display text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              Prochaine séance
+            </h2>
+            {nextSession ? (
+              <div className="flex flex-col gap-3">
+                <div>
+                  <Link to="/workout" className="group">
+                    <p className="font-display text-sm font-bold leading-tight transition-colors group-hover:text-primary-soft">
+                      {nextSession.session.nameFr}
+                    </p>
+                    <p className="mt-0.5 text-[11px] font-semibold text-primary-soft/80">
+                      {nextSession.program.nameFr}
+                    </p>
+                  </Link>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {nextSession.session.exercises.length} exercice
+                    {nextSession.session.exercises.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={launchNext}
+                  className="flex items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 font-display text-xs font-bold uppercase tracking-widest text-primary-soft transition-all hover:shadow-glow"
+                >
+                  <Play className="h-3.5 w-3.5" /> Lancer
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-3 py-2 text-center">
+                <Swords className="h-5 w-5 text-muted-foreground" />
+                <p className="text-xs text-muted-foreground">Aucun programme actif.</p>
+                <Link
+                  to="/workout"
+                  className="rounded-lg border border-primary px-3 py-1.5 font-display text-[10px] font-bold uppercase tracking-widest text-primary transition-all hover:shadow-glow"
+                >
+                  Lancer un programme
+                </Link>
+              </div>
+            )}
+          </div>
         </>
       )}
 
-      {/* Activity history */}
+      {/* ── Activité récente ── */}
       <div>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-display text-sm font-bold uppercase tracking-widest text-muted-foreground">

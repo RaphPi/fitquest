@@ -137,20 +137,20 @@ function HistoryItem({
 
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-card">
-      <div className="flex items-center gap-3 px-4 py-3">
+      <div className="flex items-start gap-3 px-4 py-3.5">
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className="flex min-w-0 flex-1 items-center gap-3 text-left transition-colors"
+          className="flex min-w-0 flex-1 items-start gap-3 text-left transition-colors"
         >
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-primary/30 bg-primary/10">
+          <div className="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-primary/30 bg-primary/10">
             <Swords className="h-5 w-5 text-primary-soft" />
           </div>
 
           <div className="min-w-0 flex-1">
-            <div className="truncate font-display text-sm font-bold">{log.sessionName}</div>
+            <div className="line-clamp-2 font-display text-sm font-bold leading-snug">{log.sessionName}</div>
             {programName && (
-              <div className="truncate text-[11px] font-semibold text-primary-soft/80">{programName}</div>
+              <div className="line-clamp-1 text-[11px] font-semibold text-primary-soft/80">{programName}</div>
             )}
             <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
               <span>{formatDate(log.date)} · {formatTime(log.date)}</span>
@@ -162,29 +162,31 @@ function HistoryItem({
           </div>
         </button>
 
-        <div className="shrink-0 text-right">
-          <div className="inline-flex items-center gap-1 font-display text-sm font-black text-xp">
-            <Zap className="h-3.5 w-3.5" /> +{log.xpEarned}
+        <div className="flex shrink-0 items-center gap-1.5 self-start pt-0.5">
+          <div className="text-right">
+            <div className="inline-flex items-center gap-1 font-display text-sm font-black text-xp">
+              <Zap className="h-3.5 w-3.5" /> +{log.xpEarned}
+            </div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">XP</div>
           </div>
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">XP</div>
-        </div>
 
-        {canRelaunch && (
-          <button
-            type="button"
-            onClick={onRelaunch}
-            title="Relancer cette séance"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-primary/40 bg-primary/10 text-primary-soft transition-all hover:shadow-glow"
-          >
-            <RotateCcw className="h-4 w-4" />
+          {canRelaunch && (
+            <button
+              type="button"
+              onClick={onRelaunch}
+              title="Relancer cette séance"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-primary/40 bg-primary/10 text-primary-soft transition-all hover:shadow-glow"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </button>
+          )}
+
+          <button type="button" onClick={() => setOpen((o) => !o)} className="p-1">
+            <ChevronDown
+              className={`h-4 w-4 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`}
+            />
           </button>
-        )}
-
-        <button type="button" onClick={() => setOpen((o) => !o)} className="shrink-0 p-1">
-          <ChevronDown
-            className={`h-4 w-4 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`}
-          />
-        </button>
+        </div>
       </div>
 
       {open && (

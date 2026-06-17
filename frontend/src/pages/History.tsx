@@ -128,7 +128,7 @@ export default function History() {
           <SummaryTile
             icon={<Flame className="h-4 w-4" />}
             value={user ? String(Math.max(stats.maxStrk, user.streak)) : String(stats.maxStrk)}
-            label="Streak max"
+            label="Série max"
             color="#f97316"
           />
         </div>
