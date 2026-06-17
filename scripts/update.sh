@@ -47,7 +47,8 @@ msg_ok "Schéma à jour"
 
 # 5. Seed (idempotent — upsert exercices, reset programmes seed)
 msg_info "Seed de la base…"
-$DC exec -T backend npx prisma db seed || die "prisma db seed a échoué."
+$DC exec -T backend npx prisma db seed \
+  || msg_err "Le seed a échoué (non bloquant) — relancer : ${DC} exec -T backend npx prisma db seed"
 msg_ok "Base seedée"
 
 # 6. Auto-réparation : s'assure que les commandes utilitaires sont en place

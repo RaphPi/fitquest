@@ -461,7 +461,7 @@ Export A4 via Puppeteer, template HTML dans `backend/src/export/templates/charac
 | S8 | Dashboard, historique, métriques corporelles, photos — **découpé en 5 étapes : voir `Sprint8_Plan.md`** |
 | **S8.5** | **Polish & Cohérence UX — 4 étapes (voir détail ci-dessous)** |
 | S9 | Thèmes, responsive mobile/tablette/desktop |
-| S10 | Scripts install/update, tests, README, GitHub release |
+| S10 | Scripts install/update, tests, README, GitHub release — **découpé en 4 étapes (voir détail ci-dessous)** |
 
 #### Sprint 8.5 — Polish & Cohérence UX (sprint intermédiaire, découpé en 4 étapes)
 
@@ -487,6 +487,31 @@ Export A4 via Puppeteer, template HTML dans `backend/src/export/templates/charac
 1. Profil : `LevelBadge` en haut de page agrandi, chiffre ne touche plus la bordure
 2. Badges/Trophées : remplacer la vitrine complète du Profil par une tuile résumée (3 derniers + progression du prochain) + bouton "Salle des trophées →" vers page complète
 3. Paramètres : sections thématiques (Compte / Apparence / Combat / Notifications) avec en-têtes de section
+
+#### Sprint 10 — Release MVP (découpé en 4 étapes, 1 session chacune)
+
+**10A — Correctif scripts**
+1. `scripts/update.sh` : rendre le seed non-bloquant (msg_err + continue, comme dans install.sh) — incohérence actuelle : install dit "non bloquant", update fait `die`
+2. Vérifier `.env.example` : toutes les vars en place (`UPLOAD_DIR`, `AI_PROVIDER`, etc.), commentaires explicatifs à jour
+3. Pas de changement `ct/fitquest.sh` ni `scripts/install.sh` — déjà cohérents avec l'état actuel (routes /body /badges auto-incluses au build, volume uploads déjà dans docker-compose.prod.yml)
+
+**10B — README refonte**
+1. Retirer la mention "Sprint 1 — Setup & Infrastructure" (datée, S1-S9 clos)
+2. Section "Fonctionnalités" : liste complète (séance active boss fight pixel art, XP/niveaux/paliers/badges, avatar évolutif, métriques corporelles + photos, thèmes, PWA iOS)
+3. Section "Variables d'env" expliquées (APP_PORT, DB_PASS, JWT_SECRET, AI_PROVIDER, UPLOAD_DIR, etc.)
+4. Section "PWA / iPhone" (ajout à l'écran d'accueil)
+5. Dév local à jour (sans Docker + avec Docker)
+
+**10C — Tests Vitest**
+1. Setup Vitest minimal dans `frontend/vite.config.ts` (mode `'test'`, globals, environnement `node`)
+2. `frontend/src/lib/xp.test.ts` : `xpRequiredForLevel` (L1=100, L10=1900, L50=29500), `levelProgressPct` (0%, 50%, 100%, >100% clippé)
+3. `frontend/src/lib/bossFight.test.ts` : `effortPoints` (reps + duration + zéro), `bossMaxHp` (séance vide, séance mixte), `bossTitle` (catégorie dominante)
+4. Pas de tests backend (Supertest + Postgres de test = Phase 2), pas de tests composants RTL (coût/valeur défavorable sur pixel art)
+
+**10D — Release v1.0.0**
+1. Vérification finale : `tsc` front+back vert + `vite build` vert
+2. Tag git `v1.0.0` + `gh release create v1.0.0` avec notes (fonctionnalités, install one-liner)
+3. Clôture Phase 1
 
 #### Fonctionnalités exclues du Sprint 8.5 → Phase 2
 - **Widgets sidebar desktop configurables** (mini-graphes, lancement séance direct, choix dans paramètres) → S17
