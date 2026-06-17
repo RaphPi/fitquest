@@ -14,7 +14,8 @@ export type BadgeConditionType =
   | 'perfect_week' // ≥ 5 séances valides sur les 7 derniers jours glissants
   | 'level' // niveau ≥ threshold
   | 'first_custom_program' // ≥ 1 programme custom créé
-  | 'body_metric_count'; // ≥ threshold relevés de métriques corporelles
+  | 'body_metric_count' // ≥ threshold relevés de métriques corporelles
+  | 'body_photo_count'; // ≥ threshold photos de progression
 
 export type BadgeCategory = 'sessions' | 'streak' | 'level' | 'program' | 'body';
 
@@ -32,7 +33,7 @@ export interface BadgeDef {
   order: number;
 }
 
-/** Catalogue — 12 badges (11 Sprint 7C + Sculpteur Sprint 8A). */
+/** Catalogue — 13 badges (11 Sprint 7C + Sculpteur Sprint 8A + Photographe Sprint 8C). */
 export const BADGES: BadgeDef[] = [
   {
     id: 'first_step',
@@ -190,6 +191,19 @@ export const BADGES: BadgeDef[] = [
     threshold: 10,
     order: 120,
   },
+  {
+    id: 'photographer',
+    nameFr: 'Photographe',
+    nameEn: 'Photographer',
+    descFr: '5 photos de progression enregistrées.',
+    descEn: 'Log 5 progress photos.',
+    rarity: 'rare',
+    iconType: 'camera',
+    category: 'body',
+    conditionType: 'body_photo_count',
+    threshold: 5,
+    order: 130,
+  },
 ];
 
 /** Stats utilisateur servant à évaluer toutes les conditions de badge. */
@@ -200,6 +214,7 @@ export interface BadgeContext {
   sessionsLast7Days: number; // séances valides sur 7 jours glissants
   customProgramCount: number;
   bodyMetricCount: number; // total de relevés de métriques corporelles
+  bodyPhotoCount: number; // total de photos de progression
 }
 
 /** Une condition de badge est-elle satisfaite par le contexte courant ? */
@@ -217,6 +232,8 @@ export function isUnlocked(badge: BadgeDef, ctx: BadgeContext): boolean {
       return ctx.customProgramCount >= (badge.threshold ?? 1);
     case 'body_metric_count':
       return ctx.bodyMetricCount >= (badge.threshold ?? Infinity);
+    case 'body_photo_count':
+      return ctx.bodyPhotoCount >= (badge.threshold ?? Infinity);
     default:
       return false;
   }
@@ -248,6 +265,9 @@ export function badgeProgress(
     case 'body_metric_count':
       current = ctx.bodyMetricCount;
       break;
+    case 'body_photo_count':
+      current = ctx.bodyPhotoCount;
+      break;
     default:
       return null;
   }
@@ -265,13 +285,14 @@ export async function buildBadgeContext(
   streak: number,
 ): Promise<BadgeContext> {
   const sevenDaysAgo = new Date(Date.now() - 7 * 86_400_000);
-  const [sessionCount, sessionsLast7Days, customProgramCount, bodyMetricCount] = await Promise.all([
+  const [sessionCount, sessionsLast7Days, customProgramCount, bodyMetricCount, bodyPhotoCount] = await Promise.all([
     prisma.workoutLog.count({ where: { userId, xpEarned: { gt: 0 } } }),
     prisma.workoutLog.count({ where: { userId, xpEarned: { gt: 0 }, date: { gte: sevenDaysAgo } } }),
     prisma.program.count({ where: { createdBy: userId, isCustom: true } }),
     prisma.bodyMetric.count({ where: { userId } }),
+    prisma.bodyPhoto.count({ where: { userId } }),
   ]);
-  return { sessionCount, sessionsLast7Days, customProgramCount, bodyMetricCount, level, streak };
+  return { sessionCount, sessionsLast7Days, customProgramCount, bodyMetricCount, bodyPhotoCount, level, streak };
 }
 
 /**

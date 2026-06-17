@@ -168,6 +168,22 @@ const ICONS: Record<string, string[]> = {
     '.............',
     '.............',
   ],
+  // Appareil photo pixel art : corps + viseur + objectif centré
+  camera: [
+    '.............',
+    '.....###.....',
+    '.###########.',
+    '.#MMMMMMMMM#.',
+    '.#M#######M#.',
+    '.#M#MLLLM#M#.',
+    '.#M#MLLLM#M#.',
+    '.#M#MLLLM#M#.',
+    '.#M#######M#.',
+    '.#MMMMMMMMM#.',
+    '.###########.',
+    '.............',
+    '.............',
+  ],
 };
 
 const FALLBACK = 'medal';

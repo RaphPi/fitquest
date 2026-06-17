@@ -107,7 +107,8 @@ export type BadgeConditionType =
   | 'perfect_week'
   | 'level'
   | 'first_custom_program'
-  | 'body_metric_count';
+  | 'body_metric_count'
+  | 'body_photo_count';
 
 export type BadgeCategory = 'sessions' | 'streak' | 'level' | 'program' | 'body';
 
@@ -142,7 +143,18 @@ export interface WorkoutResult {
   newBadges: BadgeDef[];
 }
 
-// ─── Métriques corporelles (Sprint 8) ──────────────────────────────────────
+// ─── Métriques & photos corporelles (Sprint 8) ─────────────────────────────
+
+export interface BodyPhoto {
+  id: string;
+  userId: string;
+  date: string;
+  /** front | back | side | arm | leg | full | other */
+  type: string;
+  url: string;
+  note: string | null;
+}
+
 export interface CustomMetric {
   name: string;
   value: number;

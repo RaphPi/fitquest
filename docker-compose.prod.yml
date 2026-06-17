@@ -28,7 +28,7 @@ services:
     expose:
       - "3001"
     volumes:
-      - uploads:/app/src/uploads
+      - uploads:/app/uploads
     depends_on:
       db:
         condition: service_healthy
