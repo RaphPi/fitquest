@@ -146,7 +146,21 @@ $DC exec -T backend npx prisma db seed \
   || msg_err "Le seed a échoué (non bloquant) — relancer : ${DC} exec backend npx prisma db seed"
 msg_ok "Base initialisée"
 
-# ----- 7. SSH ------------------------------------------------
+# ----- 7. Attente du backend (max 60s) -----------------------
+msg_info "Vérification du backend via /api/v1/health…"
+BACKEND_OK=0
+for i in $(seq 1 30); do
+  if curl -sf "http://localhost:${APP_PORT:-80}/api/v1/health" >/dev/null 2>&1; then
+    msg_ok "Backend opérationnel (${i}0s)"; BACKEND_OK=1; break
+  fi
+  sleep 2
+done
+if [[ "${BACKEND_OK:-0}" != "1" ]]; then
+  msg_err "Backend non confirmé après 60s — vérifiez avec :"
+  echo "   docker compose -f docker-compose.prod.yml logs backend"
+fi
+
+# ----- 8. SSH ------------------------------------------------
 msg_info "Installation et configuration de SSH…"
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq openssh-server >/dev/null 2>&1 \
   || die "Échec installation openssh-server."

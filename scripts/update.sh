@@ -10,6 +10,7 @@ BRANCH="main"
 GN=$'\033[1;92m'; YW=$'\033[33m'; RD=$'\033[01;31m'; CL=$'\033[m'; BOLD=$'\033[1m'
 msg_info() { echo -e " ${YW}➜${CL} $1"; }
 msg_ok()   { echo -e " ${GN}✔${CL} $1"; }
+msg_err()  { echo -e " ${RD}✘${CL} $1"; }
 die()      { echo -e " ${RD}✘${CL} $1"; exit 1; }
 
 cd "$INSTALL_DIR" || die "Dossier $INSTALL_DIR introuvable."
