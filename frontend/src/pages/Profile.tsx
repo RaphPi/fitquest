@@ -29,10 +29,14 @@ export default function Profile() {
 
       {user && meta && (
         <div className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 sm:gap-8 sm:p-6">
-          {/* Avatar mobile (petit) */}
-          <Avatar classKey={avatarClassFromStage(user.avatarStage)} level={user.level} size={80} className="shrink-0 sm:hidden" />
+          {/* Avatar mobile (petit) — le wrapper cache l'ensemble sans conflit avec le style inline d'Avatar */}
+          <div className="shrink-0 sm:hidden">
+            <Avatar classKey={avatarClassFromStage(user.avatarStage)} level={user.level} size={80} />
+          </div>
           {/* Avatar desktop (grand) */}
-          <Avatar classKey={avatarClassFromStage(user.avatarStage)} level={user.level} size={150} className="hidden shrink-0 sm:block" />
+          <div className="hidden shrink-0 sm:block">
+            <Avatar classKey={avatarClassFromStage(user.avatarStage)} level={user.level} size={150} />
+          </div>
 
           <div className="min-w-0 flex-1 space-y-2 sm:space-y-3">
             <div>
