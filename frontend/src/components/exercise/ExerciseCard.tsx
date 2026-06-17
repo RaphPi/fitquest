@@ -61,7 +61,7 @@ export default function ExerciseCard({ exercise, onClick, className }: ExerciseC
     <button
       onClick={onClick}
       className={cn(
-        'group flex w-full flex-col gap-3 rounded-xl border border-border bg-card p-4 text-left transition-all duration-200 hover:border-primary/40 hover:shadow-glow',
+        'group flex w-full flex-col gap-3 rounded-xl border border-border bg-card p-4 text-left transition-all duration-200 hover:border-primary/40 hover:shadow-glow min-h-[9rem]',
         className,
       )}
     >
@@ -82,14 +82,14 @@ export default function ExerciseCard({ exercise, onClick, className }: ExerciseC
         <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
       </div>
 
-      <p className="font-display text-base font-bold leading-tight text-foreground">{exercise.nameFr}</p>
+      <p className="font-display text-base font-bold leading-tight text-foreground line-clamp-2 min-h-[2.5rem]">{exercise.nameFr}</p>
 
       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <EquipIcon className="h-3.5 w-3.5" />
         <span>{equipmentLabels[exercise.equipment]}</span>
       </div>
 
-      <p className="text-xs text-muted-foreground">{exercise.musclesPrimary.join(', ')}</p>
+      <p className="text-xs text-muted-foreground line-clamp-1">{exercise.musclesPrimary.join(', ')}</p>
     </button>
   );
 }

@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import type { Program, Level } from '@/types';
-import { Calendar, Dumbbell, Clock, Pencil, Trash2, ChevronRight, Layers } from 'lucide-react';
+import { getLevelTier } from '@/lib/levelTier';
+import { Calendar, Dumbbell, Clock, ChevronRight, Layers } from 'lucide-react';
 import {
   estimateProgramMinutes,
   countProgramExercises,
@@ -10,16 +11,10 @@ import {
 interface ProgramCardProps {
   program: Program;
   onClick: () => void;
-  onEdit?: () => void;
-  onDelete?: () => void;
   className?: string;
 }
 
-const levelColors: Record<Level, string> = {
-  beginner: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
-  intermediate: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-  advanced: 'text-red-400 bg-red-500/10 border-red-500/30',
-};
+const LEVEL_REP: Record<Level, number> = { beginner: 1, intermediate: 20, advanced: 50 };
 
 const levelLabels: Record<Level, string> = {
   beginner: 'Débutant',
@@ -27,7 +22,16 @@ const levelLabels: Record<Level, string> = {
   advanced: 'Avancé',
 };
 
-export default function ProgramCard({ program, onClick, onEdit, onDelete, className }: ProgramCardProps) {
+function tierBadgeStyle(level: Level) {
+  const tier = getLevelTier(LEVEL_REP[level] ?? 1);
+  return {
+    color: tier.color,
+    backgroundColor: tier.color.replace(', 1)', ', 0.12)'),
+    borderColor: tier.color.replace(', 1)', ', 0.4)'),
+  };
+}
+
+export default function ProgramCard({ program, onClick, className }: ProgramCardProps) {
   const level = program.level as Level;
   const avgMin = estimateProgramMinutes(program);
   const totalEx = countProgramExercises(program);
@@ -44,10 +48,8 @@ export default function ProgramCard({ program, onClick, onEdit, onDelete, classN
       <button className="flex flex-col gap-3 p-4 text-left w-full" onClick={onClick}>
         <div className="flex items-start justify-between gap-2">
           <span
-            className={cn(
-              'rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider',
-              levelColors[level] ?? 'text-muted-foreground border-border',
-            )}
+            className="rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider"
+            style={tierBadgeStyle(level)}
           >
             {levelLabels[level] ?? level}
           </span>
@@ -85,29 +87,6 @@ export default function ProgramCard({ program, onClick, onEdit, onDelete, classN
         </div>
       </button>
 
-      {/* Edit / delete actions */}
-      {(onEdit || onDelete) && (
-        <div className="flex items-center justify-end gap-1 border-t border-border px-3 py-2">
-          {onEdit && (
-            <button
-              onClick={onEdit}
-              className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-              Modifier
-            </button>
-          )}
-          {onDelete && (
-            <button
-              onClick={onDelete}
-              className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-muted-foreground hover:bg-danger/10 hover:text-red-400 transition-colors"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-              Supprimer
-            </button>
-          )}
-        </div>
-      )}
     </div>
   );
 }

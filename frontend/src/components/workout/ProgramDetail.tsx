@@ -8,6 +8,7 @@ import { useProgramStore } from '@/stores/programStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
 import { useWorkoutStore } from '@/stores/workoutStore';
 import { buildActiveSession } from '@/lib/launchSession';
+import { getLevelTier } from '@/lib/levelTier';
 import type { Program, WorkoutSession, Exercise, Level } from '@/types';
 import GlowButton from '@/components/ui/GlowButton';
 import SetsFlow from '@/components/workout/SetsFlow';
@@ -26,11 +27,22 @@ interface ProgramDetailProps {
   onDelete: () => void;
 }
 
+const LEVEL_REP: Record<Level, number> = { beginner: 1, intermediate: 20, advanced: 50 };
+
 const levelLabels: Record<Level, string> = {
   beginner: 'Débutant',
   intermediate: 'Intermédiaire',
   advanced: 'Avancé',
 };
+
+function tierBadgeStyle(level: Level) {
+  const tier = getLevelTier(LEVEL_REP[level] ?? 1);
+  return {
+    color: tier.color,
+    backgroundColor: tier.color.replace(', 1)', ', 0.12)'),
+    borderColor: tier.color.replace(', 1)', ', 0.4)'),
+  };
+}
 
 export default function ProgramDetail({ program, onBack, onEdit, onDelete }: ProgramDetailProps) {
   const navigate = useNavigate();
@@ -76,7 +88,10 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
       <div className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-1.5">
-            <span className="inline-flex w-fit rounded-full border border-border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            <span
+              className="inline-flex w-fit rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider"
+              style={tierBadgeStyle(program.level as Level)}
+            >
               {levelLabels[program.level as Level] ?? program.level}
             </span>
             <h2 className="font-display text-xl font-black leading-tight text-foreground">

@@ -265,8 +265,6 @@ export default function Workout() {
               key={p.id}
               program={p}
               onClick={() => openDetail(p)}
-              onEdit={() => openEdit(p)}
-              onDelete={() => handleDelete(p)}
             />
           ))}
         </div>
