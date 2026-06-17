@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Scale, Camera, Plus, Trash2, Pencil, X, Check, Upload, ArrowLeftRight } from 'lucide-react';
+import { Scale, Camera, Plus, Trash2, Pencil, X, Check, Upload, ArrowLeftRight, Eye, EyeOff, ChevronDown } from 'lucide-react';
 import {
   LineChart,
   Line,
@@ -792,11 +792,12 @@ function MetricsTab() {
 
 interface PhotoCardProps {
   photo: BodyPhoto;
+  isBlurred: boolean;
   onClick: () => void;
   onDelete: (id: string) => Promise<void>;
 }
 
-function PhotoCard({ photo, onClick, onDelete }: PhotoCardProps) {
+function PhotoCard({ photo, isBlurred, onClick, onDelete }: PhotoCardProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -814,12 +815,12 @@ function PhotoCard({ photo, onClick, onDelete }: PhotoCardProps) {
           <img
             src={photo.url}
             alt={PHOTO_TYPE_LABEL[photo.type] ?? photo.type}
-            className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+            className={`h-full w-full object-cover transition-transform duration-300 hover:scale-105 ${isBlurred ? 'blur-md' : ''}`}
           />
         </div>
       </button>
 
-      {/* Gradient overlay with type + date */}
+      {/* Gradient overlay type + date */}
       <div className="pointer-events-none absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-2 pb-1.5 pt-6">
         <p className="text-[11px] font-semibold leading-tight text-white/90">
           {PHOTO_TYPE_LABEL[photo.type] ?? photo.type}
@@ -827,7 +828,7 @@ function PhotoCard({ photo, onClick, onDelete }: PhotoCardProps) {
         <p className="text-[10px] leading-tight text-white/60">{fmtShort(photo.date)}</p>
       </div>
 
-      {/* Delete button top-right */}
+      {/* Bouton supprimer en haut à droite */}
       <div className="absolute right-1.5 top-1.5">
         {confirmDelete ? (
           <div
@@ -867,11 +868,12 @@ function PhotoCard({ photo, onClick, onDelete }: PhotoCardProps) {
 
 interface PhotoModalProps {
   photo: BodyPhoto;
+  isBlurred: boolean;
   onClose: () => void;
   onDelete: (id: string) => Promise<void>;
 }
 
-function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps) {
+function PhotoModal({ photo, isBlurred, onClose, onDelete }: PhotoModalProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -916,7 +918,7 @@ function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps) {
         <img
           src={photo.url}
           alt={PHOTO_TYPE_LABEL[photo.type] ?? photo.type}
-          className="max-h-full max-w-full rounded-xl object-contain"
+          className={`max-h-full max-w-full rounded-xl object-contain transition-all ${isBlurred ? 'blur-xl' : ''}`}
         />
       </div>
 
@@ -964,10 +966,11 @@ function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps) {
 
 interface CompareModalProps {
   photos: BodyPhoto[];
+  isBlurred: boolean;
   onClose: () => void;
 }
 
-function CompareModal({ photos, onClose }: CompareModalProps) {
+function CompareModal({ photos, isBlurred, onClose }: CompareModalProps) {
   const [photoAId, setPhotoAId] = useState<string>(photos[photos.length - 1]?.id ?? '');
   const [photoBId, setPhotoBId] = useState<string>(photos[0]?.id ?? '');
 
@@ -1000,7 +1003,7 @@ function CompareModal({ photos, onClose }: CompareModalProps) {
         </button>
       </div>
 
-      {/* Selectors */}
+      {/* Sélecteurs */}
       <div className="grid shrink-0 grid-cols-2 gap-3 px-4 py-3">
         {([
           { id: photoAId, setId: setPhotoAId, label: 'Avant' },
@@ -1023,7 +1026,7 @@ function CompareModal({ photos, onClose }: CompareModalProps) {
         ))}
       </div>
 
-      {/* Side-by-side images */}
+      {/* Images côte à côte */}
       <div
         className="flex min-h-0 flex-1 gap-3 overflow-hidden px-4"
         style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
@@ -1035,7 +1038,7 @@ function CompareModal({ photos, onClose }: CompareModalProps) {
                 <img
                   src={photo.url}
                   alt={PHOTO_TYPE_LABEL[photo.type] ?? photo.type}
-                  className="h-full w-full object-contain"
+                  className={`h-full w-full object-contain transition-all ${isBlurred ? 'blur-xl' : ''}`}
                 />
               </div>
               <p className="shrink-0 text-center text-xs text-white/50">
@@ -1060,6 +1063,9 @@ function CompareModal({ photos, onClose }: CompareModalProps) {
 
 function PhotosTab() {
   const { photos, photosLoading, fetchPhotos, addPhoto, deletePhoto } = useBodyStore();
+
+  // Upload form
+  const [showUpload, setShowUpload] = useState(false);
   const [selectedType, setSelectedType] = useState<string>('front');
   const [note, setNote] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -1067,16 +1073,44 @@ function PhotosTab() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
-  const [activePhoto, setActivePhoto] = useState<BodyPhoto | null>(null);
-  const [showCompare, setShowCompare] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Revoke previous blob URL when previewUrl changes or on unmount
-  useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
+  // Galerie
+  const [activePhoto, setActivePhoto] = useState<BodyPhoto | null>(null);
+  const [showCompare, setShowCompare] = useState(false);
+  const [filterType, setFilterType] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
 
+  // Confidentialité — persistée dans localStorage
+  const [isBlurred, setIsBlurred] = useState<boolean>(() => {
+    try { return localStorage.getItem('fq_photo_privacy') === '1'; } catch { return false; }
+  });
+
+  const toggleBlur = () => {
+    setIsBlurred((b) => {
+      const next = !b;
+      try { localStorage.setItem('fq_photo_privacy', next ? '1' : '0'); } catch { /* ignore */ }
+      return next;
+    });
+  };
+
+  // Révoque l'URL blob quand previewUrl change ou au démontage
+  useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
   useEffect(() => { fetchPhotos(); }, [fetchPhotos]);
 
-  const groups = useMemo(() => groupPhotosByMonth(photos), [photos]);
+  // Types disponibles (seulement ceux qui ont au moins une photo)
+  const availableTypes = useMemo(
+    () => PHOTO_TYPES.filter(({ value }) => photos.some((p) => p.type === value)),
+    [photos],
+  );
+
+  // Photos filtrées + triées
+  const filteredPhotos = useMemo(() => {
+    const base = filterType ? photos.filter((p) => p.type === filterType) : photos;
+    return sortOrder === 'asc' ? [...base].reverse() : base;
+  }, [photos, filterType, sortOrder]);
+
+  const groups = useMemo(() => groupPhotosByMonth(filteredPhotos), [filteredPhotos]);
 
   const handleFileChange = (file: File) => {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -1103,6 +1137,7 @@ function PhotosTab() {
       setPreviewUrl(null);
       setNote('');
       if (fileInputRef.current) fileInputRef.current.value = '';
+      setShowUpload(false);
     } catch (err) {
       setUploadError((err as Error).message);
     } finally {
@@ -1125,109 +1160,119 @@ function PhotosTab() {
 
   return (
     <div className="space-y-5">
-      {/* Zone d'upload */}
-      <div className="rounded-xl border border-border bg-card p-4">
-        <h3 className="mb-4 text-sm font-semibold text-foreground">Nouvelle photo</h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Sélecteur de type */}
-          <div>
-            <p className="mb-2 text-xs text-muted-foreground">Type de photo</p>
-            <div className="flex flex-wrap gap-2">
-              {PHOTO_TYPES.map(({ value, label }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setSelectedType(value)}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-                    selectedType === value
-                      ? 'bg-primary/15 text-primary ring-1 ring-primary/40'
-                      : 'border border-border text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+
+      {/* ── Section d'upload dépliable ── */}
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
+        <button
+          type="button"
+          onClick={() => setShowUpload((s) => !s)}
+          className="flex w-full items-center justify-between px-4 py-3.5 text-left"
+        >
+          <div className="flex items-center gap-2">
+            <Camera className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold text-foreground">Nouvelle photo</span>
           </div>
-
-          {/* Drop zone */}
-          <label
-            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-            onDragLeave={() => setDragOver(false)}
-            onDrop={handleDrop}
-            className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed p-6 transition ${
-              dragOver
-                ? 'border-primary bg-primary/10'
-                : selectedFile
-                ? 'border-primary/40 bg-primary/5'
-                : 'border-border hover:border-primary/40'
-            }`}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="sr-only"
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileChange(f); }}
-            />
-            {previewUrl ? (
-              <div className="relative">
-                <img
-                  src={previewUrl}
-                  alt="Aperçu"
-                  className="max-h-52 max-w-full rounded-lg object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={clearPreview}
-                  className="absolute -right-2 -top-2 rounded-full bg-card p-1 text-muted-foreground shadow ring-1 ring-border transition hover:text-foreground"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            ) : (
-              <>
-                <Upload className="h-8 w-8 text-muted-foreground/50" />
-                <div className="text-center">
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Glisse une photo ou{' '}
-                    <span className="text-primary">clique pour choisir</span>
-                  </p>
-                  <p className="mt-0.5 text-xs text-muted-foreground/60">
-                    JPG, PNG, HEIC — max 10 Mo
-                  </p>
-                </div>
-              </>
-            )}
-          </label>
-
-          {/* Note optionnelle */}
-          <input
-            type="text"
-            placeholder="Note optionnelle…"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            className="h-10 w-full rounded-lg border border-border bg-card/50 px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+          <ChevronDown
+            className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${showUpload ? 'rotate-180' : ''}`}
           />
+        </button>
 
-          {uploadError && <p className="text-sm text-red-400">{uploadError}</p>}
+        {showUpload && (
+          <form onSubmit={handleSubmit} className="space-y-4 border-t border-border px-4 pb-4 pt-4">
+            {/* Sélecteur de type */}
+            <div>
+              <p className="mb-2 text-xs text-muted-foreground">Type de photo</p>
+              <div className="flex flex-wrap gap-2">
+                {PHOTO_TYPES.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setSelectedType(value)}
+                    className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+                      selectedType === value
+                        ? 'bg-primary/15 text-primary ring-1 ring-primary/40'
+                        : 'border border-border text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-          <button
-            type="submit"
-            disabled={!selectedFile || uploading}
-            className="h-10 w-full rounded-lg bg-primary text-sm font-medium text-white transition hover:bg-primary/90 disabled:opacity-40"
-          >
-            {uploading ? 'Envoi en cours…' : 'Enregistrer la photo'}
-          </button>
-        </form>
+            {/* Drop zone */}
+            <label
+              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={handleDrop}
+              className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed p-6 transition ${
+                dragOver
+                  ? 'border-primary bg-primary/10'
+                  : selectedFile
+                  ? 'border-primary/40 bg-primary/5'
+                  : 'border-border hover:border-primary/40'
+              }`}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileChange(f); }}
+              />
+              {previewUrl ? (
+                <div className="relative">
+                  <img src={previewUrl} alt="Aperçu" className="max-h-52 max-w-full rounded-lg object-cover" />
+                  <button
+                    type="button"
+                    onClick={clearPreview}
+                    className="absolute -right-2 -top-2 rounded-full bg-card p-1 text-muted-foreground shadow ring-1 ring-border transition hover:text-foreground"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <Upload className="h-8 w-8 text-muted-foreground/50" />
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Glisse une photo ou{' '}
+                      <span className="text-primary">clique pour choisir</span>
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground/60">JPG, PNG, HEIC — max 10 Mo</p>
+                  </div>
+                </>
+              )}
+            </label>
+
+            {/* Note */}
+            <input
+              type="text"
+              placeholder="Note optionnelle…"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              className="h-10 w-full rounded-lg border border-border bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+            />
+
+            {uploadError && <p className="text-sm text-red-400">{uploadError}</p>}
+
+            <button
+              type="submit"
+              disabled={!selectedFile || uploading}
+              className="h-10 w-full rounded-lg bg-primary text-sm font-medium text-white transition hover:bg-primary/90 disabled:opacity-40"
+            >
+              {uploading ? 'Envoi en cours…' : 'Enregistrer la photo'}
+            </button>
+          </form>
+        )}
       </div>
 
-      {/* Bouton comparer (≥ 2 photos) */}
+      {/* ── Bouton Comparer (≥ 2 photos) ── */}
       {photos.length >= 2 && (
         <button
           type="button"
           onClick={() => setShowCompare(true)}
-          className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary/15 py-3 text-sm font-semibold text-primary ring-1 ring-primary/30 transition hover:bg-primary/25 active:scale-[0.98]"
         >
           <ArrowLeftRight className="h-4 w-4" />
           Comparer avant / après
@@ -1243,8 +1288,75 @@ function PhotosTab() {
       {!photosLoading && photos.length === 0 && (
         <div className="flex flex-col items-center py-10 text-center text-muted-foreground">
           <Camera className="mb-3 h-12 w-12 opacity-20" />
-          <p className="text-sm">Aucune photo — enregistre ton premier cliché !</p>
+          <p className="text-sm">Aucune photo — ouvre « Nouvelle photo » pour commencer !</p>
         </div>
+      )}
+
+      {/* ── Filtres + tri + confidentialité ── */}
+      {photos.length > 0 && (
+        <div className="flex items-center gap-2">
+          {/* Pills de filtre type (scroll horizontal sur mobile) */}
+          <div
+            className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto pb-0.5"
+            style={{ scrollbarWidth: 'none' }}
+          >
+            <button
+              onClick={() => setFilterType(null)}
+              className={`shrink-0 rounded-lg px-2.5 py-1 text-xs font-medium transition ${
+                filterType === null
+                  ? 'bg-primary/15 text-primary ring-1 ring-primary/30'
+                  : 'border border-border text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Tout ({photos.length})
+            </button>
+            {availableTypes.map(({ value, label }) => {
+              const count = photos.filter((p) => p.type === value).length;
+              return (
+                <button
+                  key={value}
+                  onClick={() => setFilterType(filterType === value ? null : value)}
+                  className={`shrink-0 rounded-lg px-2.5 py-1 text-xs font-medium transition ${
+                    filterType === value
+                      ? 'bg-primary/15 text-primary ring-1 ring-primary/30'
+                      : 'border border-border text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {label} ({count})
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Tri + Confidentialité */}
+          <div className="flex shrink-0 gap-1.5">
+            <button
+              onClick={() => setSortOrder((s) => (s === 'desc' ? 'asc' : 'desc'))}
+              title={sortOrder === 'desc' ? 'Plus récentes en premier' : 'Plus anciennes en premier'}
+              className="flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-xs text-muted-foreground transition hover:text-foreground"
+            >
+              {sortOrder === 'desc' ? '↓' : '↑'} Date
+            </button>
+            <button
+              onClick={toggleBlur}
+              title={isBlurred ? 'Afficher les photos' : 'Masquer les photos'}
+              className={`rounded-lg border p-1.5 transition ${
+                isBlurred
+                  ? 'border-primary/40 bg-primary/10 text-primary'
+                  : 'border-border text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {isBlurred ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Aucun résultat après filtrage */}
+      {photos.length > 0 && filteredPhotos.length === 0 && (
+        <p className="py-4 text-center text-sm text-muted-foreground">
+          Aucune photo pour ce filtre.
+        </p>
       )}
 
       {/* Galerie groupée par mois */}
@@ -1258,6 +1370,7 @@ function PhotosTab() {
               <PhotoCard
                 key={photo.id}
                 photo={photo}
+                isBlurred={isBlurred}
                 onClick={() => setActivePhoto(photo)}
                 onDelete={handleDelete}
               />
@@ -1270,6 +1383,7 @@ function PhotosTab() {
       {activePhoto && (
         <PhotoModal
           photo={activePhoto}
+          isBlurred={isBlurred}
           onClose={() => setActivePhoto(null)}
           onDelete={handleDelete}
         />
@@ -1279,6 +1393,7 @@ function PhotosTab() {
       {showCompare && (
         <CompareModal
           photos={photos}
+          isBlurred={isBlurred}
           onClose={() => setShowCompare(false)}
         />
       )}
