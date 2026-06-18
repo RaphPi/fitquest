@@ -28,7 +28,7 @@ export default function SetsFlow({
   isDuration,
   compact = false,
 }: SetsFlowProps) {
-  const pillValue = isDuration ? `${durationSeconds ?? '?'}s` : `${reps ?? '?'}`;
+  const pillValue = isDuration ? `${durationSeconds ?? '?'}s` : `${reps != null ? reps : 'max'}`;
   const h = compact ? 'h-7 min-w-[32px] text-[11px]' : 'h-8 min-w-[36px] text-xs';
 
   const pillStyle = isDuration

@@ -266,6 +266,29 @@ const ImportPayloadSchema = z.object({
   exercises: z.array(ExerciseImportItemSchema),
 });
 
+// DELETE /api/v1/programs/import/lfy
+// Supprime tous les exercices (id lfy_*) et programmes (nameFr LFY*) de la BDD.
+// Sessions et SessionExercises sont supprimés en cascade via le schéma Prisma.
+router.delete('/import/lfy', requireAuth, async (_req: AuthRequest, res) => {
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Programmes : cascade vers Sessions → SessionExercises (onDelete: Cascade)
+      const { count: programs } = await tx.program.deleteMany({
+        where: { nameFr: { startsWith: 'LFY' } },
+      });
+      // 2. Exercices : pas de FK contrainte sur SessionExercise.exerciseId → suppression directe
+      const { count: exercises } = await tx.exercise.deleteMany({
+        where: { id: { startsWith: 'lfy_' } },
+      });
+      return { programs, exercises };
+    }, { timeout: 30000 });
+    res.json({ deleted: result });
+  } catch (e) {
+    console.error('[programs/import/lfy DELETE]', e);
+    res.status(500).json({ error: 'Erreur lors de la suppression' });
+  }
+});
+
 // POST /api/v1/programs/import
 // Ingère un payload JSON (exercises + programs) et peuple la BDD.
 // Exercices : upsert par id. Programmes : créé seulement si le nameFr n'existe pas déjà.
