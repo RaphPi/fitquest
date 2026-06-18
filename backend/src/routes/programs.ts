@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { prisma } from '../lib/prisma';
 import { requireAuth } from '../middleware/requireAuth';
 import type { AuthRequest } from '../middleware/requireAuth';
@@ -207,6 +208,145 @@ router.delete('/:id/sessions/:sessionId', requireAuth, async (req: AuthRequest, 
     const code = (e as { code?: string }).code;
     if (code === 'P2025') res.status(404).json({ error: 'Séance introuvable' });
     else { console.error(e); res.status(500).json({ error: 'Erreur serveur' }); }
+  }
+});
+
+// ── Import LFY ──────────────────────────────────────────────────────────────
+
+const SessionExerciseImportSchema = z.object({
+  exerciseId: z.string().min(1),
+  order: z.number().int().min(1),
+  sets: z.number().int().min(1),
+  reps: z.number().int().min(1).nullable().optional(),
+  durationSeconds: z.number().int().min(1).nullable().optional(),
+  restBetweenSetsSeconds: z.number().int().min(0).optional(),
+  restAfterExerciseSeconds: z.number().int().min(0).optional(),
+});
+
+const SessionImportSchema = z.object({
+  nameFr: z.string().min(1),
+  nameEn: z.string().min(1),
+  order: z.number().int().min(1),
+  exercises: z.array(SessionExerciseImportSchema).default([]),
+});
+
+const ProgramImportItemSchema = z.object({
+  nameFr: z.string().min(1),
+  nameEn: z.string().min(1),
+  descFr: z.string().nullable().optional(),
+  descEn: z.string().nullable().optional(),
+  level: z.enum(['beginner', 'intermediate', 'advanced']),
+  daysPerWeek: z.number().int().min(1).max(7),
+  durationWeeks: z.number().int().min(1).nullable().optional(),
+  equipment: z.array(z.string()).default([]),
+  sessions: z.array(SessionImportSchema).default([]),
+});
+
+const ExerciseImportItemSchema = z.object({
+  id: z.string().min(1),
+  nameFr: z.string().min(1),
+  nameEn: z.string().min(1),
+  category: z.string().min(1),
+  musclesPrimary: z.array(z.string()).default([]),
+  musclesSecondary: z.array(z.string()).default([]),
+  equipment: z.string().min(1),
+  level: z.string().min(1),
+  type: z.string().min(1),
+  instructionsFr: z.string().min(1),
+  instructionsEn: z.string().min(1),
+  tipsFr: z.string().nullable().optional(),
+  tipsEn: z.string().nullable().optional(),
+  variations: z.array(z.string()).default([]),
+});
+
+const ImportPayloadSchema = z.object({
+  version: z.string().optional(),
+  sourcePrefix: z.string().optional(),
+  programs: z.array(ProgramImportItemSchema),
+  exercises: z.array(ExerciseImportItemSchema),
+});
+
+// POST /api/v1/programs/import
+// Ingère un payload JSON (exercises + programs) et peuple la BDD.
+// Exercices : upsert par id. Programmes : créé seulement si le nameFr n'existe pas déjà.
+router.post('/import', requireAuth, async (req: AuthRequest, res) => {
+  const parsed = ImportPayloadSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'Payload invalide', details: parsed.error.flatten() });
+    return;
+  }
+
+  const { programs, exercises } = parsed.data;
+  let importedExercises = 0;
+  let importedPrograms = 0;
+  let skipped = 0;
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      for (const ex of exercises) {
+        const data = {
+          nameFr: ex.nameFr,
+          nameEn: ex.nameEn,
+          category: ex.category,
+          musclesPrimary: ex.musclesPrimary,
+          musclesSecondary: ex.musclesSecondary,
+          equipment: ex.equipment,
+          level: ex.level,
+          type: ex.type,
+          instructionsFr: ex.instructionsFr,
+          instructionsEn: ex.instructionsEn,
+          tipsFr: ex.tipsFr ?? null,
+          tipsEn: ex.tipsEn ?? null,
+          variations: ex.variations,
+        };
+        await tx.exercise.upsert({ where: { id: ex.id }, update: data, create: { id: ex.id, ...data } });
+        importedExercises++;
+      }
+
+      for (const prog of programs) {
+        const existing = await tx.program.findFirst({ where: { nameFr: prog.nameFr } });
+        if (existing) { skipped++; continue; }
+
+        await tx.program.create({
+          data: {
+            nameFr: prog.nameFr,
+            nameEn: prog.nameEn,
+            descFr: prog.descFr ?? null,
+            descEn: prog.descEn ?? null,
+            level: prog.level,
+            daysPerWeek: prog.daysPerWeek,
+            durationWeeks: prog.durationWeeks ?? null,
+            equipment: prog.equipment,
+            isCustom: false,
+            isAiGen: false,
+            sessions: {
+              create: prog.sessions.map((s) => ({
+                nameFr: s.nameFr,
+                nameEn: s.nameEn,
+                order: s.order,
+                exercises: {
+                  create: s.exercises.map((e) => ({
+                    exerciseId: e.exerciseId,
+                    order: e.order,
+                    sets: e.sets,
+                    reps: e.reps ?? null,
+                    durationSeconds: e.durationSeconds ?? null,
+                    restBetweenSetsSeconds: e.restBetweenSetsSeconds ?? 60,
+                    restAfterExerciseSeconds: e.restAfterExerciseSeconds ?? 20,
+                  })),
+                },
+              })),
+            },
+          },
+        });
+        importedPrograms++;
+      }
+    }, { timeout: 30000 });
+
+    res.json({ imported: { exercises: importedExercises, programs: importedPrograms }, skipped, errors: [] });
+  } catch (e) {
+    console.error('[programs/import]', e);
+    res.status(500).json({ error: "Erreur lors de l'import", details: String(e) });
   }
 });
 
