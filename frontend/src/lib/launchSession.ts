@@ -15,7 +15,8 @@ export function buildActiveSession(
     .map((se) => {
       const ex = exMap.get(se.exerciseId);
       const type = ex?.type ?? (se.durationSeconds ? 'duration' : 'reps');
-      const target = type === 'duration' ? (se.durationSeconds ?? 30) : (se.reps ?? 10);
+      // reps null = "max reps" : target 0 → pré-remplissage à 0, surpass dès la 1ère répétition
+      const target = type === 'duration' ? (se.durationSeconds ?? 30) : (se.reps ?? 0);
       return {
         sessionExerciseId: se.id,
         exerciseId: se.exerciseId,

@@ -12,19 +12,20 @@ Le fichier est modifié sur place.
 import json
 import sys
 
-IMPORT_PATH = r'C:\Users\EloRaf\Documents\lfy_import.json'
+IMPORT_PATH = r'C:\Users\EloRaf\Documents\lfy_pages\lfy_import.json'
 
 
 def fix_mojibake(s: str) -> str:
-    """Inverse le mojibake latin-1 → utf-8.
+    """Inverse le mojibake cp1252 -> utf-8.
 
-    Si s contient des octets UTF-8 encodés comme Latin-1
-    (ex. 'Ã©' pour 'é'), on réencode en latin-1 puis on décode en utf-8.
-    Si la chaîne est déjà correcte (ASCII ou déjà UTF-8 propre),
-    l'encodage en latin-1 échoue et on retourne s intact.
+    cp1252 (Windows-1252) couvre les octets 0x80-0x9F absents de latin-1 pur,
+    notamment euro=0x80 et guillemet=0x94. Ces octets apparaissent dans la
+    reconstitution de l'em-dash (UTF-8: E2 80 94) ou des guillemets anglais.
+    Sans cp1252, encode('latin-1') echoue des que la chaine contient un de
+    ces caracteres, et la correction est silencieusement abandonnee.
     """
     try:
-        return s.encode('latin-1').decode('utf-8')
+        return s.encode('cp1252').decode('utf-8')
     except (UnicodeEncodeError, UnicodeDecodeError):
         return s
 
