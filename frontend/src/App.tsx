@@ -10,6 +10,7 @@ import Library from '@/pages/Library';
 import Profile from '@/pages/Profile';
 import Trophees from '@/pages/Trophees';
 import Settings from '@/pages/Settings';
+import ImportLFY from '@/pages/ImportLFY';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/trophees" element={<ProtectedRoute><Trophees /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/import" element={<ProtectedRoute><ImportLFY /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppLayout>

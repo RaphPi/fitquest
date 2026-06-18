@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Volume2, VolumeX, Plus, Lock, LogOut, Mail, ChevronDown } from 'lucide-react';
+import { Volume2, VolumeX, Plus, Lock, LogOut, Mail, ChevronDown, FileJson } from 'lucide-react';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useUserStore } from '@/stores/userStore';
 import { cn } from '@/lib/utils';
@@ -25,7 +25,7 @@ const THEME_LIST: { id: ThemeId; label: string }[] = [
 const BOSS_KEYS = Object.keys(BOSSES) as BossKey[];
 const WEAPON_KEYS = Object.keys(WEAPONS) as WeaponKey[];
 
-type SectionId = 'apparence' | 'combat' | 'compte';
+type SectionId = 'apparence' | 'combat' | 'compte' | 'donnees';
 
 /** Interrupteur on/off. */
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
@@ -318,6 +318,29 @@ export default function Settings() {
             Se déconnecter
           </button>
         </div>
+      </SectionCard>
+
+      {/* ── Données ──────────────────────────────────────────────────── */}
+      <SectionCard
+        id="donnees"
+        title="Données"
+        hint="Import de contenu externe."
+        open={open === 'donnees'}
+        onToggle={() => toggle('donnees')}
+      >
+        <button
+          type="button"
+          onClick={() => navigate('/import')}
+          className="flex w-full items-center gap-3 rounded-lg border border-border px-4 py-3 text-left transition-colors hover:bg-card-shield/40"
+        >
+          <FileJson className="h-5 w-5 shrink-0 text-primary-soft" />
+          <div>
+            <div className="text-sm font-semibold text-foreground">Import JSON</div>
+            <div className="text-xs text-muted-foreground">
+              Importe exercices &amp; programmes depuis un fichier lfy_import.json.
+            </div>
+          </div>
+        </button>
       </SectionCard>
     </section>
   );
