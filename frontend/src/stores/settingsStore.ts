@@ -21,7 +21,7 @@ function readWidgets(): WidgetId[] {
     const parsed: unknown = JSON.parse(v);
     if (!Array.isArray(parsed)) return DEFAULT_WIDGETS;
     const valid = parsed.filter((x): x is WidgetId => ALL_WIDGET_IDS.includes(x as WidgetId));
-    return valid.length > 0 ? valid.slice(0, 4) : DEFAULT_WIDGETS;
+    return valid.length > 0 ? valid.slice(0, 2) : DEFAULT_WIDGETS;
   } catch {
     return DEFAULT_WIDGETS;
   }
@@ -90,7 +90,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     set({ autoAdvanceRest: on });
   },
   setSidebarWidgets: (widgets) => {
-    const clamped = widgets.slice(0, 4);
+    const clamped = widgets.slice(0, 2);
     localStorage.setItem(WIDGETS_KEY, JSON.stringify(clamped));
     set({ sidebarWidgets: clamped });
   },

@@ -257,16 +257,16 @@ export default function Settings() {
         <SubLabel className="mt-5">
           Widgets sidebar
           <span className="ml-1 normal-case font-normal text-muted-foreground/60">
-            ({sidebarWidgets.length}/4)
+            ({sidebarWidgets.length}/2)
           </span>
         </SubLabel>
         <p className="mb-3 text-xs text-muted-foreground">
-          Informations affichées dans la barre latérale. Max 4.
+          Informations affichées dans la barre latérale. Max 2.
         </p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
           {WIDGET_OPTIONS.map((w) => {
             const active = sidebarWidgets.includes(w.id);
-            const maxed = !active && sidebarWidgets.length >= 4;
+            const maxed = !active && sidebarWidgets.length >= 2;
             return (
               <button
                 key={w.id}
