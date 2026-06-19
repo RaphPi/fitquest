@@ -209,7 +209,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <MobileHeader />
         {/* pt = safe-area + header 3.5rem + XPBar h-1 (4px) + buffer ≃ 74px */}
         <main className="min-w-0 flex-1 p-4 pt-[calc(env(safe-area-inset-top)_+_74px)] pb-24 md:p-6 md:pt-6 md:pb-6 lg:p-8">
-          {children}
+          <div key={pathname} className="motion-safe:animate-page-enter min-w-0">
+            {children}
+          </div>
         </main>
       </div>
       <BottomNav />
