@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Search, X, SlidersHorizontal, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useExerciseStore } from '@/stores/exerciseStore';
 import type { ExerciseFormData } from '@/stores/exerciseStore';
 import ExerciseCard from '@/components/exercise/ExerciseCard';
@@ -9,31 +10,33 @@ import FilterChips from '@/components/exercise/FilterChips';
 import GlowButton from '@/components/ui/GlowButton';
 import type { Category, Equipment, Level, Exercise } from '@/types';
 
-const categoryOptions: { value: Category; label: string }[] = [
-  { value: 'push', label: 'Push' },
-  { value: 'pull', label: 'Pull' },
-  { value: 'legs', label: 'Jambes' },
-  { value: 'core', label: 'Core' },
-  { value: 'cardio', label: 'Cardio' },
-  { value: 'back', label: 'Dos' },
-];
-
-const equipmentOptions: { value: Equipment; label: string }[] = [
-  { value: 'none', label: 'Poids du corps' },
-  { value: 'dumbbells', label: 'Haltères' },
-  { value: 'barbell', label: 'Barre' },
-  { value: 'pull_bar', label: 'Barre de traction' },
-];
-
-const levelOptions: { value: Level; label: string }[] = [
-  { value: 'beginner', label: 'Débutant' },
-  { value: 'intermediate', label: 'Intermédiaire' },
-  { value: 'advanced', label: 'Avancé' },
-];
-
 type Modal = 'none' | 'detail' | 'create' | 'edit';
 
 export default function Library() {
+  const { t } = useTranslation();
+
+  const categoryOptions: { value: Category; label: string }[] = [
+    { value: 'push', label: t('library.category.push') },
+    { value: 'pull', label: t('library.category.pull') },
+    { value: 'legs', label: t('library.category.legs') },
+    { value: 'core', label: t('library.category.core') },
+    { value: 'cardio', label: t('library.category.cardio') },
+    { value: 'back', label: t('library.category.back') },
+  ];
+
+  const equipmentOptions: { value: Equipment; label: string }[] = [
+    { value: 'none', label: t('library.equipment.none') },
+    { value: 'dumbbells', label: t('library.equipment.dumbbells') },
+    { value: 'barbell', label: t('library.equipment.barbell') },
+    { value: 'pull_bar', label: t('library.equipment.pull_bar') },
+  ];
+
+  const levelOptions: { value: Level; label: string }[] = [
+    { value: 'beginner', label: t('library.level.beginner') },
+    { value: 'intermediate', label: t('library.level.intermediate') },
+    { value: 'advanced', label: t('library.level.advanced') },
+  ];
+
   const {
     isLoading,
     isSaving,
@@ -107,14 +110,14 @@ export default function Library() {
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-black text-foreground">Exercices</h1>
+          <h1 className="font-display text-2xl font-black text-foreground">{t('library.title')}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {isLoading ? 'Chargement…' : `${results.length} exercice${results.length !== 1 ? 's' : ''}`}
+            {isLoading ? t('library.loading') : t('library.count', { count: results.length })}
           </p>
         </div>
         <GlowButton variant="primary" size="sm" onClick={() => setModal('create')}>
           <Plus className="mr-1.5 h-4 w-4" />
-          Créer
+          {t('library.create')}
         </GlowButton>
       </div>
 
@@ -124,7 +127,7 @@ export default function Library() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Rechercher un exercice…"
+            placeholder={t('library.searchPlaceholder')}
             value={filters.search}
             onChange={(e) => setFilter('search', e.target.value)}
             className="w-full rounded-lg border border-border bg-card py-2.5 pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none focus:ring-1 focus:ring-primary/40"
@@ -147,7 +150,7 @@ export default function Library() {
           }`}
         >
           <SlidersHorizontal className="h-4 w-4" />
-          <span className="hidden sm:inline">Filtres</span>
+          <span className="hidden sm:inline">{t('common.filters')}</span>
           {(filters.categories.length > 0 || filters.equipments.length > 0 || filters.levels.length > 0) && (
             <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-black text-white">
               {(filters.categories.length > 0 ? 1 : 0) + (filters.equipments.length > 0 ? 1 : 0) + (filters.levels.length > 0 ? 1 : 0)}
@@ -160,20 +163,20 @@ export default function Library() {
       {showFilters && (
         <div className="rounded-xl border border-border bg-card p-4 space-y-4">
           <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Catégorie</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t('library.filters.category')}</p>
             <FilterChips options={categoryOptions} selected={filters.categories} onToggle={(v) => toggleFilterItem('categories', v)} />
           </div>
           <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Équipement</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t('library.filters.equipment')}</p>
             <FilterChips options={equipmentOptions} selected={filters.equipments} onToggle={(v) => toggleFilterItem('equipments', v)} />
           </div>
           <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Niveau</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t('library.filters.level')}</p>
             <FilterChips options={levelOptions} selected={filters.levels} onToggle={(v) => toggleFilterItem('levels', v)} />
           </div>
           {hasFilters && (
             <button onClick={clearFilters} className="text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
-              Effacer tous les filtres
+              {t('common.clearAllFilters')}
             </button>
           )}
         </div>
@@ -194,16 +197,16 @@ export default function Library() {
       ) : results.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
           <p className="text-base font-semibold text-foreground">
-            {hasFilters ? 'Aucun exercice trouvé' : 'Aucun exercice dans la base'}
+            {hasFilters ? t('library.noResults') : t('library.empty')}
           </p>
           {hasFilters ? (
             <button onClick={clearFilters} className="text-sm text-primary underline-offset-2 hover:underline">
-              Effacer les filtres
+              {t('common.clearFilters')}
             </button>
           ) : (
             <GlowButton variant="primary" size="sm" onClick={() => setModal('create')}>
               <Plus className="mr-1.5 h-4 w-4" />
-              Créer le premier exercice
+              {t('library.createFirst')}
             </GlowButton>
           )}
         </div>

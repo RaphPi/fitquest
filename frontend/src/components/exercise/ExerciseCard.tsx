@@ -3,6 +3,7 @@ import type { Exercise, Category, Equipment, Level } from '@/types';
 import type { ExercisePR } from '@/stores/exerciseStore';
 import { Dumbbell, User, Zap, ChevronRight, Trophy } from 'lucide-react';
 import { formatPr } from '@/lib/formatPr';
+import { useTranslation } from 'react-i18next';
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -20,15 +21,6 @@ const categoryColors: Record<Category, string> = {
   back: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
 };
 
-const categoryLabels: Record<Category, string> = {
-  push: 'Push',
-  pull: 'Pull',
-  legs: 'Jambes',
-  core: 'Core',
-  cardio: 'Cardio',
-  back: 'Dos',
-};
-
 const equipmentIcons: Record<Equipment, typeof Dumbbell> = {
   none: User,
   dumbbells: Dumbbell,
@@ -37,27 +29,14 @@ const equipmentIcons: Record<Equipment, typeof Dumbbell> = {
   other: Dumbbell,
 };
 
-const equipmentLabels: Record<Equipment, string> = {
-  none: 'Poids du corps',
-  dumbbells: 'Haltères',
-  barbell: 'Barre',
-  pull_bar: 'Barre de traction',
-  other: 'Autre',
-};
-
 const levelColors: Record<Level, string> = {
   beginner: 'text-emerald-400',
   intermediate: 'text-amber-400',
   advanced: 'text-red-400',
 };
 
-const levelLabels: Record<Level, string> = {
-  beginner: 'Débutant',
-  intermediate: 'Intermédiaire',
-  advanced: 'Avancé',
-};
-
 export default function ExerciseCard({ exercise, pr, onClick, className }: ExerciseCardProps) {
+  const { t } = useTranslation();
   const EquipIcon = equipmentIcons[exercise.equipment];
   const prLabel = formatPr(pr);
 
@@ -77,10 +56,10 @@ export default function ExerciseCard({ exercise, pr, onClick, className }: Exerc
               categoryColors[exercise.category],
             )}
           >
-            {categoryLabels[exercise.category]}
+            {t(`library.category.${exercise.category}`)}
           </span>
           <span className={cn('text-[11px] font-semibold uppercase tracking-wider', levelColors[exercise.level])}>
-            {levelLabels[exercise.level]}
+            {t(`library.level.${exercise.level}`)}
           </span>
         </div>
         <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
@@ -90,7 +69,7 @@ export default function ExerciseCard({ exercise, pr, onClick, className }: Exerc
 
       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <EquipIcon className="h-3.5 w-3.5" />
-        <span>{equipmentLabels[exercise.equipment]}</span>
+        <span>{t(`library.equipment.${exercise.equipment}`)}</span>
       </div>
 
       <p className="text-xs text-muted-foreground line-clamp-1">{exercise.musclesPrimary.join(', ')}</p>

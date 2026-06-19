@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Upload, FileJson, CheckCircle2, XCircle, Loader2, AlertCircle,
   ArrowLeft, Trash2, TriangleAlert,
@@ -33,6 +34,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 
 export default function ImportLFY() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // ── Import state ──────────────────────────────────────────────────────────
   const [status, setStatus] = useState<PageStatus>('idle');
@@ -52,7 +54,7 @@ export default function ImportLFY() {
 
   function readFile(file: File) {
     if (!file.name.endsWith('.json')) {
-      setErrorMsg('Le fichier doit être un .json');
+      setErrorMsg(t('import.error.notJson'));
       setStatus('error');
       return;
     }
@@ -68,7 +70,7 @@ export default function ImportLFY() {
         });
         setStatus('preview');
       } catch {
-        setErrorMsg('Fichier JSON invalide ou mal formé');
+        setErrorMsg(t('import.error.invalidJson'));
         setStatus('error');
       }
     };
@@ -99,7 +101,7 @@ export default function ImportLFY() {
       setResult(res);
       setStatus('success');
     } catch (e) {
-      setErrorMsg(e instanceof Error ? e.message : 'Erreur inconnue');
+      setErrorMsg(e instanceof Error ? e.message : t('common.unknownError'));
       setStatus('error');
     }
   }
@@ -124,7 +126,7 @@ export default function ImportLFY() {
       setPurgeResult(res);
       setPurgeStatus('done');
     } catch (e) {
-      setPurgeError(e instanceof Error ? e.message : 'Erreur inconnue');
+      setPurgeError(e instanceof Error ? e.message : t('common.unknownError'));
       setPurgeStatus('error');
     }
   }
@@ -140,11 +142,11 @@ export default function ImportLFY() {
           className="mb-3 flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Réglages
+          {t('import.backLink')}
         </button>
-        <h1 className="font-display text-2xl font-bold">Import JSON</h1>
+        <h1 className="font-display text-2xl font-bold">{t('import.title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Importe exercices et programmes depuis un fichier{' '}
+          {t('import.subtitle')}{' '}
           <span className="font-mono text-foreground">lfy_import.json</span>.
         </p>
       </div>
@@ -154,7 +156,7 @@ export default function ImportLFY() {
         <div
           role="button"
           tabIndex={0}
-          aria-label="Sélectionner un fichier JSON à importer"
+          aria-label={t('import.dropZoneAriaLabel')}
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
@@ -169,8 +171,8 @@ export default function ImportLFY() {
         >
           <Upload className="h-10 w-10 text-muted-foreground" />
           <div className="text-center">
-            <p className="text-sm font-semibold text-foreground">Glisse ton fichier ici</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">ou clique pour sélectionner un .json</p>
+            <p className="text-sm font-semibold text-foreground">{t('import.dropHint')}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">{t('import.dropSubhint')}</p>
           </div>
           <input
             ref={inputRef}
@@ -187,7 +189,7 @@ export default function ImportLFY() {
         <div className="flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/10 p-4">
           <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
           <div>
-            <p className="text-sm font-semibold text-red-400">Erreur</p>
+            <p className="text-sm font-semibold text-red-400">{t('import.error.title')}</p>
             <p className="mt-0.5 text-xs text-red-400/80">{errorMsg}</p>
           </div>
         </div>
@@ -199,21 +201,21 @@ export default function ImportLFY() {
           <div className="flex items-center gap-3 border-b border-border px-5 py-4">
             <FileJson className="h-5 w-5 text-primary-soft" />
             <h2 className="font-display text-sm font-bold uppercase tracking-widest">
-              Aperçu du fichier
+              {t('import.preview.title')}
             </h2>
           </div>
           <div className="flex gap-8 p-5">
             <div>
               <p className="text-3xl font-black text-foreground">{preview.exercises}</p>
               <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Exercices
+                {t('import.preview.exercises')}
               </p>
             </div>
             <div className="border-l border-border" />
             <div>
               <p className="text-3xl font-black text-foreground">{preview.programs}</p>
               <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Programmes
+                {t('import.preview.programs')}
               </p>
             </div>
           </div>
@@ -223,14 +225,14 @@ export default function ImportLFY() {
               onClick={() => void handleImport()}
               className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold uppercase tracking-widest text-background shadow-glow transition-all hover:opacity-90"
             >
-              Importer
+              {t('import.preview.import')}
             </button>
             <button
               type="button"
               onClick={reset}
               className="rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
             >
-              Annuler
+              {t('import.preview.cancel')}
             </button>
           </div>
         </div>
@@ -241,9 +243,9 @@ export default function ImportLFY() {
         <div className="flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-12">
           <Loader2 className="h-10 w-10 animate-spin text-primary" />
           <div className="text-center">
-            <p className="text-sm font-semibold text-muted-foreground">Import en cours…</p>
+            <p className="text-sm font-semibold text-muted-foreground">{t('import.loading.title')}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              La transaction peut prendre quelques secondes.
+              {t('import.loading.hint')}
             </p>
           </div>
         </div>
@@ -256,21 +258,21 @@ export default function ImportLFY() {
             <div className="flex items-center gap-3 border-b border-border px-5 py-4">
               <CheckCircle2 className="h-5 w-5 text-primary" />
               <h2 className="font-display text-sm font-bold uppercase tracking-widest text-primary">
-                Import réussi
+                {t('import.success.title')}
               </h2>
             </div>
             <div className="flex flex-wrap gap-8 p-5">
               <div>
                 <p className="text-3xl font-black text-foreground">{result.imported.exercises}</p>
                 <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Exercices
+                  {t('import.success.exercises')}
                 </p>
               </div>
               <div className="border-l border-border" />
               <div>
                 <p className="text-3xl font-black text-foreground">{result.imported.programs}</p>
                 <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Programmes
+                  {t('import.success.programs')}
                 </p>
               </div>
               {result.skipped > 0 && (
@@ -279,7 +281,7 @@ export default function ImportLFY() {
                   <div>
                     <p className="text-3xl font-black text-muted-foreground">{result.skipped}</p>
                     <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      Ignorés
+                      {t('import.success.skipped')}
                     </p>
                   </div>
                 </>
@@ -289,7 +291,7 @@ export default function ImportLFY() {
               <div className="border-t border-border px-5 pb-5 pt-4">
                 <div className="mb-2 flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 text-yellow-400" />
-                  <p className="text-xs font-semibold text-yellow-400">Avertissements</p>
+                  <p className="text-xs font-semibold text-yellow-400">{t('import.success.warnings')}</p>
                 </div>
                 <ul className="space-y-1">
                   {result.errors.map((err, i) => (
@@ -304,7 +306,7 @@ export default function ImportLFY() {
             onClick={reset}
             className="w-full rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
           >
-            Importer un autre fichier
+            {t('import.success.importAnother')}
           </button>
         </>
       )}
@@ -314,7 +316,7 @@ export default function ImportLFY() {
         <div className="flex items-center gap-3 border-b border-red-500/20 px-5 py-4">
           <Trash2 className="h-4 w-4 text-red-400" />
           <h2 className="font-display text-sm font-bold uppercase tracking-widest text-red-400">
-            Purger les données LFY
+            {t('import.purge.title')}
           </h2>
         </div>
 
@@ -322,9 +324,7 @@ export default function ImportLFY() {
           {purgeStatus === 'idle' && (
             <>
               <p className="mb-4 text-xs text-muted-foreground">
-                Supprime tous les exercices (<span className="font-mono">lfy_*</span>) et
-                programmes (<span className="font-mono">LFY…</span>) de la base.
-                À utiliser avant une réimportation pour corriger les données.
+                {t('import.purge.hint')}
               </p>
               <button
                 type="button"
@@ -332,7 +332,7 @@ export default function ImportLFY() {
                 className="flex items-center gap-2 rounded-lg border border-red-500/30 px-4 py-2 text-sm font-semibold text-red-400 transition-colors hover:bg-red-500/10"
               >
                 <Trash2 className="h-4 w-4" />
-                Purger
+                {t('import.purge.purge')}
               </button>
             </>
           )}
@@ -342,7 +342,7 @@ export default function ImportLFY() {
               <div className="flex items-start gap-3 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3">
                 <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-yellow-400" />
                 <p className="text-xs text-yellow-400">
-                  Cette action est irréversible. Tous les exercices et programmes LFY seront supprimés.
+                  {t('import.purge.confirm')}
                 </p>
               </div>
               <div className="flex gap-3">
@@ -351,14 +351,14 @@ export default function ImportLFY() {
                   onClick={() => void handlePurge()}
                   className="flex-1 rounded-lg bg-red-500/80 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-red-500"
                 >
-                  Confirmer la suppression
+                  {t('import.purge.confirmBtn')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setPurgeStatus('idle')}
                   className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Annuler
+                  {t('import.purge.cancel')}
                 </button>
               </div>
             </div>
@@ -367,7 +367,7 @@ export default function ImportLFY() {
           {purgeStatus === 'purging' && (
             <div className="flex items-center gap-3">
               <Loader2 className="h-5 w-5 animate-spin text-red-400" />
-              <p className="text-sm text-muted-foreground">Suppression en cours…</p>
+              <p className="text-sm text-muted-foreground">{t('import.purge.purging')}</p>
             </div>
           )}
 
@@ -376,8 +376,7 @@ export default function ImportLFY() {
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
                 <p className="text-sm font-semibold text-foreground">
-                  {purgeResult.deleted.programs} programme{purgeResult.deleted.programs !== 1 ? 's' : ''} et{' '}
-                  {purgeResult.deleted.exercises} exercice{purgeResult.deleted.exercises !== 1 ? 's' : ''} supprimés.
+                  {t('import.purge.doneMsg', { programs: purgeResult.deleted.programs, exercises: purgeResult.deleted.exercises, count: purgeResult.deleted.programs })}
                 </p>
               </div>
               <button
@@ -385,7 +384,7 @@ export default function ImportLFY() {
                 onClick={() => { setPurgeStatus('idle'); setPurgeResult(null); }}
                 className="w-fit text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
               >
-                Réinitialiser
+                {t('import.purge.reset')}
               </button>
             </div>
           )}
@@ -401,7 +400,7 @@ export default function ImportLFY() {
                 onClick={() => setPurgeStatus('idle')}
                 className="w-fit text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
               >
-                Réessayer
+                {t('import.purge.retry')}
               </button>
             </div>
           )}

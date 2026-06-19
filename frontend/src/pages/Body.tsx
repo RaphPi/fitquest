@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Scale, Camera, Plus, Trash2, Pencil, X, Check, Upload, ArrowLeftRight, Eye, EyeOff, ChevronDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
   LineChart,
   Line,
@@ -168,10 +169,6 @@ const PHOTO_TYPES = [
   { value: 'other', label: 'Autre' },
 ] as const;
 
-const PHOTO_TYPE_LABEL: Record<string, string> = Object.fromEntries(
-  PHOTO_TYPES.map(({ value, label }) => [value, label]),
-);
-
 function fmtMonth(isoDate: string): string {
   return new Date(isoDate).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
 }
@@ -225,7 +222,7 @@ interface MetricFormProps {
   initial?: FormState;
   onSubmit: (payload: MetricPayload) => Promise<void>;
   onCancel?: () => void;
-  submitLabel?: string;
+  submitLabel?: string | null;
   getColor: (key: string) => string;
   setColor: (key: string, color: string) => void;
 }
@@ -234,10 +231,12 @@ function MetricForm({
   initial = EMPTY_FORM,
   onSubmit,
   onCancel,
-  submitLabel = 'Enregistrer',
+  submitLabel,
   getColor,
   setColor,
 }: MetricFormProps) {
+  const { t } = useTranslation();
+  const resolvedSubmitLabel = submitLabel ?? t('body.metrics.submitLabel');
   const [form, setForm] = useState<FormState>({
     ...initial,
     measures: { ...initial.measures },
@@ -258,7 +257,7 @@ function MetricForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!hasAny) { setError('Au moins un champ requis.'); return; }
+    if (!hasAny) { setError(t('body.metrics.atLeastOne')); return; }
     setSaving(true);
     setError(null);
     try {
@@ -308,7 +307,7 @@ function MetricForm({
           {form.weightEnabled && <Check className="h-3 w-3 text-xp" />}
         </button>
         <span className={`w-28 shrink-0 text-sm font-medium ${form.weightEnabled ? 'text-foreground' : 'text-muted-foreground'}`}>
-          Poids
+          {t('body.metrics.weight')}
         </span>
         <NumberStepper
           value={form.weightKg}
@@ -324,7 +323,7 @@ function MetricForm({
       </div>
 
       {/* Mensurations standard */}
-      {STD.map(({ key, label, unit, step, min, max }) => {
+      {STD.map(({ key, unit, step, min, max }) => {
         const on = form.measures[key].enabled;
         return (
           <div key={key} className="flex items-center gap-3">
@@ -338,7 +337,7 @@ function MetricForm({
               {on && <Check className="h-3 w-3 text-primary" />}
             </button>
             <span className={`w-28 shrink-0 text-sm font-medium ${on ? 'text-foreground' : 'text-muted-foreground'}`}>
-              {label}
+              {t(`body.metrics.${key}`)}
             </span>
             <NumberStepper
               value={form.measures[key].value}
@@ -358,12 +357,12 @@ function MetricForm({
       {/* Champs custom */}
       {form.customFields.length > 0 && (
         <div className="space-y-2 border-t border-border pt-3">
-          <p className="text-xs text-muted-foreground">Mesures personnalisées</p>
+          <p className="text-xs text-muted-foreground">{t('body.metrics.customMeasures')}</p>
           {form.customFields.map((cf, i) => (
             <div key={i} className="flex items-center gap-2">
               <input
                 type="text"
-                placeholder="Nom"
+                placeholder={t('body.metrics.customNamePlaceholder')}
                 value={cf.name}
                 onChange={(e) => setCustomField(i, 'name', e.target.value)}
                 className="h-10 min-w-0 flex-1 rounded-lg border border-border bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
@@ -377,7 +376,7 @@ function MetricForm({
               />
               <input
                 type="text"
-                placeholder="unité"
+                placeholder={t('body.metrics.customUnitPlaceholder')}
                 value={cf.unit}
                 onChange={(e) => setCustomField(i, 'unit', e.target.value)}
                 className="h-10 w-16 shrink-0 rounded-lg border border-border bg-card px-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
@@ -401,20 +400,20 @@ function MetricForm({
           className="flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
         >
           <Plus className="h-4 w-4" />
-          Ajouter une mesure personnalisée
+          {t('body.metrics.addCustom')}
         </button>
       )}
 
       {/* Couleurs des graphiques */}
       {hasColorRows && (
         <div className="space-y-2 rounded-lg border border-border/50 bg-card/30 p-3">
-          <p className="text-xs font-medium text-muted-foreground">Couleurs dans les graphiques</p>
+          <p className="text-xs font-medium text-muted-foreground">{t('body.metrics.graphColors')}</p>
           {form.weightEnabled && (
-            <ColorRow colorKey="weight" label="Poids" getColor={getColor} setColor={setColor} />
+            <ColorRow colorKey="weight" label={t('body.metrics.weight')} getColor={getColor} setColor={setColor} />
           )}
-          {STD.map(({ key, label }) =>
+          {STD.map(({ key }) =>
             form.measures[key].enabled ? (
-              <ColorRow key={key} colorKey={key} label={label} getColor={getColor} setColor={setColor} />
+              <ColorRow key={key} colorKey={key} label={t(`body.metrics.${key}`)} getColor={getColor} setColor={setColor} />
             ) : null
           )}
           {form.customFields.map((cf, i) =>
@@ -433,7 +432,7 @@ function MetricForm({
           disabled={saving || !hasAny}
           className="h-10 flex-1 rounded-lg bg-primary text-sm font-medium text-white transition hover:bg-primary/90 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
         >
-          {saving ? 'Sauvegarde…' : submitLabel}
+          {saving ? t('body.metrics.saving') : resolvedSubmitLabel}
         </button>
         {onCancel && (
           <button
@@ -441,7 +440,7 @@ function MetricForm({
             onClick={onCancel}
             className="h-10 rounded-lg border border-border px-4 text-sm text-muted-foreground transition hover:border-foreground/30 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
           >
-            Annuler
+            {t('common.cancel')}
           </button>
         )}
       </div>
@@ -452,6 +451,7 @@ function MetricForm({
 // ─── WeightChart ──────────────────────────────────────────────────────────────
 
 function WeightChart({ metrics, color }: { metrics: BodyMetric[]; color: string }) {
+  const { t } = useTranslation();
   const data = useMemo(
     () =>
       [...metrics]
@@ -464,7 +464,7 @@ function WeightChart({ metrics, color }: { metrics: BodyMetric[]; color: string 
   if (data.length === 0) {
     return (
       <p className="flex h-20 items-center justify-center text-sm text-muted-foreground">
-        Aucune donnée de poids.
+        {t('body.metrics.noWeightData')}
       </p>
     );
   }
@@ -478,7 +478,7 @@ function WeightChart({ metrics, color }: { metrics: BodyMetric[]; color: string 
         <Tooltip
           contentStyle={{ background: 'rgba(15,15,25,0.95)', border: `1px solid ${hexToRgba(color, 0.35)}`, borderRadius: 8, padding: '6px 12px' }}
           labelStyle={{ color: 'rgba(255,255,255,0.55)', fontSize: 11 }}
-          formatter={(v) => [`${v} kg`, 'Poids']}
+          formatter={(v) => [`${v} kg`, t('body.metrics.weight')]}
           itemStyle={{ color }}
         />
         <Line
@@ -503,6 +503,7 @@ function MeasureChart({
   metrics: BodyMetric[];
   getColor: (key: string) => string;
 }) {
+  const { t } = useTranslation();
   const availableKeys = useMemo(() => {
     const keys: string[] = [];
     STD.forEach(({ key }) => {
@@ -520,7 +521,8 @@ function MeasureChart({
     : (availableKeys[0] ?? '');
 
   const color = getColor(selectedKey);
-  const label = getMeasureLabel(selectedKey);
+  const isStdKey = STD.some((s) => s.key === selectedKey);
+  const label = isStdKey ? t(`body.metrics.${selectedKey}`) : getMeasureLabel(selectedKey);
   const unit = getMeasureUnit(selectedKey, metrics);
 
   const data = useMemo(
@@ -535,7 +537,7 @@ function MeasureChart({
   if (availableKeys.length === 0) {
     return (
       <p className="flex h-20 items-center justify-center text-sm text-muted-foreground">
-        Aucune mensuration enregistrée.
+        {t('body.metrics.noMeasureData')}
       </p>
     );
   }
@@ -550,14 +552,14 @@ function MeasureChart({
           className="h-8 rounded-lg border border-border bg-card px-3 text-sm text-foreground focus:border-primary focus:outline-none"
         >
           {availableKeys.map((k) => (
-            <option key={k} value={k}>{getMeasureLabel(k)}</option>
+            <option key={k} value={k}>{STD.some((s) => s.key === k) ? t(`body.metrics.${k}`) : getMeasureLabel(k)}</option>
           ))}
         </select>
       </div>
 
       {data.length === 0 ? (
         <p className="flex h-20 items-center justify-center text-sm text-muted-foreground">
-          Aucune donnée pour cette mensuration.
+          {t('body.metrics.noMeasureDataSingle')}
         </p>
       ) : (
         <ResponsiveContainer width="100%" height={180}>
@@ -596,13 +598,14 @@ interface MetricCardProps {
 }
 
 function MetricCard({ metric, onEdit, onDelete, getColor }: MetricCardProps) {
+  const { t } = useTranslation();
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const fields: { key: string; label: string; value: string }[] = [];
-  if (metric.weightKg != null) fields.push({ key: 'weight', label: 'Poids', value: `${metric.weightKg} kg` });
-  STD.forEach(({ key, label, unit }) => {
+  if (metric.weightKg != null) fields.push({ key: 'weight', label: t('body.metrics.weight'), value: `${metric.weightKg} kg` });
+  STD.forEach(({ key, unit }) => {
     const v = (metric as unknown as Record<string, number | null>)[key];
-    if (v != null) fields.push({ key, label, value: `${v} ${unit}` });
+    if (v != null) fields.push({ key, label: t(`body.metrics.${key}`), value: `${v} ${unit}` });
   });
   metric.customMetrics?.forEach((c) => {
     fields.push({ key: c.name, label: c.name, value: `${c.value} ${c.unit}` });
@@ -619,13 +622,13 @@ function MetricCard({ metric, onEdit, onDelete, getColor }: MetricCardProps) {
                 onClick={() => onDelete(metric.id)}
                 className="rounded border border-red-400/40 px-2 py-1 text-xs text-red-400 transition hover:border-red-300/60 hover:text-red-300 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
               >
-                Confirmer
+                {t('common.confirm')}
               </button>
               <button
                 onClick={() => setConfirmDelete(false)}
                 className="rounded border border-border px-2 py-1 text-xs text-muted-foreground transition hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
               >
-                Annuler
+                {t('common.cancel')}
               </button>
             </>
           ) : (
@@ -673,6 +676,7 @@ function MetricCard({ metric, onEdit, onDelete, getColor }: MetricCardProps) {
 // ─── MetricsTab ───────────────────────────────────────────────────────────────
 
 function MetricsTab() {
+  const { t } = useTranslation();
   const { metrics, isLoading, error, fetchMetrics, addMetric, updateMetric, deleteMetric } = useBodyStore();
   const [editingMetric, setEditingMetric] = useState<BodyMetric | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -707,12 +711,12 @@ function MetricsTab() {
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-xl border border-border bg-card p-4">
             <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
-              <span style={{ color: getColor('weight') }}>●</span> Évolution du poids
+              <span style={{ color: getColor('weight') }}>●</span> {t('body.metrics.weightEvolution')}
             </h3>
             <WeightChart metrics={metrics} color={getColor('weight')} />
           </div>
           <div className="rounded-xl border border-border bg-card p-4">
-            <h3 className="mb-3 text-sm font-semibold text-foreground">Mensurations</h3>
+            <h3 className="mb-3 text-sm font-semibold text-foreground">{t('body.metrics.measurements')}</h3>
             <MeasureChart metrics={metrics} getColor={getColor} />
           </div>
         </div>
@@ -722,13 +726,13 @@ function MetricsTab() {
       {editingMetric && (
         <div ref={editRef} className="rounded-xl border border-primary/40 bg-card p-4">
           <h3 className="mb-4 text-sm font-semibold text-foreground">
-            Modifier — {fmtLong(editingMetric.date)}
+            {t('body.metrics.editTitle', { date: fmtLong(editingMetric.date) })}
           </h3>
           <MetricForm
             initial={metricToForm(editingMetric)}
             onSubmit={handleUpdate}
             onCancel={() => setEditingMetric(null)}
-            submitLabel="Mettre à jour"
+            submitLabel={t('body.metrics.submitLabelEdit')}
             getColor={getColor}
             setColor={setColor}
           />
@@ -740,11 +744,11 @@ function MetricsTab() {
         <div className="rounded-xl border border-border bg-card p-4">
           {isEmpty || showAddForm ? (
             <>
-              <h3 className="mb-4 text-sm font-semibold text-foreground">Nouveau relevé</h3>
+              <h3 className="mb-4 text-sm font-semibold text-foreground">{t('body.metrics.newRecord')}</h3>
               <MetricForm
                 onSubmit={handleAdd}
                 onCancel={metrics.length > 0 ? () => setShowAddForm(false) : undefined}
-                submitLabel="Enregistrer le relevé"
+                submitLabel={t('body.metrics.submitLabelNew')}
                 getColor={getColor}
                 setColor={setColor}
               />
@@ -755,7 +759,7 @@ function MetricsTab() {
               className="flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
             >
               <Plus className="h-4 w-4" />
-              Ajouter un relevé
+              {t('body.metrics.addRecord')}
             </button>
           )}
         </div>
@@ -763,7 +767,7 @@ function MetricsTab() {
 
       {/* États */}
       {isLoading && (
-        <p className="py-4 text-center text-sm text-muted-foreground">Chargement…</p>
+        <p className="py-4 text-center text-sm text-muted-foreground">{t('common.loading')}</p>
       )}
       {error && (
         <p className="py-4 text-center text-sm text-red-400">{error}</p>
@@ -772,7 +776,7 @@ function MetricsTab() {
       {/* Liste */}
       {metrics.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-foreground">Historique</h3>
+          <h3 className="text-sm font-semibold text-foreground">{t('body.metrics.history')}</h3>
           {metrics.map((m) => (
             <MetricCard key={m.id} metric={m} onEdit={handleEdit} onDelete={deleteMetric} getColor={getColor} />
           ))}
@@ -783,7 +787,7 @@ function MetricsTab() {
       {isEmpty && !showAddForm && (
         <div className="flex flex-col items-center py-10 text-center text-muted-foreground">
           <Scale className="mb-3 h-12 w-12 opacity-20" />
-          <p className="text-sm">Aucun relevé — commence par enregistrer ton premier bilan !</p>
+          <p className="text-sm">{t('body.metrics.empty')}</p>
         </div>
       )}
     </div>
@@ -800,6 +804,7 @@ interface PhotoCardProps {
 }
 
 function PhotoCard({ photo, isBlurred, onClick, onDelete }: PhotoCardProps) {
+  const { t } = useTranslation();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -816,7 +821,7 @@ function PhotoCard({ photo, isBlurred, onClick, onDelete }: PhotoCardProps) {
         <div className="aspect-square overflow-hidden">
           <img
             src={photo.url}
-            alt={PHOTO_TYPE_LABEL[photo.type] ?? photo.type}
+            alt={t(`body.photos.types.${photo.type}`)}
             className={`h-full w-full object-cover transition-transform duration-300 hover:scale-105 ${isBlurred ? 'blur-md' : ''}`}
           />
         </div>
@@ -825,7 +830,7 @@ function PhotoCard({ photo, isBlurred, onClick, onDelete }: PhotoCardProps) {
       {/* Gradient overlay type + date */}
       <div className="pointer-events-none absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-2 pb-1.5 pt-6">
         <p className="text-[11px] font-semibold leading-tight text-white/90">
-          {PHOTO_TYPE_LABEL[photo.type] ?? photo.type}
+          {t(`body.photos.types.${photo.type}`)}
         </p>
         <p className="text-xs leading-tight text-white/60">{fmtShort(photo.date)}</p>
       </div>
@@ -842,21 +847,21 @@ function PhotoCard({ photo, isBlurred, onClick, onDelete }: PhotoCardProps) {
               disabled={deleting}
               className="text-xs font-medium text-red-400 hover:text-red-300 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
             >
-              {deleting ? '…' : 'Oui'}
+              {deleting ? '…' : t('body.photos.confirmDelete')}
             </button>
             <span className="text-xs text-white/30">|</span>
             <button
               onClick={(e) => { e.stopPropagation(); setConfirmDelete(false); }}
               className="text-xs text-white/60 hover:text-white focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
             >
-              Non
+              {t('body.photos.cancelDelete')}
             </button>
           </div>
         ) : (
           <button
             type="button"
             onClick={handleDeleteClick}
-            aria-label="Supprimer la photo"
+            aria-label={t('body.photos.deletePhoto')}
             className="rounded-lg bg-black/40 p-1.5 text-white/60 backdrop-blur-sm transition hover:bg-red-500/30 hover:text-red-400 focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -877,6 +882,7 @@ interface PhotoModalProps {
 }
 
 function PhotoModal({ photo, isBlurred, onClose, onDelete }: PhotoModalProps) {
+  const { t } = useTranslation();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -904,7 +910,7 @@ function PhotoModal({ photo, isBlurred, onClose, onDelete }: PhotoModalProps) {
       >
         <div className="flex items-center gap-2">
           <span id="photo-modal-title" className="rounded-md bg-primary/20 px-2 py-1 text-xs font-medium text-primary">
-            {PHOTO_TYPE_LABEL[photo.type] ?? photo.type}
+            {t(`body.photos.types.${photo.type}`)}
           </span>
           <span className="text-sm text-white/60">{fmtLong(photo.date)}</span>
         </div>
@@ -920,7 +926,7 @@ function PhotoModal({ photo, isBlurred, onClose, onDelete }: PhotoModalProps) {
       <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden px-4">
         <img
           src={photo.url}
-          alt={PHOTO_TYPE_LABEL[photo.type] ?? photo.type}
+          alt={t(`body.photos.types.${photo.type}`)}
           className={`max-h-full max-w-full rounded-xl object-contain transition-all ${isBlurred ? 'blur-xl' : ''}`}
         />
       </div>
@@ -941,13 +947,13 @@ function PhotoModal({ photo, isBlurred, onClose, onDelete }: PhotoModalProps) {
                 disabled={deleting}
                 className="rounded-lg bg-red-500/20 px-4 py-2 text-sm text-red-400 transition hover:bg-red-500/30 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
               >
-                {deleting ? 'Suppression…' : 'Confirmer la suppression'}
+                {deleting ? t('common.deleting') : t('body.photos.deleteConfirmLabel')}
               </button>
               <button
                 onClick={() => setConfirmDelete(false)}
                 className="rounded-lg border border-white/20 px-4 py-2 text-sm text-white/60 transition hover:text-white focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
               >
-                Annuler
+                {t('common.cancel')}
               </button>
             </div>
           ) : (
@@ -956,7 +962,7 @@ function PhotoModal({ photo, isBlurred, onClose, onDelete }: PhotoModalProps) {
               className="flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2 text-sm text-white/50 transition hover:border-red-400/40 hover:text-red-400 focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
             >
               <Trash2 className="h-4 w-4" />
-              Supprimer
+              {t('common.delete')}
             </button>
           )}
         </div>
@@ -974,6 +980,7 @@ interface CompareModalProps {
 }
 
 function CompareModal({ photos, isBlurred, onClose }: CompareModalProps) {
+  const { t } = useTranslation();
   const [photoAId, setPhotoAId] = useState<string>(photos[photos.length - 1]?.id ?? '');
   const [photoBId, setPhotoBId] = useState<string>(photos[0]?.id ?? '');
 
@@ -997,7 +1004,7 @@ function CompareModal({ photos, isBlurred, onClose }: CompareModalProps) {
         className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-4"
         style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
       >
-        <span id="compare-modal-title" className="text-sm font-semibold text-white">Comparaison avant / après</span>
+        <span id="compare-modal-title" className="text-sm font-semibold text-white">{t('body.photos.compareModal.title')}</span>
         <button
           onClick={onClose}
           className="rounded-xl p-2 text-white/60 transition hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
@@ -1009,11 +1016,11 @@ function CompareModal({ photos, isBlurred, onClose }: CompareModalProps) {
       {/* Sélecteurs */}
       <div className="grid shrink-0 grid-cols-2 gap-3 px-4 py-3">
         {([
-          { id: photoAId, setId: setPhotoAId, label: 'Avant' },
-          { id: photoBId, setId: setPhotoBId, label: 'Après' },
-        ] as const).map(({ id, setId, label }) => (
-          <div key={label}>
-            <p className="mb-1 text-[11px] text-white/40">{label}</p>
+          { id: photoAId, setId: setPhotoAId, labelKey: 'before' as const },
+          { id: photoBId, setId: setPhotoBId, labelKey: 'after' as const },
+        ]).map(({ id, setId, labelKey }) => (
+          <div key={labelKey}>
+            <p className="mb-1 text-[11px] text-white/40">{t(`body.photos.compareModal.${labelKey}`)}</p>
             <select
               value={id}
               onChange={(e) => setId(e.target.value)}
@@ -1021,7 +1028,7 @@ function CompareModal({ photos, isBlurred, onClose }: CompareModalProps) {
             >
               {photos.map((p) => (
                 <option key={p.id} value={p.id} className="bg-gray-900">
-                  {fmtShort(p.date)} — {PHOTO_TYPE_LABEL[p.type] ?? p.type}
+                  {fmtShort(p.date)} — {t(`body.photos.types.${p.type}`)}
                 </option>
               ))}
             </select>
@@ -1040,12 +1047,12 @@ function CompareModal({ photos, isBlurred, onClose }: CompareModalProps) {
               <div className="flex min-h-0 flex-1 overflow-hidden rounded-xl bg-white/5">
                 <img
                   src={photo.url}
-                  alt={PHOTO_TYPE_LABEL[photo.type] ?? photo.type}
+                  alt={t(`body.photos.types.${photo.type}`)}
                   className={`h-full w-full object-contain transition-all ${isBlurred ? 'blur-xl' : ''}`}
                 />
               </div>
               <p className="shrink-0 text-center text-xs text-white/50">
-                {fmtShort(photo.date)} · {PHOTO_TYPE_LABEL[photo.type] ?? photo.type}
+                {fmtShort(photo.date)} · {t(`body.photos.types.${photo.type}`)}
               </p>
             </div>
           ) : (
@@ -1053,7 +1060,7 @@ function CompareModal({ photos, isBlurred, onClose }: CompareModalProps) {
               key={i}
               className="flex flex-1 items-center justify-center rounded-xl border border-white/10 text-white/30"
             >
-              <p className="text-xs">Aucune photo</p>
+              <p className="text-xs">{t('body.photos.noPhoto')}</p>
             </div>
           ),
         )}
@@ -1065,6 +1072,7 @@ function CompareModal({ photos, isBlurred, onClose }: CompareModalProps) {
 // ─── PhotosTab ────────────────────────────────────────────────────────────────
 
 function PhotosTab() {
+  const { t } = useTranslation();
   const { photos, photosLoading, fetchPhotos, addPhoto, deletePhoto } = useBodyStore();
 
   // Upload form
@@ -1173,7 +1181,7 @@ function PhotosTab() {
         >
           <div className="flex items-center gap-2">
             <Camera className="h-4 w-4 text-primary" />
-            <span className="text-sm font-semibold text-foreground">Nouvelle photo</span>
+            <span className="text-sm font-semibold text-foreground">{t('body.photos.newPhoto')}</span>
           </div>
           <ChevronDown
             className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${showUpload ? 'rotate-180' : ''}`}
@@ -1184,9 +1192,9 @@ function PhotosTab() {
           <form onSubmit={handleSubmit} className="space-y-4 border-t border-border px-4 pb-4 pt-4">
             {/* Sélecteur de type */}
             <div>
-              <p className="mb-2 text-xs text-muted-foreground">Type de photo</p>
+              <p className="mb-2 text-xs text-muted-foreground">{t('body.photos.photoType')}</p>
               <div className="flex flex-wrap gap-2">
-                {PHOTO_TYPES.map(({ value, label }) => (
+                {PHOTO_TYPES.map(({ value }) => (
                   <button
                     key={value}
                     type="button"
@@ -1197,7 +1205,7 @@ function PhotosTab() {
                         : 'border border-border text-muted-foreground hover:text-foreground'
                     }`}
                   >
-                    {label}
+                    {t(`body.photos.types.${value}`)}
                   </button>
                 ))}
               </div>
@@ -1239,10 +1247,10 @@ function PhotosTab() {
                   <Upload className="h-8 w-8 text-muted-foreground/50" />
                   <div className="text-center">
                     <p className="text-sm font-medium text-muted-foreground">
-                      Glisse une photo ou{' '}
-                      <span className="text-primary">clique pour choisir</span>
+                      {t('body.photos.dropHint')}{' '}
+                      <span className="text-primary">{t('body.photos.clickHint')}</span>
                     </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground/60">JPG, PNG, HEIC — max 10 Mo</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground/60">{t('body.photos.fileTypes')}</p>
                   </div>
                 </>
               )}
@@ -1251,7 +1259,7 @@ function PhotosTab() {
             {/* Note */}
             <input
               type="text"
-              placeholder="Note optionnelle…"
+              placeholder={t('body.photos.notePlaceholder')}
               value={note}
               onChange={(e) => setNote(e.target.value)}
               className="h-10 w-full rounded-lg border border-border bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
@@ -1264,7 +1272,7 @@ function PhotosTab() {
               disabled={!selectedFile || uploading}
               className="h-10 w-full rounded-lg bg-primary text-sm font-medium text-white transition hover:bg-primary/90 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
             >
-              {uploading ? 'Envoi en cours…' : 'Enregistrer la photo'}
+              {uploading ? t('body.photos.uploading') : t('body.photos.upload')}
             </button>
           </form>
         )}
@@ -1278,20 +1286,20 @@ function PhotosTab() {
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary/15 py-3 text-sm font-semibold text-primary ring-1 ring-primary/30 transition hover:bg-primary/25 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
         >
           <ArrowLeftRight className="h-4 w-4" />
-          Comparer avant / après
+          {t('body.photos.compare')}
         </button>
       )}
 
       {/* Chargement */}
       {photosLoading && (
-        <p className="py-4 text-center text-sm text-muted-foreground">Chargement…</p>
+        <p className="py-4 text-center text-sm text-muted-foreground">{t('body.photos.loading')}</p>
       )}
 
       {/* État vide */}
       {!photosLoading && photos.length === 0 && (
         <div className="flex flex-col items-center py-10 text-center text-muted-foreground">
           <Camera className="mb-3 h-12 w-12 opacity-20" />
-          <p className="text-sm">Aucune photo — ouvre « Nouvelle photo » pour commencer !</p>
+          <p className="text-sm">{t('body.photos.empty')}</p>
         </div>
       )}
 
@@ -1311,9 +1319,9 @@ function PhotosTab() {
                   : 'border border-border text-muted-foreground hover:text-foreground'
               }`}
             >
-              Tout ({photos.length})
+              {t('body.photos.all', { count: photos.length })}
             </button>
-            {availableTypes.map(({ value, label }) => {
+            {availableTypes.map(({ value }) => {
               const count = photos.filter((p) => p.type === value).length;
               return (
                 <button
@@ -1325,7 +1333,7 @@ function PhotosTab() {
                       : 'border border-border text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  {label} ({count})
+                  {t(`body.photos.types.${value}`)} ({count})
                 </button>
               );
             })}
@@ -1343,8 +1351,8 @@ function PhotosTab() {
             </button>
             <button
               onClick={toggleBlur}
-              aria-label={isBlurred ? 'Afficher les photos' : 'Masquer les photos'}
-              title={isBlurred ? 'Afficher les photos' : 'Masquer les photos'}
+              aria-label={isBlurred ? t('body.photos.showPhotos') : t('body.photos.hidePhotos')}
+              title={isBlurred ? t('body.photos.showPhotos') : t('body.photos.hidePhotos')}
               className={`rounded-lg border p-1.5 transition focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none ${
                 isBlurred
                   ? 'border-primary/40 bg-primary/10 text-primary'
@@ -1360,7 +1368,7 @@ function PhotosTab() {
       {/* Aucun résultat après filtrage */}
       {photos.length > 0 && filteredPhotos.length === 0 && (
         <p className="py-4 text-center text-sm text-muted-foreground">
-          Aucune photo pour ce filtre.
+          {t('body.photos.noFilterResult')}
         </p>
       )}
 
@@ -1411,13 +1419,14 @@ function PhotosTab() {
 type Tab = 'metrics' | 'photos';
 
 export default function Body() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>('metrics');
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-bold text-foreground">Corps</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Suis ta progression physique</p>
+        <h1 className="font-display text-2xl font-bold text-foreground">{t('body.title')}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t('body.subtitle')}</p>
       </div>
 
       {/* Onglets */}
@@ -1431,7 +1440,7 @@ export default function Body() {
           }`}
         >
           <Scale className="h-4 w-4" />
-          Métriques
+          {t('body.tabs.metrics')}
         </button>
         <button
           onClick={() => setTab('photos')}
@@ -1442,7 +1451,7 @@ export default function Body() {
           }`}
         >
           <Camera className="h-4 w-4" />
-          Photos
+          {t('body.tabs.photos')}
         </button>
       </div>
 

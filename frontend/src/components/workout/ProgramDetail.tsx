@@ -4,6 +4,7 @@ import {
   ArrowLeft, ChevronDown, ChevronRight, Clock, Dumbbell,
   Layers, Calendar, Pencil, Trash2, Plus, Info, Swords,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useProgramStore } from '@/stores/programStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
 import { useWorkoutStore } from '@/stores/workoutStore';
@@ -29,12 +30,6 @@ interface ProgramDetailProps {
 
 const LEVEL_REP: Record<Level, number> = { beginner: 1, intermediate: 20, advanced: 50 };
 
-const levelLabels: Record<Level, string> = {
-  beginner: 'Débutant',
-  intermediate: 'Intermédiaire',
-  advanced: 'Avancé',
-};
-
 function tierBadgeStyle(level: Level) {
   const tier = getLevelTier(LEVEL_REP[level] ?? 1);
   return {
@@ -45,6 +40,7 @@ function tierBadgeStyle(level: Level) {
 }
 
 export default function ProgramDetail({ program, onBack, onEdit, onDelete }: ProgramDetailProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { exercises, fetchExercises } = useExerciseStore();
   const startSession = useWorkoutStore((s) => s.start);
@@ -81,7 +77,7 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
         className="font-display flex items-center gap-1.5 self-start text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
-        Retour
+        {t('workout.detail.back')}
       </button>
 
       {/* Header */}
@@ -92,7 +88,7 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
               className="inline-flex w-fit rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider"
               style={tierBadgeStyle(program.level as Level)}
             >
-              {levelLabels[program.level as Level] ?? program.level}
+              {t(`workout.level.${program.level}`)}
             </span>
             <h2 className="font-display text-xl font-black leading-tight text-foreground">
               {program.nameFr}
@@ -105,14 +101,14 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
             <button
               onClick={onEdit}
               className="rounded-lg p-2 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
-              title="Modifier"
+              title={t('workout.detail.edit')}
             >
               <Pencil className="h-4 w-4" />
             </button>
             <button
               onClick={() => setDeleteConfirm(true)}
               className="rounded-lg p-2 text-muted-foreground hover:bg-danger/10 hover:text-red-400 transition-colors"
-              title="Supprimer"
+              title={t('workout.detail.delete')}
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -123,23 +119,23 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
         <div className="flex flex-wrap gap-2">
           <span className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-semibold text-muted-foreground">
             <Calendar className="h-3.5 w-3.5" />
-            {program.daysPerWeek} j/semaine
-            {program.durationWeeks ? ` · ${program.durationWeeks} sem.` : ''}
+            {t('workout.detail.daysPerWeek', { days: program.daysPerWeek })}
+            {program.durationWeeks ? ` · ${t('workout.detail.durationWeeks', { weeks: program.durationWeeks })}` : ''}
           </span>
           <span className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-semibold text-muted-foreground">
             <Dumbbell className="h-3.5 w-3.5" />
-            {program.sessions.length} séance{program.sessions.length !== 1 ? 's' : ''}
+            {t('workout.detail.sessions', { count: program.sessions.length })}
           </span>
           {totalEx > 0 && (
             <span className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-semibold text-muted-foreground">
               <Layers className="h-3.5 w-3.5" />
-              {totalEx} exercices · {totalSets} séries
+              {t('workout.detail.exercisesAndSets', { ex: totalEx, sets: totalSets })}
             </span>
           )}
           {avgMin > 0 && (
             <span className="flex items-center gap-1.5 rounded-lg border border-xp/30 bg-xp/10 px-2.5 py-1.5 text-xs font-semibold text-xp">
               <Clock className="h-3.5 w-3.5" />
-              ~{avgMin} min/séance
+              {t('workout.detail.avgDuration', { min: avgMin })}
             </span>
           )}
         </div>
@@ -148,10 +144,10 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
       {/* Sessions accordion */}
       {program.sessions.length === 0 ? (
         <div className="flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-8 text-center">
-          <p className="text-sm text-muted-foreground">Aucune séance dans ce programme.</p>
+          <p className="text-sm text-muted-foreground">{t('workout.detail.noSessions')}</p>
           <GlowButton variant="primary" size="sm" onClick={onEdit}>
             <Plus className="mr-1.5 h-4 w-4" />
-            Ajouter une séance
+            {t('workout.detail.addSession')}
           </GlowButton>
         </div>
       ) : (
@@ -188,7 +184,7 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
                         {session.nameFr}
                       </p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {session.exercises.length} exercice{session.exercises.length !== 1 ? 's' : ''}
+                        {t('workout.detail.exerciseCount', { count: session.exercises.length })}
                         {sessionMin > 0 ? ` · ${session.exercises.reduce((a, e) => a + e.sets, 0)} séries · ~${sessionMin} min` : ''}
                       </p>
                     </div>
@@ -197,12 +193,12 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
                   {session.exercises.some((e) => e.sets > 0) && (
                     <button
                       onClick={() => launchSession(session)}
-                      title="Lancer la séance"
+                      title={t('workout.detail.launchSession')}
                       className="flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-2 font-display text-xs font-bold uppercase tracking-wide text-white transition-transform active:scale-[0.97]"
                       style={{ borderColor: '#fca5a5', background: 'linear-gradient(180deg,#ef4444,#991b1b)', boxShadow: '0 3px 0 #5b1212' }}
                     >
                       <Swords className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">Lancer</span>
+                      <span className="hidden sm:inline">{t('workout.detail.launch')}</span>
                     </button>
                   )}
                   <button onClick={() => toggleSession(session.id)} className="shrink-0 p-1">
@@ -238,7 +234,7 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
                                 <button
                                   onClick={() => setInfoExercise(ex)}
                                   className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-primary transition-colors"
-                                  title="Voir la fiche exercice"
+                                  title={t('workout.detail.viewInfo')}
                                 >
                                   <Info className="h-3.5 w-3.5" />
                                 </button>
@@ -277,7 +273,7 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
                                 className="shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap"
                                 style={{ border: '1px solid rgba(234,179,8,0.5)', background: 'rgba(234,179,8,0.12)', color: 'rgba(234,179,8,1)' }}
                               >
-                                Repos {se.restAfterExerciseSeconds}s
+                                {t('workout.detail.rest', { secs: se.restAfterExerciseSeconds })}
                               </span>
                               <div
                                 className="flex-1 h-0.5"
@@ -297,7 +293,7 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
                         style={{ borderColor: '#fca5a5', background: 'linear-gradient(180deg,#ef4444,#991b1b)', boxShadow: '0 5px 0 #5b1212' }}
                       >
                         <Swords className="h-4 w-4" />
-                        Lancer la séance
+                        {t('workout.detail.launchSession')}
                       </button>
                     </div>
                   </div>
@@ -317,23 +313,23 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
       {deleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
           <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-2xl">
-            <h3 className="font-display text-lg font-bold text-foreground">Supprimer ce programme ?</h3>
+            <h3 className="font-display text-lg font-bold text-foreground">{t('workout.detail.confirmDeleteTitle')}</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Cette action est irréversible. Toutes les séances associées seront supprimées.
+              {t('workout.detail.confirmDeleteBody')}
             </p>
             <div className="mt-5 flex gap-3">
               <button
                 onClick={() => setDeleteConfirm(false)}
                 className="flex-1 rounded-lg border border-border py-2 text-sm font-semibold text-foreground hover:bg-white/5"
               >
-                Annuler
+                {t('common.cancel')}
               </button>
               <button
                 disabled={isSaving}
                 onClick={() => { setDeleteConfirm(false); onDelete(); }}
                 className="flex-1 rounded-lg bg-danger/80 py-2 text-sm font-semibold text-white hover:bg-danger disabled:opacity-50"
               >
-                Supprimer
+                {t('common.delete')}
               </button>
             </div>
           </div>

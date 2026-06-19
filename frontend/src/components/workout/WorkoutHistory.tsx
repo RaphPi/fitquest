@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Clock, Swords, ChevronDown, Zap, RotateCcw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useWorkoutStore } from '@/stores/workoutStore';
 import { useProgramStore } from '@/stores/programStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
@@ -48,6 +49,7 @@ export function resolveSession(
 
 /** Liste de l'historique des séances terminées (récentes d'abord). */
 export default function WorkoutHistory({ limit, overrideLogs }: Props) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { history, isLoadingHistory, fetchHistory, start } = useWorkoutStore();
   const { programs, fetchPrograms } = useProgramStore();
@@ -76,7 +78,7 @@ export default function WorkoutHistory({ limit, overrideLogs }: Props) {
   if (!overrideLogs && isLoadingHistory && history.length === 0) {
     return (
       <div className="rounded-lg border border-border bg-card p-6 text-center text-sm text-muted-foreground">
-        Chargement de l'historique…
+        {t('workout.history.loading')}
       </div>
     );
   }
@@ -86,13 +88,13 @@ export default function WorkoutHistory({ limit, overrideLogs }: Props) {
       <div className="rounded-lg border border-dashed border-border bg-card p-6 text-center">
         <Swords className="mx-auto mb-2 h-6 w-6 text-muted-foreground" />
         <p className="text-sm text-muted-foreground">
-          Aucune séance enregistrée pour l'instant.
+          {t('workout.history.empty')}
         </p>
         <Link
           to="/workout"
           className="mt-3 inline-block rounded-lg border border-primary px-4 py-2 font-display text-xs font-bold uppercase tracking-widest text-primary transition-all hover:shadow-glow"
         >
-          Lancer ton premier combat ⚔
+          {t('workout.history.firstFight')}
         </Link>
       </div>
     );
@@ -114,7 +116,7 @@ export default function WorkoutHistory({ limit, overrideLogs }: Props) {
       ))}
       {remaining > 0 && (
         <p className="pt-1 text-center text-xs text-muted-foreground">
-          + {remaining} autre{remaining > 1 ? 's' : ''} séance{remaining > 1 ? 's' : ''}
+          {t('workout.history.more', { count: remaining })}
         </p>
       )}
     </div>
@@ -132,6 +134,7 @@ function HistoryItem({
   canRelaunch: boolean;
   onRelaunch: () => void;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const setCount = log.completedSets.length;
 
@@ -189,7 +192,7 @@ function HistoryItem({
       {open && (
         <div className="border-t border-border/60 px-4 py-3">
           {setCount === 0 ? (
-            <p className="text-xs text-muted-foreground">Aucune série enregistrée (séance abandonnée).</p>
+            <p className="text-xs text-muted-foreground">{t('workout.history.abandonedSession')}</p>
           ) : (
             <ul className="space-y-1.5">
               {log.completedSets.map((s) => (

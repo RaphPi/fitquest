@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { ArrowLeft, Plus, Trash2, ChevronUp, ChevronDown, Search, X, Clock, Layers, Info, SlidersHorizontal } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useProgramStore } from '@/stores/programStore';
 import type { ProgramFormData, SessionExerciseInput } from '@/stores/programStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
@@ -31,23 +32,7 @@ interface DraftSession {
   exercises: DraftExercise[];
 }
 
-const levelOptions: { value: Level; label: string }[] = [
-  { value: 'beginner', label: 'Débutant' },
-  { value: 'intermediate', label: 'Intermédiaire' },
-  { value: 'advanced', label: 'Avancé' },
-];
-
-const equipmentOptions: { value: Equipment; label: string }[] = [
-  { value: 'none', label: 'Poids du corps' },
-  { value: 'dumbbells', label: 'Haltères' },
-  { value: 'barbell', label: 'Barre' },
-  { value: 'pull_bar', label: 'Barre de traction' },
-  { value: 'other', label: 'Autre' },
-];
-
-const categoryLabels: Record<Category, string> = {
-  push: 'Push', pull: 'Pull', legs: 'Jambes', core: 'Core', cardio: 'Cardio', back: 'Dos',
-};
+const categories: Category[] = ['push', 'pull', 'legs', 'core', 'cardio', 'back'];
 
 const categoryColors: Record<Category, string> = {
   push: 'border-indigo-500/40 bg-indigo-500/10 text-indigo-300',
@@ -56,11 +41,6 @@ const categoryColors: Record<Category, string> = {
   core: 'border-amber-500/40 bg-amber-500/10 text-amber-300',
   cardio: 'border-red-500/40 bg-red-500/10 text-red-300',
   back: 'border-cyan-500/40 bg-cyan-500/10 text-cyan-300',
-};
-
-const equipmentBadgeLabels: Record<Equipment, string> = {
-  none: 'Corps', dumbbells: 'Haltères', barbell: 'Barre',
-  pull_bar: 'Traction', other: 'Autre',
 };
 
 let _keySeq = 0;
@@ -119,9 +99,24 @@ function deriveEquipment(sessions: DraftSession[], exMap: Map<string, Exercise>)
 }
 
 export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuilderProps) {
+  const { t } = useTranslation();
   const { createProgram, updateProgram, createSession, updateSession, deleteSession } = useProgramStore();
   const { exercises, fetchExercises } = useExerciseStore();
   const exMap = useMemo(() => new Map(exercises.map((e) => [e.id, e])), [exercises]);
+
+  const levelOptions: { value: Level; label: string }[] = [
+    { value: 'beginner', label: t('workout.level.beginner') },
+    { value: 'intermediate', label: t('workout.level.intermediate') },
+    { value: 'advanced', label: t('workout.level.advanced') },
+  ];
+
+  const equipmentOptions: { value: Equipment; label: string }[] = [
+    { value: 'none', label: t('workout.builder.equipmentTypes.none') },
+    { value: 'dumbbells', label: t('workout.builder.equipmentTypes.dumbbells') },
+    { value: 'barbell', label: t('workout.builder.equipmentTypes.barbell') },
+    { value: 'pull_bar', label: t('workout.builder.equipmentTypes.pull_bar') },
+    { value: 'other', label: t('workout.builder.equipmentTypes.other') },
+  ];
 
   const [nameFr, setNameFr] = useState(initial?.nameFr ?? '');
   const [nameEn, setNameEn] = useState(initial?.nameEn ?? '');
@@ -260,12 +255,12 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
 
   const handleSave = async () => {
     if (!nameFr.trim() || !nameEn.trim()) {
-      setSaveError('Le nom du programme est requis (FR et EN)');
+      setSaveError(t('workout.builder.errorNameRequired'));
       return;
     }
     for (const s of sessions) {
       if (!s.nameFr.trim() || !s.nameEn.trim()) {
-        setSaveError('Chaque séance doit avoir un nom (FR et EN)');
+        setSaveError(t('workout.builder.errorSessionName'));
         return;
       }
     }
@@ -327,22 +322,22 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
         className="font-display flex items-center gap-1.5 self-start text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
-        Retour
+        {t('common.back')}
       </button>
 
       <h2 className="font-display text-xl font-black text-foreground">
-        {initial ? 'Modifier le programme' : 'Créer un programme'}
+        {initial ? t('workout.builder.editTitle') : t('workout.builder.createTitle')}
       </h2>
 
       {/* ── Live stats ─────────────────────────────────── */}
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
-        <p className="mb-2 text-xs font-bold uppercase tracking-widest text-primary/70">Estimation temps réel</p>
+        <p className="mb-2 text-xs font-bold uppercase tracking-widest text-primary/70">{t('workout.builder.liveStats')}</p>
         <div className="grid grid-cols-4 gap-2">
           {[
-            { val: sessions.length, lbl: 'Séances' },
-            { val: liveStats.totalEx, lbl: 'Exercices' },
-            { val: liveStats.totalSets, lbl: 'Séries' },
-            { val: liveStats.avgMin > 0 ? `~${liveStats.avgMin}` : '—', lbl: 'min/séance', gold: true },
+            { val: sessions.length, lbl: t('workout.builder.stats.sessions') },
+            { val: liveStats.totalEx, lbl: t('workout.builder.stats.exercises') },
+            { val: liveStats.totalSets, lbl: t('workout.builder.stats.sets') },
+            { val: liveStats.avgMin > 0 ? `~${liveStats.avgMin}` : '—', lbl: t('workout.builder.stats.avgMin'), gold: true },
           ].map(({ val, lbl, gold }) => (
             <div key={lbl} className="flex flex-col items-center rounded-lg border border-border bg-card py-2 px-1">
               <span className={`font-display text-lg font-black ${gold ? 'text-xp' : 'text-primary'}`}>{val}</span>
@@ -354,38 +349,38 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
 
       {/* ── Program info ───────────────────────────────── */}
       <div className="rounded-xl border border-border bg-card p-4 flex flex-col gap-4">
-        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Informations</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('workout.builder.info')}</p>
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1">
-            <label className="text-[11px] text-muted-foreground font-semibold">Nom FR *</label>
+            <label className="text-[11px] text-muted-foreground font-semibold">{t('workout.builder.nameFr')}</label>
             <input value={nameFr} onChange={(e) => setNameFr(e.target.value)}
               placeholder="ex : Full Body Débutant"
               className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[11px] text-muted-foreground font-semibold">Nom EN *</label>
+            <label className="text-[11px] text-muted-foreground font-semibold">{t('workout.builder.nameEn')}</label>
             <input value={nameEn} onChange={(e) => setNameEn(e.target.value)}
               placeholder="ex : Full Body Beginner"
               className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[11px] text-muted-foreground font-semibold">Description FR</label>
+            <label className="text-[11px] text-muted-foreground font-semibold">{t('workout.builder.descFr')}</label>
             <input value={descFr} onChange={(e) => setDescFr(e.target.value)}
               placeholder="Description courte"
               className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[11px] text-muted-foreground font-semibold">Description EN</label>
+            <label className="text-[11px] text-muted-foreground font-semibold">{t('workout.builder.descEn')}</label>
             <input value={descEn} onChange={(e) => setDescEn(e.target.value)}
               placeholder="Short description"
               className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[11px] text-muted-foreground font-semibold">Niveau *</label>
+            <label className="text-[11px] text-muted-foreground font-semibold">{t('workout.builder.level')}</label>
             <select value={level} onChange={(e) => setLevel(e.target.value as Level)}
               className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary/60 focus:outline-none"
             >
@@ -393,16 +388,16 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
             </select>
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[11px] text-muted-foreground font-semibold">Jours / semaine *</label>
+            <label className="text-[11px] text-muted-foreground font-semibold">{t('workout.builder.daysPerWeek')}</label>
             <NumberStepper value={daysPerWeek} min={1} max={7} onChange={setDaysPerWeek} variant="primary" className="w-full" />
           </div>
           <div className="flex flex-col gap-1 col-span-2">
-            <label className="text-[11px] text-muted-foreground font-semibold">Durée (semaines) <span className="font-normal italic text-muted-foreground">— optionnel</span></label>
+            <label className="text-[11px] text-muted-foreground font-semibold">{t('workout.builder.durationWeeks')} <span className="font-normal italic text-muted-foreground">{t('workout.builder.durationWeeksOptional')}</span></label>
             <div className="flex items-center gap-3">
               <NumberStepper value={durationWeeks ? Number(durationWeeks) : 0} min={0} max={52} suffix="sem."
                 onChange={(v) => setDurationWeeks(v === 0 ? '' : String(v))} variant="default" className="w-auto" />
               {durationWeeks && (
-                <button type="button" onClick={() => setDurationWeeks('')} className="text-xs text-muted-foreground underline hover:text-foreground">Effacer</button>
+                <button type="button" onClick={() => setDurationWeeks('')} className="text-xs text-muted-foreground underline hover:text-foreground">{t('workout.builder.clearDuration')}</button>
               )}
             </div>
           </div>
@@ -411,8 +406,8 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
         {/* Equipment — auto-updated but still editable */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <label className="text-[11px] text-muted-foreground font-semibold">Équipement</label>
-            <span className="text-[9px] text-muted-foreground italic">(mis à jour automatiquement)</span>
+            <label className="text-[11px] text-muted-foreground font-semibold">{t('workout.builder.equipment')}</label>
+            <span className="text-[9px] text-muted-foreground italic">{t('workout.builder.equipmentAuto')}</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {equipmentOptions.map((o) => (
@@ -433,13 +428,13 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
       {/* ── Sessions ───────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-          Séances ({sessions.length})
+          {t('workout.builder.sessions', { count: sessions.length })}
         </p>
         <button type="button" onClick={addSession}
           className="flex items-center gap-1 rounded-lg border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary hover:bg-primary/20"
         >
           <Plus className="h-3.5 w-3.5" />
-          Ajouter
+          {t('workout.builder.addSession')}
         </button>
       </div>
 
@@ -495,7 +490,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
               <div className="flex flex-wrap gap-1.5 border-b border-border px-3 py-1.5">
                 {sessionEquipment.map((eq) => (
                   <span key={eq} className="rounded-full border border-border bg-white/5 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
-                    {equipmentBadgeLabels[eq]}
+                    {t(`workout.builder.equipmentTypes.${eq}`)}
                   </span>
                 ))}
               </div>
@@ -520,7 +515,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                             type="button"
                             onClick={() => setInfoExercise(exInfo)}
                             className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-primary transition-colors"
-                            title="Voir la fiche exercice"
+                            title={t('workout.detail.viewInfo')}
                           >
                             <Info className="h-3.5 w-3.5" />
                           </button>
@@ -530,12 +525,12 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                       <div className="flex gap-1 shrink-0">
                         {exCategory && (
                           <span className={`rounded-full border px-1.5 py-0.5 text-[8px] font-bold uppercase ${categoryColors[exCategory]}`}>
-                            {categoryLabels[exCategory]}
+                            {t(`library.category.${exCategory}`)}
                           </span>
                         )}
                         {exEquipment && exEquipment !== 'none' && (
                           <span className="rounded-full border border-border bg-white/5 px-1.5 py-0.5 text-[8px] font-semibold text-muted-foreground">
-                            {equipmentBadgeLabels[exEquipment]}
+                            {t(`workout.builder.equipmentTypes.${exEquipment}`)}
                           </span>
                         )}
                       </div>
@@ -559,7 +554,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                     <div className="ml-6 grid grid-cols-2 gap-x-3 gap-y-2.5">
                       {/* Row 1: Séries | Transition */}
                       <div className="flex flex-col gap-1">
-                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Séries</span>
+                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">{t('workout.builder.sets')}</span>
                         <NumberStepper
                           value={ex.sets} min={1} max={20}
                           onChange={(v) => updateExField(session._key, ex._key, 'sets', v)}
@@ -567,7 +562,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                         />
                       </div>
                       <div className="flex flex-col gap-1">
-                        <span className="text-[9px] font-semibold uppercase tracking-wider text-primary/70">Transition</span>
+                        <span className="text-[9px] font-semibold uppercase tracking-wider text-primary/70">{t('workout.builder.transition')}</span>
                         <NumberStepper
                           value={ex.restBetweenSetsSeconds} min={0} max={300} step={5} suffix="s"
                           onChange={(v) => updateExField(session._key, ex._key, 'restBetweenSetsSeconds', v)}
@@ -578,7 +573,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                       {/* Row 2: Reps/Durée | Repos */}
                       {ex._type === 'reps' ? (
                         <div className="flex flex-col gap-1">
-                          <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Reps</span>
+                          <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">{t('workout.builder.reps')}</span>
                           <NumberStepper
                             value={ex.reps ?? 1} min={1} max={100}
                             onChange={(v) => updateExField(session._key, ex._key, 'reps', v)}
@@ -587,7 +582,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                         </div>
                       ) : (
                         <div className="flex flex-col gap-1">
-                          <span className="text-[9px] font-semibold uppercase tracking-wider text-cyan-400/80">Durée</span>
+                          <span className="text-[9px] font-semibold uppercase tracking-wider text-cyan-400/80">{t('workout.builder.duration')}</span>
                           <NumberStepper
                             value={ex.durationSeconds ?? 30} min={5} max={600} step={5} suffix="s"
                             onChange={(v) => updateExField(session._key, ex._key, 'durationSeconds', v)}
@@ -596,7 +591,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                         </div>
                       )}
                       <div className="flex flex-col gap-1">
-                        <span className="text-[9px] font-semibold uppercase tracking-wider text-xp/70">Repos</span>
+                        <span className="text-[9px] font-semibold uppercase tracking-wider text-xp/70">{t('workout.builder.rest')}</span>
                         <NumberStepper
                           value={ex.restAfterExerciseSeconds} min={0} max={300} step={5} suffix="s"
                           onChange={(v) => updateExField(session._key, ex._key, 'restAfterExerciseSeconds', v)}
@@ -626,7 +621,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                           }}
                         />
                         <span className="text-[9px] font-semibold whitespace-nowrap" style={{ color: 'rgba(234,179,8,1)' }}>
-                          Repos {ex.restAfterExerciseSeconds}s
+                          {t('workout.builder.rest')} {ex.restAfterExerciseSeconds}s
                         </span>
                         <div className="h-0.5 flex-1"
                           style={{
@@ -645,7 +640,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
               className="flex w-full items-center justify-center gap-2 border-t-2 border-primary/40 bg-primary/20 py-3.5 text-sm font-bold font-display uppercase tracking-wider text-primary hover:bg-primary/30 active:bg-primary/40 transition-colors"
             >
               <Plus className="h-4 w-4" />
-              Ajouter un exercice
+              {t('workout.builder.addExercise')}
             </button>
           </div>
         );
@@ -662,10 +657,10 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
         <button type="button" onClick={onBack}
           className="flex-1 rounded-lg border border-border py-2.5 text-sm font-semibold text-foreground hover:bg-white/5 transition-colors"
         >
-          Annuler
+          {t('workout.builder.cancel')}
         </button>
         <GlowButton variant="primary" className="flex-1" onClick={handleSave} disabled={saving}>
-          {saving ? 'Enregistrement…' : initial ? 'Enregistrer' : 'Créer le programme'}
+          {saving ? t('workout.builder.saving') : initial ? t('workout.builder.save') : t('workout.builder.createProgram')}
         </GlowButton>
       </div>
 
@@ -676,7 +671,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
             <div className="flex items-center justify-between border-b border-border p-4">
               <div className="flex items-center gap-2">
                 <Layers className="h-4 w-4 text-primary" />
-                <p className="font-display text-sm font-bold text-foreground">Choisir un exercice</p>
+                <p className="font-display text-sm font-bold text-foreground">{t('workout.builder.picker.title')}</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -689,7 +684,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                   }`}
                 >
                   <SlidersHorizontal className="h-3.5 w-3.5" />
-                  Filtres
+                  {t('common.filters')}
                   {pickerHasFilters && (
                     <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary text-[8px] font-black text-white">
                       {(pickerCategoryFilter ? 1 : 0) + (pickerEquipmentFilter ? 1 : 0)}
@@ -708,7 +703,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   autoFocus value={pickerSearch} onChange={(e) => setPickerSearch(e.target.value)}
-                  placeholder="Rechercher…"
+                  placeholder={t('workout.builder.picker.searchPlaceholder')}
                   className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none"
                 />
               </div>
@@ -718,9 +713,9 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
             {pickerShowFilters && (
               <div className="border-b border-border p-3 space-y-3">
                 <div className="space-y-1.5">
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Catégorie</p>
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">{t('workout.builder.picker.category')}</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {(Object.keys(categoryLabels) as Category[]).map((cat) => (
+                    {categories.map((cat) => (
                       <button key={cat} type="button"
                         onClick={() => setPickerCategoryFilter(pickerCategoryFilter === cat ? null : cat)}
                         className={`rounded-full border px-2 py-0.5 text-xs font-semibold transition-colors ${
@@ -729,13 +724,13 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                             : 'border-border text-muted-foreground hover:text-foreground'
                         }`}
                       >
-                        {categoryLabels[cat]}
+                        {t(`library.category.${cat}`)}
                       </button>
                     ))}
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Équipement</p>
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">{t('workout.builder.picker.equipment')}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {equipmentOptions.map((o) => (
                       <button key={o.value} type="button"
@@ -757,7 +752,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                     onClick={() => { setPickerCategoryFilter(null); setPickerEquipmentFilter(null); }}
                     className="text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
                   >
-                    Effacer les filtres
+                    {t('workout.builder.picker.clearFilters')}
                   </button>
                 )}
               </div>
@@ -766,7 +761,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
             {/* Results */}
             <div className="overflow-y-auto divide-y divide-border">
               {filteredExercises.length === 0 ? (
-                <p className="p-6 text-center text-sm text-muted-foreground">Aucun exercice trouvé</p>
+                <p className="p-6 text-center text-sm text-muted-foreground">{t('workout.builder.picker.noResults')}</p>
               ) : (
                 filteredExercises.map((ex) => (
                   <button key={ex.id} onClick={() => addExerciseToSession(pickerSession, ex)}
@@ -776,11 +771,11 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                       <p className="font-display text-sm font-bold text-foreground">{ex.nameFr}</p>
                       <div className="mt-0.5 flex gap-1.5">
                         <span className={`rounded-full border px-1.5 py-px text-[9px] font-bold uppercase ${categoryColors[ex.category as Category]}`}>
-                          {categoryLabels[ex.category as Category]}
+                          {t(`library.category.${ex.category}`)}
                         </span>
-                        <span className="text-xs text-muted-foreground">{ex.type === 'duration' ? 'Durée' : 'Reps'}</span>
+                        <span className="text-xs text-muted-foreground">{ex.type === 'duration' ? t('workout.builder.picker.typeDuration') : t('workout.builder.picker.typeReps')}</span>
                         {ex.equipment !== 'none' && (
-                          <span className="text-xs text-muted-foreground">{equipmentBadgeLabels[ex.equipment as Equipment]}</span>
+                          <span className="text-xs text-muted-foreground">{t(`workout.builder.equipmentTypes.${ex.equipment}`)}</span>
                         )}
                       </div>
                     </div>

@@ -1,16 +1,14 @@
 // Fiche exercice en lecture seule, utilisée depuis le builder de programme.
 import { X, Info, Lightbulb, Link2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
-import type { Exercise, Category, Equipment, Level } from '@/types';
+import type { Exercise, Category, Level } from '@/types';
 
 interface ExerciseInfoModalProps {
   exercise: Exercise;
   onClose: () => void;
 }
 
-const categoryLabels: Record<Category, string> = {
-  push: 'Push', pull: 'Pull', legs: 'Jambes', core: 'Core', cardio: 'Cardio', back: 'Dos',
-};
 const categoryColors: Record<Category, string> = {
   push: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
   pull: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
@@ -19,18 +17,12 @@ const categoryColors: Record<Category, string> = {
   cardio: 'bg-red-500/20 text-red-300 border-red-500/30',
   back: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
 };
-const equipmentLabels: Record<Equipment, string> = {
-  none: 'Poids du corps', dumbbells: 'Haltères', barbell: 'Barre',
-  pull_bar: 'Barre de traction', other: 'Autre',
-};
-const levelLabels: Record<Level, string> = {
-  beginner: 'Débutant', intermediate: 'Intermédiaire', advanced: 'Avancé',
-};
 const levelColors: Record<Level, string> = {
   beginner: 'text-emerald-400', intermediate: 'text-amber-400', advanced: 'text-red-400',
 };
 
 export default function ExerciseInfoModal({ exercise, onClose }: ExerciseInfoModalProps) {
+  const { t } = useTranslation();
   return (
     <div
       className="fixed inset-0 z-[60] flex items-end justify-center bg-black/75 p-4 sm:items-center"
@@ -42,10 +34,10 @@ export default function ExerciseInfoModal({ exercise, onClose }: ExerciseInfoMod
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap gap-2">
               <span className={cn('rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider', categoryColors[exercise.category])}>
-                {categoryLabels[exercise.category]}
+                {t(`library.category.${exercise.category}`)}
               </span>
               <span className={cn('text-[11px] font-semibold uppercase tracking-wider self-center', levelColors[exercise.level as Level])}>
-                {levelLabels[exercise.level as Level]}
+                {t(`library.level.${exercise.level}`)}
               </span>
             </div>
             <h2 className="font-display text-xl font-black text-foreground">{exercise.nameFr}</h2>
@@ -59,13 +51,13 @@ export default function ExerciseInfoModal({ exercise, onClose }: ExerciseInfoMod
         {/* Body */}
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
           <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-            <span>{equipmentLabels[exercise.equipment as Equipment]}</span>
-            <span>{exercise.type === 'reps' ? 'Répétitions' : 'Durée'}</span>
+            <span>{t(`library.equipment.${exercise.equipment}`)}</span>
+            <span>{t(`library.type.${exercise.type}`)}</span>
           </div>
 
           {/* Muscles */}
           <div className="space-y-2">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Muscles</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('library.detail.muscles')}</p>
             <div className="flex flex-wrap gap-1.5">
               {exercise.musclesPrimary.map((m) => (
                 <span key={m} className="rounded-md bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">{m}</span>
@@ -80,7 +72,7 @@ export default function ExerciseInfoModal({ exercise, onClose }: ExerciseInfoMod
           <div className="space-y-2">
             <div className="flex items-center gap-1.5">
               <Info className="h-4 w-4 text-primary" />
-              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Instructions</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('library.detail.instructions')}</p>
             </div>
             <p className="text-sm leading-relaxed text-foreground">{exercise.instructionsFr}</p>
           </div>
@@ -90,7 +82,7 @@ export default function ExerciseInfoModal({ exercise, onClose }: ExerciseInfoMod
             <div className="space-y-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
               <div className="flex items-center gap-1.5">
                 <Lightbulb className="h-4 w-4 text-amber-400" />
-                <p className="text-xs font-bold uppercase tracking-widest text-amber-400">Conseil</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-amber-400">{t('library.detail.tips')}</p>
               </div>
               <p className="text-sm leading-relaxed text-foreground">{exercise.tipsFr}</p>
             </div>
@@ -99,7 +91,7 @@ export default function ExerciseInfoModal({ exercise, onClose }: ExerciseInfoMod
           {exercise.variations.length > 0 && (
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <Link2 className="h-4 w-4" />
-              <p className="text-xs">{exercise.variations.length} variante{exercise.variations.length > 1 ? 's' : ''}</p>
+              <p className="text-xs">{t('library.detail.variations', { count: exercise.variations.length })}</p>
             </div>
           )}
         </div>
@@ -110,7 +102,7 @@ export default function ExerciseInfoModal({ exercise, onClose }: ExerciseInfoMod
             onClick={onClose}
             className="w-full rounded-lg border border-border py-2 text-sm font-semibold text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors"
           >
-            Fermer
+            {t('library.detail.close')}
           </button>
         </div>
       </div>

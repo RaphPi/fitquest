@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Dumbbell, User, Zap, Info, Lightbulb, Link2, Pencil, Trash2, Trophy } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type { Exercise, Category, Equipment, Level } from '@/types';
 import type { ExercisePR } from '@/stores/exerciseStore';
@@ -14,10 +15,6 @@ interface ExerciseDetailProps {
   isDeleting?: boolean;
 }
 
-const categoryLabels: Record<Category, string> = {
-  push: 'Push', pull: 'Pull', legs: 'Jambes', core: 'Core', cardio: 'Cardio', back: 'Dos',
-};
-
 const categoryColors: Record<Category, string> = {
   push: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
   pull: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
@@ -31,20 +28,12 @@ const equipmentIcons: Record<Equipment, typeof Dumbbell> = {
   none: User, dumbbells: Dumbbell, barbell: Dumbbell, pull_bar: Zap, other: Dumbbell,
 };
 
-const equipmentLabels: Record<Equipment, string> = {
-  none: 'Poids du corps', dumbbells: 'Haltères', barbell: 'Barre',
-  pull_bar: 'Barre de traction', other: 'Autre',
-};
-
-const levelLabels: Record<Level, string> = {
-  beginner: 'Débutant', intermediate: 'Intermédiaire', advanced: 'Avancé',
-};
-
 const levelColors: Record<Level, string> = {
   beginner: 'text-emerald-400', intermediate: 'text-amber-400', advanced: 'text-red-400',
 };
 
 export default function ExerciseDetail({ exercise, pr, onClose, onEdit, onDelete, isDeleting }: ExerciseDetailProps) {
+  const { t } = useTranslation();
   const EquipIcon = equipmentIcons[exercise.equipment];
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -69,10 +58,10 @@ export default function ExerciseDetail({ exercise, pr, onClose, onEdit, onDelete
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap gap-2">
               <span className={cn('rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider', categoryColors[exercise.category])}>
-                {categoryLabels[exercise.category]}
+                {t(`library.category.${exercise.category}`)}
               </span>
               <span className={cn('text-[11px] font-semibold uppercase tracking-wider self-center', levelColors[exercise.level])}>
-                {levelLabels[exercise.level]}
+                {t(`library.level.${exercise.level}`)}
               </span>
             </div>
             <h2 className="font-display text-xl font-black text-foreground">{exercise.nameFr}</h2>
@@ -89,11 +78,11 @@ export default function ExerciseDetail({ exercise, pr, onClose, onEdit, onDelete
           <div className="flex flex-wrap gap-4 text-sm">
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <EquipIcon className="h-4 w-4" />
-              <span>{equipmentLabels[exercise.equipment]}</span>
+              <span>{t(`library.equipment.${exercise.equipment}`)}</span>
             </div>
             <div className="flex items-center gap-1.5 text-muted-foreground">
-              <span className="font-semibold text-foreground">Type :</span>
-              <span>{exercise.type === 'reps' ? 'Répétitions' : 'Durée'}</span>
+              <span className="font-semibold text-foreground">{t('library.detail.type')}</span>
+              <span>{t(`library.type.${exercise.type}`)}</span>
             </div>
           </div>
 
@@ -102,19 +91,19 @@ export default function ExerciseDetail({ exercise, pr, onClose, onEdit, onDelete
             <div className="space-y-2">
               <div className="flex items-center gap-1.5">
                 <Trophy className="h-4 w-4 text-amber-400" />
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Records perso</p>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t('library.detail.personalRecords')}</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {pr!.maxWeightKg != null && pr!.maxWeightKg > 0 && (
                   <div className="flex flex-col items-center rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2">
                     <span className="font-display text-xl font-black leading-none text-amber-300">{pr!.maxWeightKg} kg</span>
-                    <span className="text-xs text-muted-foreground">poids max</span>
+                    <span className="text-xs text-muted-foreground">{t('library.detail.maxWeight')}</span>
                   </div>
                 )}
                 {pr!.maxReps != null && pr!.maxReps > 0 && (
                   <div className="flex flex-col items-center rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2">
                     <span className="font-display text-xl font-black leading-none text-amber-300">{pr!.maxReps}</span>
-                    <span className="text-xs text-muted-foreground">reps max</span>
+                    <span className="text-xs text-muted-foreground">{t('library.detail.maxReps')}</span>
                   </div>
                 )}
               </div>
@@ -123,7 +112,7 @@ export default function ExerciseDetail({ exercise, pr, onClose, onEdit, onDelete
 
           {/* Muscles */}
           <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Muscles</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t('library.detail.muscles')}</p>
             <div className="space-y-1">
               <div className="flex flex-wrap gap-1.5">
                 {exercise.musclesPrimary.map((m) => (
@@ -144,7 +133,7 @@ export default function ExerciseDetail({ exercise, pr, onClose, onEdit, onDelete
           <div className="space-y-2">
             <div className="flex items-center gap-1.5">
               <Info className="h-4 w-4 text-primary" />
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Instructions</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t('library.detail.instructions')}</p>
             </div>
             <p className="text-sm leading-relaxed text-foreground">{exercise.instructionsFr}</p>
           </div>
@@ -154,7 +143,7 @@ export default function ExerciseDetail({ exercise, pr, onClose, onEdit, onDelete
             <div className="space-y-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
               <div className="flex items-center gap-1.5">
                 <Lightbulb className="h-4 w-4 text-amber-400" />
-                <p className="text-xs font-semibold uppercase tracking-widest text-amber-400">Conseil</p>
+                <p className="text-xs font-semibold uppercase tracking-widest text-amber-400">{t('library.detail.tips')}</p>
               </div>
               <p className="text-sm leading-relaxed text-foreground">{exercise.tipsFr}</p>
             </div>
@@ -165,7 +154,7 @@ export default function ExerciseDetail({ exercise, pr, onClose, onEdit, onDelete
             <div className="flex items-center gap-1.5">
               <Link2 className="h-4 w-4 text-muted-foreground" />
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                {exercise.variations.length} variante{exercise.variations.length > 1 ? 's' : ''}
+                {t('library.detail.variations', { count: exercise.variations.length })}
               </p>
             </div>
           )}
@@ -184,23 +173,23 @@ export default function ExerciseDetail({ exercise, pr, onClose, onEdit, onDelete
             )}
           >
             <Trash2 className="h-3.5 w-3.5" />
-            {confirmDelete ? 'Confirmer ?' : 'Supprimer'}
+            {confirmDelete ? t('library.detail.confirmDelete') : t('library.detail.delete')}
           </button>
           {confirmDelete && (
             <button
               onClick={() => setConfirmDelete(false)}
               className="rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground hover:text-foreground"
             >
-              Annuler
+              {t('library.detail.cancel')}
             </button>
           )}
           <div className="flex-1" />
           <GlowButton variant="primary" size="sm" onClick={onEdit}>
             <Pencil className="mr-1.5 h-3.5 w-3.5" />
-            Modifier
+            {t('library.detail.edit')}
           </GlowButton>
           <GlowButton variant="primary" size="sm" onClick={onClose} className="bg-transparent border-border text-muted-foreground hover:text-foreground hover:shadow-none">
-            Fermer
+            {t('library.detail.close')}
           </GlowButton>
         </div>
       </div>

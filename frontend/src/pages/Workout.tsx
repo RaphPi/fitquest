@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Plus, Search, X, SlidersHorizontal } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useProgramStore } from '@/stores/programStore';
 import type { Program, Level } from '@/types';
 import ProgramCard from '@/components/workout/ProgramCard';
@@ -9,21 +10,23 @@ import GlowButton from '@/components/ui/GlowButton';
 import { estimateProgramMinutes } from '@/lib/duration';
 
 type View = 'list' | 'detail' | 'builder';
-
-const levelOptions: { value: Level; label: string }[] = [
-  { value: 'beginner', label: 'Débutant' },
-  { value: 'intermediate', label: 'Intermédiaire' },
-  { value: 'advanced', label: 'Avancé' },
-];
-
 type DurationFilter = 'any' | 'short' | 'medium' | 'long';
-const durationOptions: { value: DurationFilter; label: string }[] = [
-  { value: 'short', label: '< 30 min' },
-  { value: 'medium', label: '30–60 min' },
-  { value: 'long', label: '> 60 min' },
-];
 
 export default function Workout() {
+  const { t } = useTranslation();
+
+  const levelOptions: { value: Level; label: string }[] = [
+    { value: 'beginner', label: t('workout.level.beginner') },
+    { value: 'intermediate', label: t('workout.level.intermediate') },
+    { value: 'advanced', label: t('workout.level.advanced') },
+  ];
+
+  const durationOptions: { value: DurationFilter; label: string }[] = [
+    { value: 'short', label: t('workout.duration.short') },
+    { value: 'medium', label: t('workout.duration.medium') },
+    { value: 'long', label: t('workout.duration.long') },
+  ];
+
   const { programs, isLoading, isSaving, error, fetchPrograms, deleteProgram } = useProgramStore();
   const [view, setView] = useState<View>('list');
   const [activeProgram, setActiveProgram] = useState<Program | null>(null);
@@ -135,14 +138,14 @@ export default function Workout() {
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-black text-foreground">Programmes</h1>
+          <h1 className="font-display text-2xl font-black text-foreground">{t('workout.title')}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {isLoading ? 'Chargement…' : `${filtered.length} programme${filtered.length !== 1 ? 's' : ''}`}
+            {isLoading ? t('workout.loading') : t('workout.programCount', { count: filtered.length })}
           </p>
         </div>
         <GlowButton variant="primary" size="sm" onClick={openCreate}>
           <Plus className="mr-1.5 h-4 w-4" />
-          Créer
+          {t('workout.create')}
         </GlowButton>
       </div>
 
@@ -152,7 +155,7 @@ export default function Workout() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Rechercher un programme…"
+            placeholder={t('workout.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-lg border border-border bg-card py-2.5 pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none focus:ring-1 focus:ring-primary/40"
@@ -175,7 +178,7 @@ export default function Workout() {
           }`}
         >
           <SlidersHorizontal className="h-4 w-4" />
-          <span className="hidden sm:inline">Filtres</span>
+          <span className="hidden sm:inline">{t('common.filters')}</span>
           {hasFilters && (
             <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-black text-white">
               {(levelFilter.length > 0 ? 1 : 0) + (durationFilter !== 'any' ? 1 : 0)}
@@ -188,7 +191,7 @@ export default function Workout() {
       {showFilters && (
         <div className="rounded-xl border border-border bg-card p-4 space-y-4">
           <div className="space-y-2">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Niveau</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('workout.filters.level')}</p>
             <div className="flex flex-wrap gap-2">
               {levelOptions.map((o) => (
                 <button
@@ -206,7 +209,7 @@ export default function Workout() {
             </div>
           </div>
           <div className="space-y-2">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Durée de séance</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('workout.filters.duration')}</p>
             <div className="flex flex-wrap gap-2">
               {durationOptions.map((o) => (
                 <button
@@ -225,7 +228,7 @@ export default function Workout() {
           </div>
           {hasFilters && (
             <button onClick={clearFilters} className="text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
-              Effacer les filtres
+              {t('common.clearFilters')}
             </button>
           )}
         </div>
@@ -245,16 +248,16 @@ export default function Workout() {
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-4 py-16 text-center">
           <p className="text-base font-semibold text-foreground">
-            {programs.length === 0 ? 'Aucun programme disponible' : 'Aucun programme trouvé'}
+            {programs.length === 0 ? t('workout.noPrograms') : t('workout.noResults')}
           </p>
           {programs.length === 0 ? (
             <GlowButton variant="primary" size="sm" onClick={openCreate}>
               <Plus className="mr-1.5 h-4 w-4" />
-              Créer le premier programme
+              {t('workout.createFirst')}
             </GlowButton>
           ) : (
             <button onClick={clearFilters} className="text-sm text-primary underline-offset-2 hover:underline">
-              Effacer les filtres
+              {t('common.clearFilters')}
             </button>
           )}
         </div>
@@ -272,7 +275,7 @@ export default function Workout() {
 
       {isSaving && (
         <div className="fixed bottom-20 left-1/2 -translate-x-1/2 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground shadow-lg sm:bottom-4">
-          Enregistrement…
+          {t('workout.saving')}
         </div>
       )}
     </section>

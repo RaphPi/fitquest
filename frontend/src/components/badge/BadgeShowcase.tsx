@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Trophy } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useBadgeStore } from '@/stores/badgeStore';
 import { RARITY_META } from '@/lib/badgeIcons';
 import BadgeIcon from '@/components/badge/BadgeIcon';
@@ -19,6 +20,7 @@ function fmtDate(iso: string): string {
 
 /** Vitrine des trophées : badges groupés par rareté, obtenus en couleur + locked grisés. */
 export default function BadgeShowcase() {
+  const { t } = useTranslation();
   const { badges, isLoading, error, fetchBadges } = useBadgeStore();
   const [selected, setSelected] = useState<BadgeState | null>(null);
 
@@ -37,17 +39,17 @@ export default function BadgeShowcase() {
   const obtainedCount = badges.filter((b) => b.obtained).length;
 
   if (isLoading && badges.length === 0) {
-    return <p className="text-sm text-muted-foreground">Chargement des trophées…</p>;
+    return <p className="text-sm text-muted-foreground">{t('trophees.loading')}</p>;
   }
   if (error && badges.length === 0) {
-    return <p className="text-sm text-red-300">Impossible de charger les trophées : {error}</p>;
+    return <p className="text-sm text-red-300">{t('trophees.loadError', { error })}</p>;
   }
   if (!isLoading && !error && badges.length === 0) {
     return (
       <div className="flex flex-col items-center py-16 text-center text-muted-foreground">
         <Trophy className="mb-4 h-12 w-12 opacity-20" />
-        <p className="text-sm font-semibold">Aucun trophée disponible.</p>
-        <p className="mt-1 text-xs">Complète tes premières séances pour débloquer des badges !</p>
+        <p className="text-sm font-semibold">{t('trophees.empty')}</p>
+        <p className="mt-1 text-xs">{t('trophees.emptyHint')}</p>
       </div>
     );
   }
@@ -56,7 +58,7 @@ export default function BadgeShowcase() {
     <div className="space-y-6">
       <div className="flex items-baseline justify-between">
         <h2 className="font-display text-sm font-bold uppercase tracking-widest text-muted-foreground">
-          Salle des trophées
+          {t('trophees.title')}
         </h2>
         <span className="font-display text-sm text-xp">
           {obtainedCount}<span className="text-muted-foreground"> / {badges.length}</span>
@@ -120,6 +122,7 @@ function BadgeTile({ badge, onClick }: { badge: BadgeState; onClick: () => void 
 }
 
 function BadgeDetailModal({ badge, onClose }: { badge: BadgeState; onClose: () => void }) {
+  const { t } = useTranslation();
   const meta = RARITY_META[badge.rarity];
   const { obtained, progress, unlockedAt } = badge;
   return (
@@ -146,12 +149,12 @@ function BadgeDetailModal({ badge, onClose }: { badge: BadgeState; onClose: () =
 
         {obtained ? (
           <div className="mt-4 rounded-lg border border-success/30 bg-success/5 px-3 py-2 text-[11px] text-success">
-            ✓ Débloqué{unlockedAt ? ` le ${fmtDate(unlockedAt)}` : ''}
+            {unlockedAt ? t('trophees.unlockedAt', { date: fmtDate(unlockedAt) }) : t('trophees.unlocked')}
           </div>
         ) : progress ? (
           <div className="mt-4">
             <div className="mb-1 flex justify-between text-[11px] text-muted-foreground">
-              <span>Progression</span>
+              <span>{t('trophees.progress')}</span>
               <span className="font-display" style={{ color: meta.color }}>
                 {progress.current} / {progress.target}
               </span>
@@ -164,11 +167,11 @@ function BadgeDetailModal({ badge, onClose }: { badge: BadgeState; onClose: () =
             </div>
           </div>
         ) : (
-          <div className="mt-4 text-[11px] italic text-muted-foreground">Encore verrouillé…</div>
+          <div className="mt-4 text-[11px] italic text-muted-foreground">{t('trophees.locked')}</div>
         )}
 
         <button onClick={onClose} className="mt-5 w-full text-xs text-muted-foreground hover:text-foreground">
-          Fermer
+          {t('trophees.close')}
         </button>
       </div>
     </div>

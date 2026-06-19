@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils';
 import type { Program, Level } from '@/types';
 import { getLevelTier } from '@/lib/levelTier';
 import { Calendar, Dumbbell, Clock, ChevronRight, Layers } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
   estimateProgramMinutes,
   countProgramExercises,
@@ -16,12 +17,6 @@ interface ProgramCardProps {
 
 const LEVEL_REP: Record<Level, number> = { beginner: 1, intermediate: 20, advanced: 50 };
 
-const levelLabels: Record<Level, string> = {
-  beginner: 'Débutant',
-  intermediate: 'Intermédiaire',
-  advanced: 'Avancé',
-};
-
 function tierBadgeStyle(level: Level) {
   const tier = getLevelTier(LEVEL_REP[level] ?? 1);
   return {
@@ -32,6 +27,7 @@ function tierBadgeStyle(level: Level) {
 }
 
 export default function ProgramCard({ program, onClick, className }: ProgramCardProps) {
+  const { t } = useTranslation();
   const level = program.level as Level;
   const avgMin = estimateProgramMinutes(program);
   const totalEx = countProgramExercises(program);
@@ -51,7 +47,7 @@ export default function ProgramCard({ program, onClick, className }: ProgramCard
             className="rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider"
             style={tierBadgeStyle(level)}
           >
-            {levelLabels[level] ?? level}
+            {t(`workout.level.${level}`)}
           </span>
           <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
         </div>
@@ -66,22 +62,22 @@ export default function ProgramCard({ program, onClick, className }: ProgramCard
         <div className="flex flex-wrap gap-2">
           <span className="flex items-center gap-1 rounded-lg border border-border bg-background px-2 py-1 text-[11px] font-semibold text-muted-foreground">
             <Calendar className="h-3 w-3" />
-            {program.daysPerWeek} j/sem
+            {t('workout.card.daysPerWeek', { days: program.daysPerWeek })}
           </span>
           <span className="flex items-center gap-1 rounded-lg border border-border bg-background px-2 py-1 text-[11px] font-semibold text-muted-foreground">
             <Dumbbell className="h-3 w-3" />
-            {program.sessions.length} séance{program.sessions.length !== 1 ? 's' : ''}
+            {t('workout.card.sessions', { count: program.sessions.length })}
           </span>
           {totalEx > 0 && (
             <span className="flex items-center gap-1 rounded-lg border border-border bg-background px-2 py-1 text-[11px] font-semibold text-muted-foreground">
               <Layers className="h-3 w-3" />
-              {totalEx} ex · {totalSets} séries
+              {t('workout.card.exercises', { ex: totalEx, sets: totalSets })}
             </span>
           )}
           {avgMin > 0 && (
             <span className="flex items-center gap-1 rounded-lg border border-xp/30 bg-xp/10 px-2 py-1 text-[11px] font-semibold text-xp">
               <Clock className="h-3 w-3" />
-              ~{avgMin} min/séance
+              {t('workout.card.avgDuration', { min: avgMin })}
             </span>
           )}
         </div>

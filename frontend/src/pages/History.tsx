@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, Clock, Zap, Flame, Calendar } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useWorkoutStore } from '@/stores/workoutStore';
 import { useProgramStore } from '@/stores/programStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
@@ -12,8 +13,6 @@ import type { WorkoutLog, Program } from '@/types';
 // ── helpers ─────────────────────────────────────────────────────────────────
 
 type Period = '7' | '30' | '90' | 'all';
-
-const PERIOD_LABELS: Record<Period, string> = { '7': '7j', '30': '30j', '90': '3 mois', all: 'Tout' };
 
 function formatTotalDuration(totalSecs: number): string {
   const h = Math.floor(totalSecs / 3600);
@@ -53,6 +52,7 @@ function uniquePrograms(logs: WorkoutLog[], programs: Program[]) {
 // ── component ────────────────────────────────────────────────────────────────
 
 export default function History() {
+  const { t } = useTranslation();
   const { history, isLoadingHistory, fetchHistory } = useWorkoutStore();
   const { programs, fetchPrograms } = useProgramStore();
   const { exercises, fetchExercises } = useExerciseStore();
@@ -105,30 +105,30 @@ export default function History() {
         >
           <ChevronLeft className="h-4 w-4" />
         </Link>
-        <h1 className="font-display text-xl font-bold">Historique</h1>
-        <span className="ml-auto text-xs text-muted-foreground">{history.length} séance{history.length !== 1 ? 's' : ''}</span>
+        <h1 className="font-display text-xl font-bold">{t('history.title')}</h1>
+        <span className="ml-auto text-xs text-muted-foreground">{t('history.count', { count: history.length })}</span>
       </div>
 
       {/* Stats summary */}
       {history.length > 0 && (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <SummaryTile icon={<Calendar className="h-4 w-4" />} value={String(stats.total)} label="Séances" />
+          <SummaryTile icon={<Calendar className="h-4 w-4" />} value={String(stats.total)} label={t('history.stats.sessions')} />
           <SummaryTile
             icon={<Clock className="h-4 w-4" />}
             value={formatTotalDuration(stats.duration)}
-            label="Durée totale"
+            label={t('history.stats.totalDuration')}
             color="rgba(34,211,238,1)"
           />
           <SummaryTile
             icon={<Zap className="h-4 w-4" />}
             value={String(stats.xp)}
-            label="XP gagnés"
+            label={t('history.stats.xpGained')}
             color="var(--xp)"
           />
           <SummaryTile
             icon={<Flame className="h-4 w-4" />}
             value={user ? String(Math.max(stats.maxStrk, user.streak)) : String(stats.maxStrk)}
-            label="Série max"
+            label={t('history.stats.maxStreak')}
             color="#f97316"
           />
         </div>
@@ -151,7 +151,7 @@ export default function History() {
                     : { color: 'var(--text-secondary)', border: '1px solid transparent' }
                 }
               >
-                {PERIOD_LABELS[p]}
+                {t(`history.periods.${p}`)}
               </button>
             ))}
           </div>
@@ -163,7 +163,7 @@ export default function History() {
               onChange={(e) => setProgramFilter(e.target.value)}
               className="rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             >
-              <option value="">Tous les programmes</option>
+              <option value="">{t('history.allPrograms')}</option>
               {programOptions.map((p) => (
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
@@ -177,7 +177,7 @@ export default function History() {
               onClick={() => { setPeriod('all'); setProgramFilter(''); }}
               className="text-[11px] text-muted-foreground underline-offset-2 hover:underline"
             >
-              Réinitialiser
+              {t('history.reset')}
             </button>
           )}
         </div>
@@ -186,14 +186,14 @@ export default function History() {
       {/* Result count when filtered */}
       {(period !== 'all' || programFilter) && filteredLogs.length !== history.length && (
         <p className="text-xs text-muted-foreground">
-          {filteredLogs.length} séance{filteredLogs.length !== 1 ? 's' : ''} sur {history.length}
+          {t('history.filteredCount', { filtered: filteredLogs.length, total: history.length, count: filteredLogs.length })}
         </p>
       )}
 
       {/* History list */}
       {isLoadingHistory && history.length === 0 ? (
         <div className="rounded-lg border border-border bg-card p-6 text-center text-sm text-muted-foreground">
-          Chargement…
+          {t('history.loading')}
         </div>
       ) : (
         <WorkoutHistory overrideLogs={filteredLogs} />
