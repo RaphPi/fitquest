@@ -632,12 +632,14 @@ function MetricCard({ metric, onEdit, onDelete, getColor }: MetricCardProps) {
             <>
               <button
                 onClick={() => onEdit(metric)}
+                aria-label="Modifier"
                 className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-primary/10 hover:text-primary"
               >
                 <Pencil className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setConfirmDelete(true)}
+                aria-label="Supprimer"
                 className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-red-400/10 hover:text-red-400"
               >
                 <Trash2 className="h-4 w-4" />
@@ -854,6 +856,7 @@ function PhotoCard({ photo, isBlurred, onClick, onDelete }: PhotoCardProps) {
           <button
             type="button"
             onClick={handleDeleteClick}
+            aria-label="Supprimer la photo"
             className="rounded-lg bg-black/40 p-1.5 text-white/60 backdrop-blur-sm transition hover:bg-red-500/30 hover:text-red-400"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -1332,6 +1335,7 @@ function PhotosTab() {
           <div className="flex shrink-0 gap-1.5">
             <button
               onClick={() => setSortOrder((s) => (s === 'desc' ? 'asc' : 'desc'))}
+              aria-label={sortOrder === 'desc' ? 'Plus récentes en premier' : 'Plus anciennes en premier'}
               title={sortOrder === 'desc' ? 'Plus récentes en premier' : 'Plus anciennes en premier'}
               className="flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-xs text-muted-foreground transition hover:text-foreground"
             >
@@ -1339,6 +1343,7 @@ function PhotosTab() {
             </button>
             <button
               onClick={toggleBlur}
+              aria-label={isBlurred ? 'Afficher les photos' : 'Masquer les photos'}
               title={isBlurred ? 'Afficher les photos' : 'Masquer les photos'}
               className={`rounded-lg border p-1.5 transition ${
                 isBlurred

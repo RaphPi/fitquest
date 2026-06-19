@@ -183,7 +183,7 @@ export default function Settings() {
   function toggleWidget(id: WidgetId) {
     if (sidebarWidgets.includes(id)) {
       setSidebarWidgets(sidebarWidgets.filter((w) => w !== id));
-    } else if (sidebarWidgets.length < 4) {
+    } else if (sidebarWidgets.length < 2) {
       setSidebarWidgets([...sidebarWidgets, id]);
     }
   }

@@ -145,6 +145,11 @@ export default function Library() {
         >
           <SlidersHorizontal className="h-4 w-4" />
           <span className="hidden sm:inline">Filtres</span>
+          {(filters.categories.length > 0 || filters.equipments.length > 0 || filters.levels.length > 0) && (
+            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-black text-white">
+              {(filters.categories.length > 0 ? 1 : 0) + (filters.equipments.length > 0 ? 1 : 0) + (filters.levels.length > 0 ? 1 : 0)}
+            </span>
+          )}
         </button>
       </div>
 

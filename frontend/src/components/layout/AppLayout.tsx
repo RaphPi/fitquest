@@ -110,6 +110,7 @@ function Sidebar() {
             key={to}
             to={to}
             end={to === '/'}
+            aria-label={t(`nav.${key}`)}
             className={({ isActive }) =>
               cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition',
@@ -177,7 +178,7 @@ function BottomNav() {
           className={({ isActive }) =>
             cn(
               'flex min-w-0 flex-1 flex-col items-center gap-0.5 px-1 py-1 text-[10px] transition',
-              isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
+              isActive ? 'text-primary bg-primary/10 rounded-lg' : 'text-muted-foreground hover:text-foreground',
             )
           }
         >

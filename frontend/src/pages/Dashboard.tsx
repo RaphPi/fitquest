@@ -71,9 +71,9 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useUserStore();
   const history = useWorkoutStore((s) => s.history);
-  const { programs, fetchPrograms } = useProgramStore();
+  const { programs, fetchPrograms, isLoading: programsLoading } = useProgramStore();
   const { exercises, fetchExercises } = useExerciseStore();
-  const { metrics, fetchMetrics } = useBodyStore();
+  const { metrics, fetchMetrics, isLoading: metricsLoading } = useBodyStore();
 
   const [showExercises, setShowExercises] = useState(false);
 
@@ -115,6 +115,7 @@ export default function Dashboard() {
 
   const hasWeeklyActivity = weeklyData.some((w) => w.count > 0);
   const stageMeta = user ? getAvatarStageMeta(user.level) : null;
+  const isDashboardLoading = programsLoading || metricsLoading;
 
   return (
     <section className="space-y-5">
@@ -153,15 +154,28 @@ export default function Dashboard() {
           />
 
           {/* ── 4 tuiles compact homogènes ── */}
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <StreakCard streak={user.streak} />
-            <StatCard icon={Zap} value={user.totalXP} label="XP total" compact />
-            <StatCard icon={Trophy} value={user.level} label="Niveau" compact />
-            <StatCard icon={Calendar} value={history.length} label="Séances" compact />
-          </div>
+          {isDashboardLoading ? (
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-20 animate-pulse rounded-xl border border-border bg-card" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <StreakCard streak={user.streak} />
+              <StatCard icon={Zap} value={user.totalXP} label="XP total" compact />
+              <StatCard icon={Trophy} value={user.level} label="Niveau" compact />
+              <StatCard icon={Calendar} value={history.length} label="Séances" compact />
+            </div>
+          )}
 
           {/* ── Fréquence + Poids : toujours 2 colonnes ── */}
-          {(hasWeeklyActivity || weightData) && (
+          {isDashboardLoading ? (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="h-28 animate-pulse rounded-lg border border-border bg-card" />
+              <div className="h-28 animate-pulse rounded-lg border border-border bg-card" />
+            </div>
+          ) : (hasWeeklyActivity || weightData) && (
             <div className="grid grid-cols-2 gap-3">
               {hasWeeklyActivity && (
                 <div className="rounded-lg border border-border bg-card p-3">
@@ -217,6 +231,9 @@ export default function Dashboard() {
           )}
 
           {/* ── Prochaine séance ── */}
+          {isDashboardLoading ? (
+            <div className="h-28 animate-pulse rounded-lg border border-border bg-card" />
+          ) : (
           <div className="rounded-lg border border-border bg-card p-4">
             <h2 className="mb-2 font-display text-xs font-bold uppercase tracking-widest text-muted-foreground">
               Prochaine séance
@@ -229,7 +246,8 @@ export default function Dashboard() {
                     <button
                       type="button"
                       onClick={() => setShowExercises((v) => !v)}
-                      title="Voir les exercices"
+                      aria-label={showExercises ? 'Masquer les exercices' : 'Voir les exercices'}
+                      title={showExercises ? 'Masquer les exercices' : 'Voir les exercices'}
                       className="grid h-5 w-5 shrink-0 place-items-center rounded text-muted-foreground transition-colors hover:text-primary-soft"
                     >
                       {showExercises
@@ -289,6 +307,7 @@ export default function Dashboard() {
               </div>
             )}
           </div>
+          )}
         </>
       )}
 
@@ -307,7 +326,15 @@ export default function Dashboard() {
             </Link>
           )}
         </div>
-        <WorkoutHistory limit={5} />
+        {isDashboardLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-16 animate-pulse rounded-xl border border-border bg-card" />
+            ))}
+          </div>
+        ) : (
+          <WorkoutHistory limit={5} />
+        )}
       </div>
     </section>
   );

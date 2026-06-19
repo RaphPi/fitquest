@@ -28,12 +28,17 @@ export default function XPBar({ current, required, level, animated = true, showL
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-card-shield">
         <div
-          className={`h-full rounded-full shadow-glow ${animated ? 'transition-all duration-700 ease-out' : ''}`}
+          className={`relative overflow-hidden h-full rounded-full shadow-glow ${animated ? 'transition-all duration-700 ease-out' : ''}`}
           style={{
             width: `${pct}%`,
             background: `linear-gradient(to right, ${tier.gradient.from}, ${tier.gradient.to})`,
           }}
-        />
+        >
+          <div
+            className="absolute inset-y-0 w-16 animate-xp-shimmer"
+            style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)' }}
+          />
+        </div>
       </div>
     </div>
   );
