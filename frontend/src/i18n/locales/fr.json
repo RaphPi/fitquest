@@ -19,8 +19,631 @@
     "profile": "Profil",
     "settings": "Réglages"
   },
+  "common": {
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "deleting": "Suppression…",
+    "add": "Ajouter",
+    "close": "Fermer",
+    "confirm": "Confirmer",
+    "create": "Créer",
+    "edit": "Modifier",
+    "back": "Retour",
+    "loading": "Chargement…",
+    "clearFilters": "Effacer les filtres",
+    "clearAllFilters": "Effacer tous les filtres",
+    "reset": "Réinitialiser",
+    "retry": "Réessayer",
+    "filters": "Filtres",
+    "search": "Rechercher…",
+    "error": "Erreur",
+    "unknownError": "Erreur inconnue",
+    "serverError": "Erreur serveur",
+    "irreversible": "Cette action est irréversible.",
+    "confirmDelete_q": "Confirmer ?"
+  },
+  "auth": {
+    "login": {
+      "title": "Connexion",
+      "heroName": "Nom de héros",
+      "heroNamePlaceholder": "ton_pseudo",
+      "password": "Mot de passe",
+      "submit": "Entrer dans l'arène",
+      "submitting": "Connexion…",
+      "noAccount": "Pas encore de compte ?",
+      "createHero": "Créer ton personnage"
+    },
+    "register": {
+      "step": "Étape {{current}} / {{total}}",
+      "continue": "Continuer →",
+      "back": "← Retour",
+      "step0": {
+        "title": "Qui es-tu, héros ?",
+        "subtitle": "Choisis ton nom d'aventurier",
+        "placeholder": "ton_pseudo"
+      },
+      "step1": {
+        "title": "Choisis ton avatar",
+        "subtitle": "Qui représente le mieux ton style ?"
+      },
+      "step2": {
+        "title": "Quel est ton niveau ?",
+        "subtitle": "Sois honnête, ça aide à progresser !",
+        "levels": {
+          "novice": "Novice",
+          "noviceDesc": "Je débute, tout est nouveau pour moi",
+          "warrior": "Guerrier en devenir",
+          "warriorDesc": "Quelques bases, prêt à progresser",
+          "fighter": "Combattant",
+          "fighterDesc": "Expérimenté, je cherche à repousser mes limites"
+        }
+      },
+      "step3": {
+        "title": "Finalise ton profil",
+        "subtitle": "Plus qu'un dernier effort !",
+        "passwordLabel": "Mot de passe *",
+        "passwordPlaceholder": "min. 8 caractères",
+        "emailLabel": "Email",
+        "emailOptional": "(optionnel)",
+        "emailPlaceholder": "hero@exemple.com",
+        "digestLabel": "Synthèse par email",
+        "digestNone": "Jamais",
+        "digestDaily": "Quotidien",
+        "digestWeekly": "Hebdo",
+        "digestMonthly": "Mensuel",
+        "submit": "⚔ Créer mon héros",
+        "submitting": "Création…"
+      },
+      "strength": {
+        "weak": "Faible",
+        "medium": "Moyen",
+        "strong": "Fort"
+      },
+      "finishing": "Ton aventure commence…",
+      "alreadyAccount": "Déjà un compte ?",
+      "login": "Se connecter"
+    }
+  },
   "dashboard": {
     "title": "Tableau de bord",
-    "welcome": "Prêt à monter de niveau ?"
+    "welcome": "Prêt à monter de niveau ?",
+    "weeklyFrequency": "Fréq. hebdo",
+    "currentWeight": "Poids actuel",
+    "nextSession": "Prochaine séance",
+    "recentActivity": "Activité récente",
+    "noActiveProgram": "Aucun programme actif.",
+    "launchProgram": "Lancer un programme",
+    "launch": "Lancer",
+    "seeAll": "Voir tout",
+    "exerciseCount": "{{count}} exercice",
+    "exerciseCount_plural": "{{count}} exercices",
+    "showExercises": "Voir les exercices",
+    "hideExercises": "Masquer les exercices",
+    "stats": {
+      "totalXp": "XP total",
+      "level": "Niveau",
+      "sessions": "Séances"
+    },
+    "tooltip": {
+      "session": "séance",
+      "sessions": "séances"
+    }
+  },
+  "workout": {
+    "title": "Programmes",
+    "create": "Créer",
+    "searchPlaceholder": "Rechercher un programme…",
+    "loading": "Chargement…",
+    "programCount": "{{count}} programme",
+    "programCount_plural": "{{count}} programmes",
+    "noPrograms": "Aucun programme disponible",
+    "noResults": "Aucun programme trouvé",
+    "createFirst": "Créer le premier programme",
+    "saving": "Enregistrement…",
+    "filters": {
+      "level": "Niveau",
+      "duration": "Durée de séance"
+    },
+    "level": {
+      "beginner": "Débutant",
+      "intermediate": "Intermédiaire",
+      "advanced": "Avancé"
+    },
+    "duration": {
+      "short": "< 30 min",
+      "medium": "30–60 min",
+      "long": "> 60 min"
+    },
+    "card": {
+      "daysPerWeek": "{{days}} j/sem",
+      "sessions": "{{count}} séance",
+      "sessions_plural": "{{count}} séances",
+      "exercises": "{{ex}} ex · {{sets}} séries",
+      "avgDuration": "~{{min}} min/séance"
+    },
+    "detail": {
+      "back": "Retour",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "daysPerWeek": "{{days}} j/semaine",
+      "durationWeeks": "{{weeks}} sem.",
+      "sessions": "{{count}} séance",
+      "sessions_plural": "{{count}} séances",
+      "exercisesAndSets": "{{ex}} exercices · {{sets}} séries",
+      "avgDuration": "~{{min}} min/séance",
+      "noSessions": "Aucune séance dans ce programme.",
+      "addSession": "Ajouter une séance",
+      "launch": "Lancer",
+      "launchSession": "Lancer la séance",
+      "viewInfo": "Voir la fiche exercice",
+      "exerciseCount": "{{count}} exercice",
+      "exerciseCount_plural": "{{count}} exercices",
+      "rest": "Repos {{secs}}s",
+      "confirmDeleteTitle": "Supprimer ce programme ?",
+      "confirmDeleteBody": "Cette action est irréversible. Toutes les séances associées seront supprimées."
+    },
+    "builder": {
+      "createTitle": "Créer un programme",
+      "editTitle": "Modifier le programme",
+      "liveStats": "Estimation temps réel",
+      "info": "Informations",
+      "nameFr": "Nom FR *",
+      "nameEn": "Nom EN *",
+      "descFr": "Description FR",
+      "descEn": "Description EN",
+      "level": "Niveau *",
+      "daysPerWeek": "Jours / semaine *",
+      "durationWeeks": "Durée (semaines)",
+      "durationWeeksOptional": "— optionnel",
+      "equipment": "Équipement",
+      "equipmentAuto": "(mis à jour automatiquement)",
+      "clearDuration": "Effacer",
+      "sessions": "Séances ({{count}})",
+      "addSession": "Ajouter",
+      "sets": "Séries",
+      "transition": "Transition",
+      "reps": "Reps",
+      "duration": "Durée",
+      "rest": "Repos",
+      "addExercise": "Ajouter un exercice",
+      "cancel": "Annuler",
+      "saving": "Enregistrement…",
+      "save": "Enregistrer",
+      "createProgram": "Créer le programme",
+      "errorNameRequired": "Le nom du programme est requis (FR et EN)",
+      "errorSessionName": "Chaque séance doit avoir un nom (FR et EN)",
+      "picker": {
+        "title": "Choisir un exercice",
+        "searchPlaceholder": "Rechercher…",
+        "category": "Catégorie",
+        "equipment": "Équipement",
+        "clearFilters": "Effacer les filtres",
+        "noResults": "Aucun exercice trouvé",
+        "typeDuration": "Durée",
+        "typeReps": "Reps"
+      },
+      "stats": {
+        "sessions": "Séances",
+        "exercises": "Exercices",
+        "sets": "Séries",
+        "avgMin": "min/séance"
+      },
+      "equipmentTypes": {
+        "none": "Poids du corps",
+        "dumbbells": "Haltères",
+        "barbell": "Barre",
+        "pull_bar": "Barre de traction",
+        "other": "Autre"
+      }
+    },
+    "history": {
+      "loading": "Chargement de l'historique…",
+      "empty": "Aucune séance enregistrée pour l'instant.",
+      "firstFight": "Lancer ton premier combat ⚔",
+      "more": "+ {{count}} autre séance",
+      "more_plural": "+ {{count}} autres séances",
+      "abandonedSession": "Aucune série enregistrée (séance abandonnée)."
+    }
+  },
+  "activeWorkout": {
+    "exerciseAbbr": "Exo",
+    "hp": "PV",
+    "objective": "Objectif",
+    "seconds": "sec",
+    "reps": "reps",
+    "effortPoints": "pts d'effort",
+    "level": "Niveau {{level}}",
+    "set": "Série {{current}}/{{total}}",
+    "inProgress": "en cours",
+    "sidebarCombat": "Combat",
+    "sidebarSession": "Séance",
+    "statDuration": "Durée",
+    "statTime": "Heure",
+    "statDamage": "Dégâts infligés",
+    "statSets": "Séries faites",
+    "statLastHit": "Dernier coup",
+    "infoBtn": "Fiche",
+    "skipExercise": "Passer l'exo ▸",
+    "strikeBtn": "⚔ PORTER LE COUP",
+    "cancelBtn": "Annuler",
+    "surpass": "✦ SURPASSEMENT ✦",
+    "comboLabel": "COMBO x{{combo}}",
+    "objectiveReached": "🎯 Objectif atteint",
+    "belowTarget": "⚠️ Sous la cible — moins de dégâts",
+    "surpassBonus": "✦ Surpassement ! (+{{extra}}) — magie bonus",
+    "rest": {
+      "forge": "⚒ À LA FORGE",
+      "forgeFlavor": "« Le forgeron répare ton bouclier… »",
+      "breathe": "⏳ REPRENDS TON SOUFFLE",
+      "nextAttack": "Prochaine attaque",
+      "nextSet": "Série {{set}} — {{name}}",
+      "resume": "Reprendre ⚔"
+    },
+    "pause": {
+      "title": "⏸ EN PAUSE",
+      "hint": "Chrono & durée figés — prends ton temps",
+      "resume": "▶ Reprendre",
+      "abandon": "Abandonner"
+    },
+    "done": {
+      "bossDefeated": "BOSS VAINCU !",
+      "bossEscaped": "BIEN BATTU !",
+      "flavorDefeated": "« Impossible… si fort… » — le boss s'effondre.",
+      "flavorEscaped": "« Je pars… mais on se reverra ! » — le boss s'enfuit en boitant.",
+      "calculating": "Calcul des récompenses…",
+      "loot": "Récupérer le butin ▸",
+      "statDamage": "dégâts",
+      "statSets": "séries",
+      "statDuration": "durée"
+    },
+    "levelUp": {
+      "title": "★ LEVEL UP ★",
+      "level": "NIVEAU {{level}}",
+      "multiLevel": "+{{gained}} niveaux d'un coup !"
+    },
+    "bossFight": {
+      "reps": {
+        "cta": "SÉRIE TERMINÉE",
+        "confirmTitle": "RÉPÉTITIONS RÉALISÉES ?",
+        "confirmHint": "Chaque répétition = un coup porté au boss",
+        "unit": "répétitions"
+      },
+      "duration": {
+        "cta": "GAINAGE TERMINÉ",
+        "confirmTitle": "SECONDES TENUES ?",
+        "confirmHint": "Chaque seconde alimente la puissance de ton coup",
+        "unit": "secondes"
+      },
+      "target": "cible {{target}}",
+      "categoryTitles": {
+        "push": "Colosse du Push",
+        "pull": "Titan du Pull",
+        "legs": "Béhémoth des Jambes",
+        "core": "Gardien du Gainage",
+        "cardio": "Spectre du Cardio",
+        "back": "Golem du Dos"
+      }
+    }
+  },
+  "body": {
+    "title": "Corps",
+    "subtitle": "Suis ta progression physique",
+    "tabs": {
+      "metrics": "Métriques",
+      "photos": "Photos"
+    },
+    "metrics": {
+      "weight": "Poids",
+      "waistCm": "Tour de taille",
+      "chestCm": "Poitrine",
+      "bicepCm": "Biceps",
+      "thighCm": "Cuisses",
+      "weightEvolution": "Évolution du poids",
+      "measurements": "Mensurations",
+      "editTitle": "Modifier — {{date}}",
+      "newRecord": "Nouveau relevé",
+      "addRecord": "Ajouter un relevé",
+      "addCustom": "Ajouter une mesure personnalisée",
+      "customMeasures": "Mesures personnalisées",
+      "customNamePlaceholder": "Nom",
+      "customUnitPlaceholder": "unité",
+      "graphColors": "Couleurs dans les graphiques",
+      "history": "Historique",
+      "submitLabel": "Enregistrer",
+      "submitLabelEdit": "Mettre à jour",
+      "submitLabelNew": "Enregistrer le relevé",
+      "saving": "Sauvegarde…",
+      "atLeastOne": "Au moins un champ requis.",
+      "separatedByCommas": "Séparés par des virgules",
+      "empty": "Aucun relevé — commence par enregistrer ton premier bilan !",
+      "noWeightData": "Aucune donnée de poids.",
+      "noMeasureData": "Aucune mensuration enregistrée.",
+      "noMeasureDataSingle": "Aucune donnée pour cette mensuration."
+    },
+    "photos": {
+      "newPhoto": "Nouvelle photo",
+      "photoType": "Type de photo",
+      "dropHint": "Glisse une photo ou",
+      "clickHint": "clique pour choisir",
+      "fileTypes": "JPG, PNG, HEIC — max 10 Mo",
+      "notePlaceholder": "Note optionnelle…",
+      "upload": "Enregistrer la photo",
+      "uploading": "Envoi en cours…",
+      "compare": "Comparer avant / après",
+      "empty": "Aucune photo — ouvre « Nouvelle photo » pour commencer !",
+      "noFilterResult": "Aucune photo pour ce filtre.",
+      "loading": "Chargement…",
+      "all": "Tout ({{count}})",
+      "showPhotos": "Afficher les photos",
+      "hidePhotos": "Masquer les photos",
+      "confirmDelete": "Oui",
+      "cancelDelete": "Non",
+      "deletePhoto": "Supprimer la photo",
+      "deleteConfirmLabel": "Confirmer la suppression",
+      "noPhoto": "Aucune photo",
+      "types": {
+        "front": "Avant",
+        "back": "Arrière",
+        "side": "Profil",
+        "arm": "Bras",
+        "leg": "Jambe",
+        "full": "Corps entier",
+        "other": "Autre"
+      },
+      "compareModal": {
+        "title": "Comparaison avant / après",
+        "before": "Avant",
+        "after": "Après"
+      }
+    }
+  },
+  "library": {
+    "title": "Exercices",
+    "create": "Créer",
+    "loading": "Chargement…",
+    "count": "{{count}} exercice",
+    "count_plural": "{{count}} exercices",
+    "searchPlaceholder": "Rechercher un exercice…",
+    "noResults": "Aucun exercice trouvé",
+    "empty": "Aucun exercice dans la base",
+    "createFirst": "Créer le premier exercice",
+    "filters": {
+      "category": "Catégorie",
+      "equipment": "Équipement",
+      "level": "Niveau"
+    },
+    "category": {
+      "push": "Push",
+      "pull": "Pull",
+      "legs": "Jambes",
+      "core": "Core",
+      "cardio": "Cardio",
+      "back": "Dos"
+    },
+    "equipment": {
+      "none": "Poids du corps",
+      "dumbbells": "Haltères",
+      "barbell": "Barre",
+      "pull_bar": "Barre de traction",
+      "other": "Autre"
+    },
+    "level": {
+      "beginner": "Débutant",
+      "intermediate": "Intermédiaire",
+      "advanced": "Avancé"
+    },
+    "type": {
+      "reps": "Répétitions",
+      "duration": "Durée"
+    },
+    "detail": {
+      "personalRecords": "Records perso",
+      "maxWeight": "poids max",
+      "maxReps": "reps max",
+      "muscles": "Muscles",
+      "instructions": "Instructions",
+      "tips": "Conseil",
+      "type": "Type :",
+      "variations": "{{count}} variante",
+      "variations_plural": "{{count}} variantes",
+      "delete": "Supprimer",
+      "confirmDelete": "Confirmer ?",
+      "cancel": "Annuler",
+      "edit": "Modifier",
+      "close": "Fermer"
+    },
+    "form": {
+      "createTitle": "Nouvel exercice",
+      "editTitle": "Modifier l'exercice",
+      "nameFr": "Nom (FR) *",
+      "nameEn": "Nom (EN)",
+      "nameFrPlaceholder": "Ex : Pompes classiques",
+      "nameEnPlaceholder": "Ex : Push-ups",
+      "category": "Catégorie",
+      "equipment": "Équipement",
+      "level": "Niveau",
+      "type": "Type",
+      "musclesPrimary": "Muscles primaires",
+      "musclesSecondary": "Muscles secondaires",
+      "musclesPrimaryPlaceholder": "Ex : pectoraux, triceps",
+      "musclesSecondaryPlaceholder": "Ex : épaules, abdominaux",
+      "instructionsFr": "Instructions (FR) *",
+      "instructionsEn": "Instructions (EN)",
+      "instructionsFrPlaceholder": "Décrivez l'exécution du mouvement…",
+      "instructionsEnPlaceholder": "Describe the exercise…",
+      "tipsFr": "Conseil (FR)",
+      "tipsEn": "Conseil (EN)",
+      "tipsFrPlaceholder": "Astuce ou conseil de sécurité…",
+      "tipsEnPlaceholder": "Safety tip or advice…",
+      "separatedByCommas": "Séparés par des virgules",
+      "cancel": "Annuler",
+      "saving": "Enregistrement…",
+      "save": "Enregistrer",
+      "create": "Créer",
+      "errorRequired": "Le nom (FR) et les instructions (FR) sont obligatoires."
+    }
+  },
+  "profile": {
+    "title": "Profil",
+    "stage": "Stade {{stage}} / {{total}} — {{tier}}",
+    "nextStage": "Prochain stade au niveau {{level}}.",
+    "ultimateStage": "Stade ultime atteint — tu es une Légende.",
+    "avatarPicker": {
+      "title": "Changer de personnage",
+      "currentClass": "Classe actuelle : {{class}}",
+      "saving": "Sauvegarde…",
+      "save": "Enregistrer",
+      "saved": "Sauvegardé"
+    }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "subtitle": "Personnalise ton expérience de combat.",
+    "sections": {
+      "appearance": "Apparence",
+      "combat": "Combat",
+      "combatHint": "Réglages du mode séance actif.",
+      "account": "Compte",
+      "data": "Données",
+      "dataHint": "Import de contenu externe."
+    },
+    "appearance": {
+      "theme": "Thème",
+      "language": "Langue",
+      "languageFr": "Français",
+      "languageEn": "English",
+      "widgets": "Widgets sidebar",
+      "widgetsHint": "Informations affichées dans la barre latérale. Max 2.",
+      "addPack": "Ajouter un pack",
+      "addPackSoon": "(bientôt)",
+      "addPackTitle": "Packs téléchargeables — bientôt disponible"
+    },
+    "widgetLabels": {
+      "streak": "Série",
+      "xp_remaining": "XP restants",
+      "last_workout": "Dernière séance",
+      "body_weight": "Poids",
+      "badge_progress": "Badge"
+    },
+    "widgetDescs": {
+      "streak": "Jours consécutifs",
+      "xp_remaining": "Prochain niveau",
+      "last_workout": "Jours depuis",
+      "body_weight": "Dernière mesure",
+      "badge_progress": "Prochain trophée"
+    },
+    "combat": {
+      "boss": "Adversaire",
+      "bossHint": "Le boss que tu affrontes pendant tes séances.",
+      "weapon": "Arme",
+      "weaponHint": "Ton arme de prédilection (le bouclier reste constant).",
+      "sound": "Sons de l'application",
+      "soundHint": "Fanfares de victoire, montée de niveau, reprise.",
+      "autoAdvance": "Enchaîner après le repos",
+      "autoAdvanceOn": "La série suivante démarre automatiquement à la fin du repos.",
+      "autoAdvanceOff": "Le repos attend que tu appuies sur « Reprendre »."
+    },
+    "account": {
+      "email": "Adresse e-mail",
+      "emailReadOnly": "Lecture seule",
+      "logout": "Se déconnecter"
+    },
+    "data": {
+      "importJson": "Import JSON",
+      "importJsonHint": "Importe exercices & programmes depuis un fichier lfy_import.json."
+    }
+  },
+  "history": {
+    "title": "Historique",
+    "count": "{{count}} séance",
+    "count_plural": "{{count}} séances",
+    "stats": {
+      "sessions": "Séances",
+      "totalDuration": "Durée totale",
+      "xpGained": "XP gagnés",
+      "maxStreak": "Série max"
+    },
+    "periods": {
+      "7": "7j",
+      "30": "30j",
+      "90": "3 mois",
+      "all": "Tout"
+    },
+    "allPrograms": "Tous les programmes",
+    "reset": "Réinitialiser",
+    "filteredCount": "{{filtered}} séance sur {{total}}",
+    "filteredCount_plural": "{{filtered}} séances sur {{total}}",
+    "loading": "Chargement…"
+  },
+  "trophees": {
+    "title": "Salle des trophées",
+    "subtitle": "Tous tes badges, groupés par rareté.",
+    "backToProfile": "Retour au profil",
+    "loading": "Chargement des trophées…",
+    "empty": "Aucun trophée disponible.",
+    "emptyHint": "Complète tes premières séances pour débloquer des badges !",
+    "loadError": "Impossible de charger les trophées : {{error}}",
+    "progress": "Progression",
+    "locked": "Encore verrouillé…",
+    "unlocked": "✓ Débloqué",
+    "unlockedAt": "✓ Débloqué le {{date}}",
+    "close": "Fermer",
+    "summary": {
+      "title": "Trophées",
+      "seeAll": "Voir tous mes trophées",
+      "empty": "Lance ta première séance pour débloquer des trophées.",
+      "next": "Prochain : {{name}}"
+    }
+  },
+  "import": {
+    "title": "Import JSON",
+    "subtitle": "Importe exercices et programmes depuis un fichier",
+    "backLink": "Réglages",
+    "dropZoneAriaLabel": "Sélectionner un fichier JSON à importer",
+    "dropHint": "Glisse ton fichier ici",
+    "dropSubhint": "ou clique pour sélectionner un .json",
+    "preview": {
+      "title": "Aperçu du fichier",
+      "exercises": "Exercices",
+      "programs": "Programmes",
+      "import": "Importer",
+      "cancel": "Annuler"
+    },
+    "loading": {
+      "title": "Import en cours…",
+      "hint": "La transaction peut prendre quelques secondes."
+    },
+    "success": {
+      "title": "Import réussi",
+      "exercises": "Exercices",
+      "programs": "Programmes",
+      "skipped": "Ignorés",
+      "warnings": "Avertissements",
+      "importAnother": "Importer un autre fichier"
+    },
+    "error": {
+      "title": "Erreur",
+      "notJson": "Le fichier doit être un .json",
+      "invalidJson": "Fichier JSON invalide ou mal formé"
+    },
+    "purge": {
+      "title": "Purger les données LFY",
+      "hint": "Supprime tous les exercices et programmes LFY de la base. À utiliser avant une réimportation pour corriger les données.",
+      "purge": "Purger",
+      "confirm": "Cette action est irréversible. Tous les exercices et programmes LFY seront supprimés.",
+      "confirmBtn": "Confirmer la suppression",
+      "cancel": "Annuler",
+      "purging": "Suppression en cours…",
+      "doneMsg": "{{programs}} programme et {{exercises}} exercice supprimés.",
+      "doneMsg_plural": "{{programs}} programmes et {{exercises}} exercices supprimés.",
+      "reset": "Réinitialiser",
+      "retry": "Réessayer"
+    }
+  },
+  "sidebar": {
+    "level": "Niv",
+    "levelFull": "Niv. {{level}} · {{username}}"
   }
 }
