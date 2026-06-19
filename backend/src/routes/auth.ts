@@ -111,6 +111,37 @@ router.post('/logout', (_req, res) => {
   res.json({ ok: true });
 });
 
+// PATCH /api/v1/auth/me — met à jour le profil (avatarStage)
+router.patch('/me', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const { avatarStage } = req.body as { avatarStage?: unknown };
+
+    if (avatarStage !== undefined) {
+      if (!Number.isInteger(avatarStage) || (avatarStage as number) < 0 || (avatarStage as number) > 3) {
+        res.status(400).json({ error: 'avatarStage doit être entre 0 et 3' });
+        return;
+      }
+    }
+
+    const user = await prisma.user.update({
+      where: { id: req.userId },
+      data: {
+        ...(avatarStage !== undefined && { avatarStage: avatarStage as number }),
+      },
+      select: {
+        id: true, username: true, email: true, avatarStage: true,
+        themeId: true, level: true, totalXP: true, currentXP: true,
+        xpBalance: true, streak: true, lastWorkout: true,
+      },
+    });
+
+    res.json({ user });
+  } catch (err) {
+    console.error('[auth/me PATCH]', err);
+    res.status(500).json({ error: 'Erreur interne du serveur' });
+  }
+});
+
 // GET /api/v1/auth/me — vérifie le cookie et retourne l'utilisateur courant
 router.get('/me', requireAuth, async (req: AuthRequest, res) => {
   try {

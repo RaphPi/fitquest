@@ -1,12 +1,123 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ChevronDown, Check } from 'lucide-react';
 import { useUserStore } from '@/stores/userStore';
 import { getLevelTier, nextTierLevel } from '@/lib/levelTier';
-import { getAvatarStageMeta, avatarClassFromStage, AVATAR_STAGE_COUNT } from '@/lib/avatar';
+import { getAvatarStageMeta, avatarClassFromStage, AVATAR_CLASSES, AVATAR_STAGE_COUNT } from '@/lib/avatar';
 import { xpRequiredForLevel } from '@/lib/xp';
+import { cn } from '@/lib/utils';
 import LevelBadge from '@/components/ui/LevelBadge';
 import XPBar from '@/components/ui/XPBar';
 import Avatar from '@/components/avatar/Avatar';
 import BadgeSummaryTile from '@/components/badge/BadgeSummaryTile';
+
+function AvatarPicker() {
+  const user = useUserStore((s) => s.user);
+  const updateProfile = useUserStore((s) => s.updateProfile);
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<number>(user?.avatarStage ?? 0);
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  if (!user) return null;
+
+  const unchanged = selected === user.avatarStage;
+
+  async function handleSave() {
+    if (unchanged || saving) return;
+    setSaving(true);
+    try {
+      await updateProfile({ avatarStage: selected });
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2000);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-card-shield/30"
+      >
+        <div>
+          <h2 className="font-display text-sm font-bold uppercase tracking-widest">
+            Changer de personnage
+          </h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Classe actuelle : {AVATAR_CLASSES.find((a) => a.id === user.avatarStage)?.labelFr ?? '—'}
+          </p>
+        </div>
+        <ChevronDown
+          className={cn(
+            'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
+            open && 'rotate-180',
+          )}
+        />
+      </button>
+
+      {open && (
+        <div className="border-t border-border p-5">
+          <div className="grid grid-cols-4 gap-3">
+            {AVATAR_CLASSES.map((av) => (
+              <button
+                key={av.id}
+                type="button"
+                onClick={() => setSelected(av.id)}
+                className="flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all duration-200"
+                style={{
+                  borderColor: selected === av.id ? 'var(--accent-soft)' : 'var(--border)',
+                  background: 'var(--bg-shield)',
+                  boxShadow: selected === av.id
+                    ? '0 0 20px color-mix(in srgb, var(--accent-soft) 38%, transparent)'
+                    : undefined,
+                  transform: selected === av.id ? 'scale(1.06)' : undefined,
+                }}
+              >
+                <Avatar
+                  classKey={av.key}
+                  level={1}
+                  bare
+                  size={40}
+                  className="drop-shadow-lg"
+                  style={{
+                    filter: selected === av.id ? 'none' : 'grayscale(0.7) brightness(0.7)',
+                    opacity: selected === av.id ? 1 : 0.65,
+                    transition: 'filter .2s, opacity .2s',
+                  }}
+                />
+                <span
+                  className="text-[10px] font-bold uppercase tracking-wider"
+                  style={{ color: selected === av.id ? 'var(--accent-soft)' : 'var(--text-secondary)' }}
+                >
+                  {av.labelFr}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-4 flex items-center justify-end gap-3">
+            {success && (
+              <span className="flex items-center gap-1 text-xs text-green-400">
+                <Check className="h-3.5 w-3.5" /> Sauvegardé
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => void handleSave()}
+              disabled={unchanged || saving}
+              className="rounded-lg bg-primary px-5 py-2 font-display text-sm font-bold uppercase tracking-widest text-white transition hover:bg-primary/90 disabled:opacity-40"
+            >
+              {saving ? 'Sauvegarde…' : 'Enregistrer'}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -29,11 +140,9 @@ export default function Profile() {
 
       {user && meta && (
         <div className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 sm:gap-8 sm:p-6">
-          {/* Avatar mobile (petit) — le wrapper cache l'ensemble sans conflit avec le style inline d'Avatar */}
           <div className="shrink-0 sm:hidden">
             <Avatar classKey={avatarClassFromStage(user.avatarStage)} level={user.level} size={80} />
           </div>
-          {/* Avatar desktop (grand) */}
           <div className="hidden shrink-0 sm:block">
             <Avatar classKey={avatarClassFromStage(user.avatarStage)} level={user.level} size={150} />
           </div>
@@ -66,6 +175,8 @@ export default function Profile() {
           </div>
         </div>
       )}
+
+      <AvatarPicker />
 
       <BadgeSummaryTile />
     </section>

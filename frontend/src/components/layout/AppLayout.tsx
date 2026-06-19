@@ -10,6 +10,7 @@ import XPBar from '@/components/ui/XPBar';
 import Avatar from '@/components/avatar/Avatar';
 import FitQuestIcon from '@/assets/logo/FitQuestIcon';
 import GlobalBadgeUnlock from '@/components/badge/GlobalBadgeUnlock';
+import SidebarWidgets from './SidebarWidgets';
 import type { ReactNode } from 'react';
 
 // Sidebar : toutes les sections (6)
@@ -123,6 +124,8 @@ function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      <SidebarWidgets />
 
       {/* Bloc héros — sticky bas de sidebar, masque le contenu qui défile */}
       {user && (() => {

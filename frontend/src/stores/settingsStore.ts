@@ -3,10 +3,29 @@ import { applyTheme } from '@/lib/theme';
 import type { Lang, ThemeId } from '@/types';
 import type { BossKey, WeaponKey } from '@/lib/pixelSprites';
 
+export type WidgetId = 'streak' | 'xp_remaining' | 'last_workout' | 'body_weight' | 'badge_progress';
+
 const BOSS_KEY = 'fq_boss';
 const WEAPON_KEY = 'fq_weapon';
 const SOUND_KEY = 'fq_sound';
 const AUTO_REST_KEY = 'fq_autorest';
+const WIDGETS_KEY = 'fq_widgets';
+
+const DEFAULT_WIDGETS: WidgetId[] = ['streak', 'xp_remaining'];
+const ALL_WIDGET_IDS: WidgetId[] = ['streak', 'xp_remaining', 'last_workout', 'body_weight', 'badge_progress'];
+
+function readWidgets(): WidgetId[] {
+  try {
+    const v = localStorage.getItem(WIDGETS_KEY);
+    if (!v) return DEFAULT_WIDGETS;
+    const parsed: unknown = JSON.parse(v);
+    if (!Array.isArray(parsed)) return DEFAULT_WIDGETS;
+    const valid = parsed.filter((x): x is WidgetId => ALL_WIDGET_IDS.includes(x as WidgetId));
+    return valid.length > 0 ? valid.slice(0, 4) : DEFAULT_WIDGETS;
+  } catch {
+    return DEFAULT_WIDGETS;
+  }
+}
 
 function readBoss(): BossKey {
   const v = localStorage.getItem(BOSS_KEY);
@@ -29,16 +48,16 @@ interface SettingsState {
   lang: Lang;
   boss: BossKey;
   weapon: WeaponKey;
-  /** Sons de l'app (fanfares de combat) activés. */
   soundEnabled: boolean;
-  /** Le repos enchaîne automatiquement sur la série suivante à la fin du décompte. */
   autoAdvanceRest: boolean;
+  sidebarWidgets: WidgetId[];
   setTheme: (theme: ThemeId) => void;
   setLang: (lang: Lang) => void;
   setBoss: (boss: BossKey) => void;
   setWeapon: (weapon: WeaponKey) => void;
   setSoundEnabled: (on: boolean) => void;
   setAutoAdvanceRest: (on: boolean) => void;
+  setSidebarWidgets: (widgets: WidgetId[]) => void;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -48,6 +67,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   weapon: readWeapon(),
   soundEnabled: readBool(SOUND_KEY, true),
   autoAdvanceRest: readBool(AUTO_REST_KEY, true),
+  sidebarWidgets: readWidgets(),
   setTheme: (theme) => {
     applyTheme(theme);
     set({ theme });
@@ -68,5 +88,10 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   setAutoAdvanceRest: (on) => {
     localStorage.setItem(AUTO_REST_KEY, on ? '1' : '0');
     set({ autoAdvanceRest: on });
+  },
+  setSidebarWidgets: (widgets) => {
+    const clamped = widgets.slice(0, 4);
+    localStorage.setItem(WIDGETS_KEY, JSON.stringify(clamped));
+    set({ sidebarWidgets: clamped });
   },
 }));

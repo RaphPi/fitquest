@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Volume2, VolumeX, Plus, Lock, LogOut, Mail, ChevronDown, FileJson } from 'lucide-react';
-import { useSettingsStore } from '@/stores/settingsStore';
+import { Volume2, VolumeX, Plus, Lock, LogOut, Mail, ChevronDown, FileJson, Flame, Zap, Clock, Activity, Trophy, Check } from 'lucide-react';
+import { useSettingsStore, type WidgetId } from '@/stores/settingsStore';
 import { useUserStore } from '@/stores/userStore';
 import { cn } from '@/lib/utils';
 import type { ThemeId } from '@/types';
@@ -15,6 +15,50 @@ import {
   type BossKey,
   type WeaponKey,
 } from '@/lib/pixelSprites';
+
+const WIDGET_OPTIONS: {
+  id: WidgetId;
+  label: string;
+  desc: string;
+  icon: React.ReactNode;
+  color: string;
+}[] = [
+  {
+    id: 'streak',
+    label: 'Série',
+    desc: 'Jours consécutifs',
+    icon: <Flame className="h-5 w-5" />,
+    color: 'rgba(249,115,22,1)',
+  },
+  {
+    id: 'xp_remaining',
+    label: 'XP restants',
+    desc: 'Prochain niveau',
+    icon: <Zap className="h-5 w-5" />,
+    color: 'rgba(234,179,8,1)',
+  },
+  {
+    id: 'last_workout',
+    label: 'Dernière séance',
+    desc: 'Jours depuis',
+    icon: <Clock className="h-5 w-5" />,
+    color: 'var(--text-secondary)',
+  },
+  {
+    id: 'body_weight',
+    label: 'Poids',
+    desc: 'Dernière mesure',
+    icon: <Activity className="h-5 w-5" />,
+    color: 'rgba(34,211,238,1)',
+  },
+  {
+    id: 'badge_progress',
+    label: 'Badge',
+    desc: 'Prochain trophée',
+    icon: <Trophy className="h-5 w-5" />,
+    color: 'rgba(99,102,241,1)',
+  },
+];
 
 const THEME_LIST: { id: ThemeId; label: string }[] = [
   { id: 'void_rpg', label: 'Void RPG' },
@@ -133,7 +177,16 @@ export default function Settings() {
   const {
     theme, setTheme, boss, weapon, setBoss, setWeapon,
     soundEnabled, setSoundEnabled, autoAdvanceRest, setAutoAdvanceRest,
+    sidebarWidgets, setSidebarWidgets,
   } = useSettingsStore();
+
+  function toggleWidget(id: WidgetId) {
+    if (sidebarWidgets.includes(id)) {
+      setSidebarWidgets(sidebarWidgets.filter((w) => w !== id));
+    } else if (sidebarWidgets.length < 4) {
+      setSidebarWidgets([...sidebarWidgets, id]);
+    }
+  }
   const user = useUserStore((s) => s.user);
   const logout = useUserStore((s) => s.logout);
 
@@ -199,6 +252,58 @@ export default function Settings() {
               {label}
             </button>
           ))}
+        </div>
+
+        <SubLabel className="mt-5">
+          Widgets sidebar
+          <span className="ml-1 normal-case font-normal text-muted-foreground/60">
+            ({sidebarWidgets.length}/4)
+          </span>
+        </SubLabel>
+        <p className="mb-3 text-xs text-muted-foreground">
+          Informations affichées dans la barre latérale. Max 4.
+        </p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+          {WIDGET_OPTIONS.map((w) => {
+            const active = sidebarWidgets.includes(w.id);
+            const maxed = !active && sidebarWidgets.length >= 4;
+            return (
+              <button
+                key={w.id}
+                type="button"
+                onClick={() => toggleWidget(w.id)}
+                disabled={maxed}
+                className={cn(
+                  'flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all duration-200',
+                  active
+                    ? 'border-primary bg-primary/10 shadow-glow'
+                    : maxed
+                      ? 'cursor-not-allowed border-border opacity-40'
+                      : 'border-border hover:border-primary/40',
+                )}
+              >
+                <div className="relative">
+                  <span style={{ color: active ? w.color : 'var(--text-secondary)' }}>
+                    {w.icon}
+                  </span>
+                  {active && (
+                    <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary">
+                      <Check className="h-2.5 w-2.5 text-white" />
+                    </span>
+                  )}
+                </div>
+                <div className="text-center">
+                  <p
+                    className="text-[11px] font-bold uppercase tracking-wide"
+                    style={{ color: active ? w.color : 'var(--text-secondary)' }}
+                  >
+                    {w.label}
+                  </p>
+                  <p className="text-[9px] text-muted-foreground">{w.desc}</p>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </SectionCard>
 
