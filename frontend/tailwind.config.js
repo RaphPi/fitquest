@@ -41,8 +41,8 @@ export default {
       },
       fontFamily: {
         display: ['VT323', 'Orbitron', 'Rajdhani', 'ui-sans-serif', 'system-ui'],
-        body: ['Inter', 'ui-sans-serif', 'system-ui'],
-        sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+        body: ['VT323', 'Inter', 'ui-sans-serif', 'system-ui'],
+        sans: ['VT323', 'Inter', 'ui-sans-serif', 'system-ui'],
       },
       borderRadius: {
         lg: 'var(--radius)',
