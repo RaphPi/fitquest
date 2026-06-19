@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Trophy } from 'lucide-react';
 import { useBadgeStore } from '@/stores/badgeStore';
 import { RARITY_META } from '@/lib/badgeIcons';
 import BadgeIcon from '@/components/badge/BadgeIcon';
@@ -40,6 +41,15 @@ export default function BadgeShowcase() {
   }
   if (error && badges.length === 0) {
     return <p className="text-sm text-red-300">Impossible de charger les trophées : {error}</p>;
+  }
+  if (!isLoading && !error && badges.length === 0) {
+    return (
+      <div className="flex flex-col items-center py-16 text-center text-muted-foreground">
+        <Trophy className="mb-4 h-12 w-12 opacity-20" />
+        <p className="text-sm font-semibold">Aucun trophée disponible.</p>
+        <p className="mt-1 text-xs">Complète tes premières séances pour débloquer des badges !</p>
+      </div>
+    );
   }
 
   return (

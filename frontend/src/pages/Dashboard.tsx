@@ -259,7 +259,7 @@ export default function Dashboard() {
                       onClick={() => setShowExercises((v) => !v)}
                       aria-label={showExercises ? 'Masquer les exercices' : 'Voir les exercices'}
                       title={showExercises ? 'Masquer les exercices' : 'Voir les exercices'}
-                      className="grid h-5 w-5 shrink-0 place-items-center rounded text-muted-foreground transition-colors hover:text-primary-soft"
+                      className="grid h-5 w-5 shrink-0 place-items-center rounded text-muted-foreground transition-colors hover:text-primary-soft focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
                     >
                       {showExercises
                         ? <ChevronDown className="h-3.5 w-3.5" />
@@ -300,7 +300,7 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={launchNext}
-                  className="flex items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 font-display text-xs font-bold uppercase tracking-widest text-primary-soft transition-all hover:shadow-glow"
+                  className="flex items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 font-display text-xs font-bold uppercase tracking-widest text-primary-soft transition-all hover:shadow-glow focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
                 >
                   <Play className="h-3.5 w-3.5" /> Lancer
                 </button>

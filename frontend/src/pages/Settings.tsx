@@ -117,7 +117,7 @@ function SectionCard({
         onClick={onToggle}
         aria-expanded={open}
         aria-controls={`section-${id}`}
-        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-card-shield/30"
+        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-card-shield/30 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
       >
         <div>
           <h2 className="font-display text-sm font-bold uppercase tracking-widest">{title}</h2>
@@ -224,7 +224,7 @@ export default function Settings() {
               type="button"
               onClick={() => setTheme(th.id)}
               className={cn(
-                'rounded-lg border px-5 py-2.5 font-display text-sm font-bold uppercase tracking-widest transition-all',
+                'rounded-lg border px-5 py-2.5 font-display text-sm font-bold uppercase tracking-widest transition-all focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none',
                 theme === th.id
                   ? 'border-primary text-primary shadow-glow'
                   : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground',
@@ -243,7 +243,7 @@ export default function Settings() {
               type="button"
               onClick={() => handleLang(id)}
               className={cn(
-                'rounded-lg border px-5 py-2.5 font-display text-sm font-bold uppercase tracking-widest transition-all',
+                'rounded-lg border px-5 py-2.5 font-display text-sm font-bold uppercase tracking-widest transition-all focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none',
                 i18n.language === id
                   ? 'border-primary text-primary shadow-glow'
                   : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground',
@@ -274,7 +274,7 @@ export default function Settings() {
                 onClick={() => toggleWidget(w.id)}
                 disabled={maxed}
                 className={cn(
-                  'flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all duration-200',
+                  'flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none',
                   active
                     ? 'border-primary bg-primary/10 shadow-glow'
                     : maxed
@@ -325,7 +325,7 @@ export default function Settings() {
               type="button"
               onClick={() => setBoss(key)}
               className={cn(
-                'flex flex-col items-center gap-2 rounded-lg border p-3 transition-all',
+                'flex flex-col items-center gap-2 rounded-lg border p-3 transition-all focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none',
                 boss === key
                   ? 'border-primary bg-primary/10 shadow-glow'
                   : 'border-border hover:border-primary/40',
@@ -350,7 +350,7 @@ export default function Settings() {
               type="button"
               onClick={() => setWeapon(key)}
               className={cn(
-                'flex flex-col items-center gap-2 rounded-lg border p-3 transition-all',
+                'flex flex-col items-center gap-2 rounded-lg border p-3 transition-all focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none',
                 weapon === key
                   ? 'border-primary bg-primary/10 shadow-glow'
                   : 'border-border hover:border-primary/40',
@@ -417,7 +417,7 @@ export default function Settings() {
           <button
             type="button"
             onClick={() => void handleLogout()}
-            className="flex items-center gap-2 text-sm font-semibold text-red-400 transition-colors hover:text-red-300"
+            className="flex items-center gap-2 text-sm font-semibold text-red-400 transition-colors hover:text-red-300 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
           >
             <LogOut className="h-4 w-4" />
             Se déconnecter

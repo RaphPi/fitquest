@@ -206,7 +206,7 @@ function ColorRow({ colorKey, label, getColor, setColor }: ColorRowProps) {
             key={c}
             type="button"
             onClick={() => setColor(colorKey, c)}
-            className="h-4 w-4 rounded-full transition-transform hover:scale-125"
+            className="h-4 w-4 rounded-full transition-transform hover:scale-125 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
             style={{
               backgroundColor: c,
               outline: current === c ? '2px solid rgba(255,255,255,0.85)' : 'none',
@@ -301,7 +301,7 @@ function MetricForm({
         <button
           type="button"
           onClick={toggleWeight}
-          className={`h-5 w-5 shrink-0 rounded border-2 flex items-center justify-center transition ${
+          className={`h-5 w-5 shrink-0 rounded border-2 flex items-center justify-center transition focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none ${
             form.weightEnabled ? 'border-xp bg-xp/20' : 'border-border'
           }`}
         >
@@ -331,7 +331,7 @@ function MetricForm({
             <button
               type="button"
               onClick={() => toggleMeasure(key)}
-              className={`h-5 w-5 shrink-0 rounded border-2 flex items-center justify-center transition ${
+              className={`h-5 w-5 shrink-0 rounded border-2 flex items-center justify-center transition focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none ${
                 on ? 'border-primary bg-primary/20' : 'border-border'
               }`}
             >
@@ -385,7 +385,7 @@ function MetricForm({
               <button
                 type="button"
                 onClick={() => removeCustom(i)}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border text-muted-foreground transition hover:border-red-400/50 hover:text-red-400"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border text-muted-foreground transition hover:border-red-400/50 hover:text-red-400 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -398,7 +398,7 @@ function MetricForm({
         <button
           type="button"
           onClick={addCustom}
-          className="flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground"
+          className="flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
         >
           <Plus className="h-4 w-4" />
           Ajouter une mesure personnalisée
@@ -431,7 +431,7 @@ function MetricForm({
         <button
           type="submit"
           disabled={saving || !hasAny}
-          className="h-10 flex-1 rounded-lg bg-primary text-sm font-medium text-white transition hover:bg-primary/90 disabled:opacity-40"
+          className="h-10 flex-1 rounded-lg bg-primary text-sm font-medium text-white transition hover:bg-primary/90 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
         >
           {saving ? 'Sauvegarde…' : submitLabel}
         </button>
@@ -439,7 +439,7 @@ function MetricForm({
           <button
             type="button"
             onClick={onCancel}
-            className="h-10 rounded-lg border border-border px-4 text-sm text-muted-foreground transition hover:border-foreground/30 hover:text-foreground"
+            className="h-10 rounded-lg border border-border px-4 text-sm text-muted-foreground transition hover:border-foreground/30 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
           >
             Annuler
           </button>
@@ -617,13 +617,13 @@ function MetricCard({ metric, onEdit, onDelete, getColor }: MetricCardProps) {
             <>
               <button
                 onClick={() => onDelete(metric.id)}
-                className="rounded border border-red-400/40 px-2 py-1 text-xs text-red-400 transition hover:border-red-300/60 hover:text-red-300"
+                className="rounded border border-red-400/40 px-2 py-1 text-xs text-red-400 transition hover:border-red-300/60 hover:text-red-300 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
               >
                 Confirmer
               </button>
               <button
                 onClick={() => setConfirmDelete(false)}
-                className="rounded border border-border px-2 py-1 text-xs text-muted-foreground transition hover:text-foreground"
+                className="rounded border border-border px-2 py-1 text-xs text-muted-foreground transition hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
               >
                 Annuler
               </button>
@@ -633,14 +633,14 @@ function MetricCard({ metric, onEdit, onDelete, getColor }: MetricCardProps) {
               <button
                 onClick={() => onEdit(metric)}
                 aria-label="Modifier"
-                className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-primary/10 hover:text-primary"
+                className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-primary/10 hover:text-primary focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
               >
                 <Pencil className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setConfirmDelete(true)}
                 aria-label="Supprimer"
-                className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-red-400/10 hover:text-red-400"
+                className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-red-400/10 hover:text-red-400 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -752,7 +752,7 @@ function MetricsTab() {
           ) : (
             <button
               onClick={() => setShowAddForm(true)}
-              className="flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground"
+              className="flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
             >
               <Plus className="h-4 w-4" />
               Ajouter un relevé
@@ -812,7 +812,7 @@ function PhotoCard({ photo, isBlurred, onClick, onDelete }: PhotoCardProps) {
 
   return (
     <div className="relative overflow-hidden rounded-xl border border-border bg-card">
-      <button type="button" onClick={onClick} className="block w-full">
+      <button type="button" onClick={onClick} className="block w-full focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none">
         <div className="aspect-square overflow-hidden">
           <img
             src={photo.url}
@@ -840,14 +840,14 @@ function PhotoCard({ photo, isBlurred, onClick, onDelete }: PhotoCardProps) {
             <button
               onClick={handleDeleteClick}
               disabled={deleting}
-              className="text-[10px] font-medium text-red-400 hover:text-red-300 disabled:opacity-40"
+              className="text-[10px] font-medium text-red-400 hover:text-red-300 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
             >
               {deleting ? '…' : 'Oui'}
             </button>
             <span className="text-[10px] text-white/30">|</span>
             <button
               onClick={(e) => { e.stopPropagation(); setConfirmDelete(false); }}
-              className="text-[10px] text-white/60 hover:text-white"
+              className="text-[10px] text-white/60 hover:text-white focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
             >
               Non
             </button>
@@ -857,7 +857,7 @@ function PhotoCard({ photo, isBlurred, onClick, onDelete }: PhotoCardProps) {
             type="button"
             onClick={handleDeleteClick}
             aria-label="Supprimer la photo"
-            className="rounded-lg bg-black/40 p-1.5 text-white/60 backdrop-blur-sm transition hover:bg-red-500/30 hover:text-red-400"
+            className="rounded-lg bg-black/40 p-1.5 text-white/60 backdrop-blur-sm transition hover:bg-red-500/30 hover:text-red-400 focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
@@ -896,21 +896,21 @@ function PhotoModal({ photo, isBlurred, onClose, onDelete }: PhotoModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-black/95">
+    <div role="dialog" aria-modal="true" aria-labelledby="photo-modal-title" className="fixed inset-0 z-50 flex flex-col bg-black/95">
       {/* Header */}
       <div
         className="flex shrink-0 items-center justify-between px-4 py-4"
         style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
       >
         <div className="flex items-center gap-2">
-          <span className="rounded-md bg-primary/20 px-2 py-1 text-xs font-medium text-primary">
+          <span id="photo-modal-title" className="rounded-md bg-primary/20 px-2 py-1 text-xs font-medium text-primary">
             {PHOTO_TYPE_LABEL[photo.type] ?? photo.type}
           </span>
           <span className="text-sm text-white/60">{fmtLong(photo.date)}</span>
         </div>
         <button
           onClick={onClose}
-          className="rounded-xl p-2 text-white/60 transition hover:bg-white/10 hover:text-white"
+          className="rounded-xl p-2 text-white/60 transition hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
         >
           <X className="h-5 w-5" />
         </button>
@@ -939,13 +939,13 @@ function PhotoModal({ photo, isBlurred, onClose, onDelete }: PhotoModalProps) {
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="rounded-lg bg-red-500/20 px-4 py-2 text-sm text-red-400 transition hover:bg-red-500/30 disabled:opacity-40"
+                className="rounded-lg bg-red-500/20 px-4 py-2 text-sm text-red-400 transition hover:bg-red-500/30 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
               >
                 {deleting ? 'Suppression…' : 'Confirmer la suppression'}
               </button>
               <button
                 onClick={() => setConfirmDelete(false)}
-                className="rounded-lg border border-white/20 px-4 py-2 text-sm text-white/60 transition hover:text-white"
+                className="rounded-lg border border-white/20 px-4 py-2 text-sm text-white/60 transition hover:text-white focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
               >
                 Annuler
               </button>
@@ -953,7 +953,7 @@ function PhotoModal({ photo, isBlurred, onClose, onDelete }: PhotoModalProps) {
           ) : (
             <button
               onClick={() => setConfirmDelete(true)}
-              className="flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2 text-sm text-white/50 transition hover:border-red-400/40 hover:text-red-400"
+              className="flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2 text-sm text-white/50 transition hover:border-red-400/40 hover:text-red-400 focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
             >
               <Trash2 className="h-4 w-4" />
               Supprimer
@@ -991,16 +991,16 @@ function CompareModal({ photos, isBlurred, onClose }: CompareModalProps) {
   const photoB = photos.find((p) => p.id === photoBId);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-black/95">
+    <div role="dialog" aria-modal="true" aria-labelledby="compare-modal-title" className="fixed inset-0 z-50 flex flex-col bg-black/95">
       {/* Header */}
       <div
         className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-4"
         style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
       >
-        <span className="text-sm font-semibold text-white">Comparaison avant / après</span>
+        <span id="compare-modal-title" className="text-sm font-semibold text-white">Comparaison avant / après</span>
         <button
           onClick={onClose}
-          className="rounded-xl p-2 text-white/60 transition hover:bg-white/10 hover:text-white"
+          className="rounded-xl p-2 text-white/60 transition hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
         >
           <X className="h-5 w-5" />
         </button>
@@ -1169,7 +1169,7 @@ function PhotosTab() {
         <button
           type="button"
           onClick={() => setShowUpload((s) => !s)}
-          className="flex w-full items-center justify-between px-4 py-3.5 text-left"
+          className="flex w-full items-center justify-between px-4 py-3.5 text-left focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
         >
           <div className="flex items-center gap-2">
             <Camera className="h-4 w-4 text-primary" />
@@ -1191,7 +1191,7 @@ function PhotosTab() {
                     key={value}
                     type="button"
                     onClick={() => setSelectedType(value)}
-                    className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+                    className={`rounded-lg px-3 py-1.5 text-sm font-medium transition focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none ${
                       selectedType === value
                         ? 'bg-primary/15 text-primary ring-1 ring-primary/40'
                         : 'border border-border text-muted-foreground hover:text-foreground'
@@ -1229,7 +1229,7 @@ function PhotosTab() {
                   <button
                     type="button"
                     onClick={clearPreview}
-                    className="absolute -right-2 -top-2 rounded-full bg-card p-1 text-muted-foreground shadow ring-1 ring-border transition hover:text-foreground"
+                    className="absolute -right-2 -top-2 rounded-full bg-card p-1 text-muted-foreground shadow ring-1 ring-border transition hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -1262,7 +1262,7 @@ function PhotosTab() {
             <button
               type="submit"
               disabled={!selectedFile || uploading}
-              className="h-10 w-full rounded-lg bg-primary text-sm font-medium text-white transition hover:bg-primary/90 disabled:opacity-40"
+              className="h-10 w-full rounded-lg bg-primary text-sm font-medium text-white transition hover:bg-primary/90 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
             >
               {uploading ? 'Envoi en cours…' : 'Enregistrer la photo'}
             </button>
@@ -1275,7 +1275,7 @@ function PhotosTab() {
         <button
           type="button"
           onClick={() => setShowCompare(true)}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary/15 py-3 text-sm font-semibold text-primary ring-1 ring-primary/30 transition hover:bg-primary/25 active:scale-[0.98]"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary/15 py-3 text-sm font-semibold text-primary ring-1 ring-primary/30 transition hover:bg-primary/25 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
         >
           <ArrowLeftRight className="h-4 w-4" />
           Comparer avant / après
@@ -1305,7 +1305,7 @@ function PhotosTab() {
           >
             <button
               onClick={() => setFilterType(null)}
-              className={`shrink-0 rounded-lg px-2.5 py-1 text-xs font-medium transition ${
+              className={`shrink-0 rounded-lg px-2.5 py-1 text-xs font-medium transition focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none ${
                 filterType === null
                   ? 'bg-primary/15 text-primary ring-1 ring-primary/30'
                   : 'border border-border text-muted-foreground hover:text-foreground'
@@ -1319,7 +1319,7 @@ function PhotosTab() {
                 <button
                   key={value}
                   onClick={() => setFilterType(filterType === value ? null : value)}
-                  className={`shrink-0 rounded-lg px-2.5 py-1 text-xs font-medium transition ${
+                  className={`shrink-0 rounded-lg px-2.5 py-1 text-xs font-medium transition focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none ${
                     filterType === value
                       ? 'bg-primary/15 text-primary ring-1 ring-primary/30'
                       : 'border border-border text-muted-foreground hover:text-foreground'
@@ -1337,7 +1337,7 @@ function PhotosTab() {
               onClick={() => setSortOrder((s) => (s === 'desc' ? 'asc' : 'desc'))}
               aria-label={sortOrder === 'desc' ? 'Plus récentes en premier' : 'Plus anciennes en premier'}
               title={sortOrder === 'desc' ? 'Plus récentes en premier' : 'Plus anciennes en premier'}
-              className="flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-xs text-muted-foreground transition hover:text-foreground"
+              className="flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-xs text-muted-foreground transition hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
             >
               {sortOrder === 'desc' ? '↓' : '↑'} Date
             </button>
@@ -1345,7 +1345,7 @@ function PhotosTab() {
               onClick={toggleBlur}
               aria-label={isBlurred ? 'Afficher les photos' : 'Masquer les photos'}
               title={isBlurred ? 'Afficher les photos' : 'Masquer les photos'}
-              className={`rounded-lg border p-1.5 transition ${
+              className={`rounded-lg border p-1.5 transition focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none ${
                 isBlurred
                   ? 'border-primary/40 bg-primary/10 text-primary'
                   : 'border-border text-muted-foreground hover:text-foreground'
@@ -1424,7 +1424,7 @@ export default function Body() {
       <div className="flex gap-1 rounded-xl border border-border bg-card p-1">
         <button
           onClick={() => setTab('metrics')}
-          className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition ${
+          className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none ${
             tab === 'metrics'
               ? 'bg-primary/15 text-primary'
               : 'text-muted-foreground hover:text-foreground'
@@ -1435,7 +1435,7 @@ export default function Body() {
         </button>
         <button
           onClick={() => setTab('photos')}
-          className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition ${
+          className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none ${
             tab === 'photos'
               ? 'bg-primary/15 text-primary'
               : 'text-muted-foreground hover:text-foreground'
