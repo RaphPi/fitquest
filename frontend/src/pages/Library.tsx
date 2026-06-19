@@ -41,6 +41,8 @@ export default function Library() {
     filters,
     selectedExercise,
     fetchExercises,
+    fetchPrs,
+    prs,
     fetchExercise,
     createExercise,
     updateExercise,
@@ -58,7 +60,8 @@ export default function Library() {
 
   useEffect(() => {
     fetchExercises();
-  }, [fetchExercises]);
+    fetchPrs();
+  }, [fetchExercises, fetchPrs]);
 
   const results = filteredExercises();
   const hasFilters =
@@ -207,7 +210,7 @@ export default function Library() {
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {results.map((ex) => (
-            <ExerciseCard key={ex.id} exercise={ex} onClick={() => openDetail(ex)} />
+            <ExerciseCard key={ex.id} exercise={ex} pr={prs[ex.id]} onClick={() => openDetail(ex)} />
           ))}
         </div>
       )}
@@ -216,6 +219,7 @@ export default function Library() {
       {modal === 'detail' && selectedExercise && (
         <ExerciseDetail
           exercise={selectedExercise}
+          pr={prs[selectedExercise.id]}
           onClose={closeAll}
           onEdit={() => setModal('edit')}
           onDelete={handleDelete}

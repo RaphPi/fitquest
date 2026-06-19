@@ -12,15 +12,22 @@ export interface ExerciseFilters {
 
 export type ExerciseFormData = Omit<Exercise, 'id' | 'imageUrl' | 'imageAiGen'>;
 
+export interface ExercisePR {
+  maxReps: number | null;
+  maxWeightKg: number | null;
+}
+
 interface ExerciseState {
   exercises: Exercise[];
   selectedExercise: Exercise | null;
+  prs: Record<string, ExercisePR>;
   filters: ExerciseFilters;
   isLoading: boolean;
   isDetailLoading: boolean;
   isSaving: boolean;
   error: string | null;
   fetchExercises: () => Promise<void>;
+  fetchPrs: () => Promise<void>;
   fetchExercise: (id: string) => Promise<void>;
   createExercise: (data: ExerciseFormData) => Promise<Exercise>;
   updateExercise: (id: string, data: Partial<ExerciseFormData>) => Promise<Exercise>;
@@ -53,6 +60,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 export const useExerciseStore = create<ExerciseState>((set, get) => ({
   exercises: [],
   selectedExercise: null,
+  prs: {},
   filters: { ...defaultFilters },
   isLoading: false,
   isDetailLoading: false,
@@ -66,6 +74,15 @@ export const useExerciseStore = create<ExerciseState>((set, get) => ({
       set({ exercises, isLoading: false });
     } catch (e) {
       set({ error: (e as Error).message, isLoading: false });
+    }
+  },
+
+  fetchPrs: async () => {
+    try {
+      const { prs } = await apiFetch<{ prs: Record<string, ExercisePR> }>(`${API}/prs`);
+      set({ prs });
+    } catch {
+      // Les PR sont un enrichissement non-bloquant : on n'expose pas l'erreur.
     }
   },
 

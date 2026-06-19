@@ -1,9 +1,12 @@
 import { cn } from '@/lib/utils';
 import type { Exercise, Category, Equipment, Level } from '@/types';
-import { Dumbbell, User, Zap, ChevronRight } from 'lucide-react';
+import type { ExercisePR } from '@/stores/exerciseStore';
+import { Dumbbell, User, Zap, ChevronRight, Trophy } from 'lucide-react';
+import { formatPr } from '@/lib/formatPr';
 
 interface ExerciseCardProps {
   exercise: Exercise;
+  pr?: ExercisePR;
   onClick: () => void;
   className?: string;
 }
@@ -54,8 +57,9 @@ const levelLabels: Record<Level, string> = {
   advanced: 'Avancé',
 };
 
-export default function ExerciseCard({ exercise, onClick, className }: ExerciseCardProps) {
+export default function ExerciseCard({ exercise, pr, onClick, className }: ExerciseCardProps) {
   const EquipIcon = equipmentIcons[exercise.equipment];
+  const prLabel = formatPr(pr);
 
   return (
     <button
@@ -90,6 +94,13 @@ export default function ExerciseCard({ exercise, onClick, className }: ExerciseC
       </div>
 
       <p className="text-xs text-muted-foreground line-clamp-1">{exercise.musclesPrimary.join(', ')}</p>
+
+      {prLabel && (
+        <span className="inline-flex w-fit items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/15 px-2 py-0.5 text-xs font-bold leading-none text-amber-300">
+          <Trophy className="h-3 w-3" />
+          {prLabel}
+        </span>
+      )}
     </button>
   );
 }

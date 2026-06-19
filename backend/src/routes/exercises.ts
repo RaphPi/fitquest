@@ -33,6 +33,27 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
+// GET /api/v1/exercises/prs — records personnels (max reps & max poids) par exercice
+// Agrégat global en 1 requête : groupBy sur CompletedSet filtré par l'utilisateur courant.
+router.get('/prs', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const grouped = await prisma.completedSet.groupBy({
+      by: ['exerciseId'],
+      where: { log: { userId: req.userId } },
+      _max: { reps: true, weightKg: true },
+    });
+
+    const prs: Record<string, { maxReps: number | null; maxWeightKg: number | null }> = {};
+    for (const g of grouped) {
+      prs[g.exerciseId] = { maxReps: g._max.reps, maxWeightKg: g._max.weightKg };
+    }
+    res.json({ prs });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 // GET /api/v1/exercises/:id
 router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
   const { id } = req.params;

@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { X, Dumbbell, User, Zap, Info, Lightbulb, Link2, Pencil, Trash2 } from 'lucide-react';
+import { X, Dumbbell, User, Zap, Info, Lightbulb, Link2, Pencil, Trash2, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Exercise, Category, Equipment, Level } from '@/types';
+import type { ExercisePR } from '@/stores/exerciseStore';
 import GlowButton from '@/components/ui/GlowButton';
 
 interface ExerciseDetailProps {
   exercise: Exercise;
+  pr?: ExercisePR;
   onClose: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -42,9 +44,11 @@ const levelColors: Record<Level, string> = {
   beginner: 'text-emerald-400', intermediate: 'text-amber-400', advanced: 'text-red-400',
 };
 
-export default function ExerciseDetail({ exercise, onClose, onEdit, onDelete, isDeleting }: ExerciseDetailProps) {
+export default function ExerciseDetail({ exercise, pr, onClose, onEdit, onDelete, isDeleting }: ExerciseDetailProps) {
   const EquipIcon = equipmentIcons[exercise.equipment];
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const hasPr = !!pr && ((pr.maxWeightKg != null && pr.maxWeightKg > 0) || (pr.maxReps != null && pr.maxReps > 0));
 
   const handleDelete = () => {
     if (!confirmDelete) {
@@ -92,6 +96,30 @@ export default function ExerciseDetail({ exercise, onClose, onEdit, onDelete, is
               <span>{exercise.type === 'reps' ? 'Répétitions' : 'Durée'}</span>
             </div>
           </div>
+
+          {/* Records personnels */}
+          {hasPr && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-1.5">
+                <Trophy className="h-4 w-4 text-amber-400" />
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Records perso</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {pr!.maxWeightKg != null && pr!.maxWeightKg > 0 && (
+                  <div className="flex flex-col items-center rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2">
+                    <span className="font-display text-xl font-black leading-none text-amber-300">{pr!.maxWeightKg} kg</span>
+                    <span className="text-xs text-muted-foreground">poids max</span>
+                  </div>
+                )}
+                {pr!.maxReps != null && pr!.maxReps > 0 && (
+                  <div className="flex flex-col items-center rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2">
+                    <span className="font-display text-xl font-black leading-none text-amber-300">{pr!.maxReps}</span>
+                    <span className="text-xs text-muted-foreground">reps max</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Muscles */}
           <div className="space-y-2">
