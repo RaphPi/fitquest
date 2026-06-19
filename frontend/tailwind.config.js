@@ -40,7 +40,7 @@ export default {
         },
       },
       fontFamily: {
-        display: ['Pixelify Sans', 'Orbitron', 'Rajdhani', 'ui-sans-serif', 'system-ui'],
+        display: ['VT323', 'Orbitron', 'Rajdhani', 'ui-sans-serif', 'system-ui'],
         body: ['Inter', 'ui-sans-serif', 'system-ui'],
         sans: ['Inter', 'ui-sans-serif', 'system-ui'],
       },
