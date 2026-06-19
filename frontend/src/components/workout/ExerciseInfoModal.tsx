@@ -65,7 +65,7 @@ export default function ExerciseInfoModal({ exercise, onClose }: ExerciseInfoMod
 
           {/* Muscles */}
           <div className="space-y-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Muscles</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Muscles</p>
             <div className="flex flex-wrap gap-1.5">
               {exercise.musclesPrimary.map((m) => (
                 <span key={m} className="rounded-md bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">{m}</span>
@@ -80,7 +80,7 @@ export default function ExerciseInfoModal({ exercise, onClose }: ExerciseInfoMod
           <div className="space-y-2">
             <div className="flex items-center gap-1.5">
               <Info className="h-4 w-4 text-primary" />
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Instructions</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Instructions</p>
             </div>
             <p className="text-sm leading-relaxed text-foreground">{exercise.instructionsFr}</p>
           </div>
@@ -90,7 +90,7 @@ export default function ExerciseInfoModal({ exercise, onClose }: ExerciseInfoMod
             <div className="space-y-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
               <div className="flex items-center gap-1.5">
                 <Lightbulb className="h-4 w-4 text-amber-400" />
-                <p className="text-[10px] font-bold uppercase tracking-widest text-amber-400">Conseil</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-amber-400">Conseil</p>
               </div>
               <p className="text-sm leading-relaxed text-foreground">{exercise.tipsFr}</p>
             </div>

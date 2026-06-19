@@ -228,7 +228,7 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
                           <div className="px-4 pt-3 pb-2">
                             {/* Exercise header */}
                             <div className="flex items-center gap-2 mb-2.5">
-                              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-primary/10 text-[10px] font-black text-primary">
+                              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-black text-primary">
                                 {eIdx + 1}
                               </span>
                               <span className="font-display text-sm font-bold text-foreground flex-1 min-w-0 truncate">
@@ -244,7 +244,7 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
                                 </button>
                               )}
                               <span
-                                className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black"
+                                className="shrink-0 rounded-full px-2 py-0.5 text-xs font-black"
                                 style={isDuration
                                   ? { border: '1px solid rgba(34,211,238,0.5)', background: 'rgba(34,211,238,0.15)', color: 'rgba(34,211,238,1)' }
                                   : { border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.1)', color: 'white' }
@@ -274,7 +274,7 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
                                 }}
                               />
                               <span
-                                className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap"
+                                className="shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap"
                                 style={{ border: '1px solid rgba(234,179,8,0.5)', background: 'rgba(234,179,8,0.12)', color: 'rgba(234,179,8,1)' }}
                               >
                                 Repos {se.restAfterExerciseSeconds}s

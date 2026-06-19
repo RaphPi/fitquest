@@ -827,7 +827,7 @@ function PhotoCard({ photo, isBlurred, onClick, onDelete }: PhotoCardProps) {
         <p className="text-[11px] font-semibold leading-tight text-white/90">
           {PHOTO_TYPE_LABEL[photo.type] ?? photo.type}
         </p>
-        <p className="text-[10px] leading-tight text-white/60">{fmtShort(photo.date)}</p>
+        <p className="text-xs leading-tight text-white/60">{fmtShort(photo.date)}</p>
       </div>
 
       {/* Bouton supprimer en haut à droite */}
@@ -840,14 +840,14 @@ function PhotoCard({ photo, isBlurred, onClick, onDelete }: PhotoCardProps) {
             <button
               onClick={handleDeleteClick}
               disabled={deleting}
-              className="text-[10px] font-medium text-red-400 hover:text-red-300 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
+              className="text-xs font-medium text-red-400 hover:text-red-300 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
             >
               {deleting ? '…' : 'Oui'}
             </button>
-            <span className="text-[10px] text-white/30">|</span>
+            <span className="text-xs text-white/30">|</span>
             <button
               onClick={(e) => { e.stopPropagation(); setConfirmDelete(false); }}
-              className="text-[10px] text-white/60 hover:text-white focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
+              className="text-xs text-white/60 hover:text-white focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
             >
               Non
             </button>

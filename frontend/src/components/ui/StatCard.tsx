@@ -29,7 +29,7 @@ export default function StatCard({ icon: Icon, value, label, accent = false, com
       </span>
       <span className={cn(
         'uppercase tracking-widest text-muted-foreground',
-        compact ? 'text-[10px] whitespace-nowrap' : 'text-xs',
+        compact ? 'text-xs whitespace-nowrap' : 'text-xs',
       )}>
         {label}
       </span>

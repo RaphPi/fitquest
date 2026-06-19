@@ -162,7 +162,7 @@ function AddPackTile() {
           <Lock className="absolute -bottom-1 -right-1 h-3.5 w-3.5 text-muted-foreground" />
         </div>
       </div>
-      <span className="text-center text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+      <span className="text-center text-xs font-bold uppercase tracking-wide text-muted-foreground">
         Ajouter un pack<br />(bientôt)
       </span>
     </div>
@@ -332,7 +332,7 @@ export default function Settings() {
               )}
             >
               <PixelCanvas className="h-20" render={(c) => renderBoss(c, key, 1, 5)} deps={[key]} />
-              <span className="text-center text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+              <span className="text-center text-xs font-bold uppercase tracking-wide text-muted-foreground">
                 {BOSSES[key].name}
               </span>
             </button>
@@ -359,7 +359,7 @@ export default function Settings() {
               <div className="grid h-20 place-items-center">
                 <PixelCanvas render={(c) => drawSprite(c, WEAPONS[key].sprite, 6)} deps={[key]} />
               </div>
-              <span className="text-center text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+              <span className="text-center text-xs font-bold uppercase tracking-wide text-muted-foreground">
                 {WEAPONS[key].name}
               </span>
             </button>

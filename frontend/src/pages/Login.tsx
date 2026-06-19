@@ -26,7 +26,7 @@ export default function Login() {
         <h1 className="font-display text-4xl font-thin tracking-[0.3em] text-white">
           FIT<span className="font-black text-primary-soft">QUEST</span>
         </h1>
-        <p className="mt-1 text-[10px] tracking-[0.5em] text-primary">LEVEL UP !</p>
+        <p className="mt-1 text-xs tracking-[0.5em] text-primary">LEVEL UP !</p>
       </div>
 
       <form

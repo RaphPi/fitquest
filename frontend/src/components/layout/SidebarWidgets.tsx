@@ -54,7 +54,7 @@ function WidgetTile({
         {main}
       </span>
       {size !== 'compact' && secondary && (
-        <span className="w-full truncate text-center text-[10px] leading-tight text-muted-foreground px-1">
+        <span className="w-full truncate text-center text-xs leading-tight text-muted-foreground px-1">
           {secondary}
         </span>
       )}

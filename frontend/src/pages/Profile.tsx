@@ -89,7 +89,7 @@ function AvatarPicker() {
                   }}
                 />
                 <span
-                  className="text-[10px] font-bold uppercase tracking-wider"
+                  className="text-xs font-bold uppercase tracking-wider"
                   style={{ color: selected === av.id ? 'var(--accent-soft)' : 'var(--text-secondary)' }}
                 >
                   {av.labelFr}

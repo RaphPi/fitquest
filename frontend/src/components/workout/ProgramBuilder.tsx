@@ -336,7 +336,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
 
       {/* ── Live stats ─────────────────────────────────── */}
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-primary/70">Estimation temps réel</p>
+        <p className="mb-2 text-xs font-bold uppercase tracking-widest text-primary/70">Estimation temps réel</p>
         <div className="grid grid-cols-4 gap-2">
           {[
             { val: sessions.length, lbl: 'Séances' },
@@ -354,7 +354,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
 
       {/* ── Program info ───────────────────────────────── */}
       <div className="rounded-xl border border-border bg-card p-4 flex flex-col gap-4">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Informations</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Informations</p>
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1">
             <label className="text-[11px] text-muted-foreground font-semibold">Nom FR *</label>
@@ -432,7 +432,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
 
       {/* ── Sessions ───────────────────────────────────── */}
       <div className="flex items-center justify-between">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
           Séances ({sessions.length})
         </p>
         <button type="button" onClick={addSession}
@@ -511,7 +511,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                   <div key={ex._key} className="px-3 py-3 flex flex-col gap-2">
                     {/* Exercise header row */}
                     <div className="flex items-center gap-2">
-                      <span className="w-4 shrink-0 text-center text-[10px] font-bold text-muted-foreground">{eIdx + 1}</span>
+                      <span className="w-4 shrink-0 text-center text-xs font-bold text-muted-foreground">{eIdx + 1}</span>
                       <div className="flex-1 min-w-0 flex items-center gap-1.5">
                         <p className="font-display text-xs font-bold text-foreground truncate">{ex._name || ex.exerciseId}</p>
                         {/* Info icon */}
@@ -723,7 +723,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                     {(Object.keys(categoryLabels) as Category[]).map((cat) => (
                       <button key={cat} type="button"
                         onClick={() => setPickerCategoryFilter(pickerCategoryFilter === cat ? null : cat)}
-                        className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold transition-colors ${
+                        className={`rounded-full border px-2 py-0.5 text-xs font-semibold transition-colors ${
                           pickerCategoryFilter === cat
                             ? categoryColors[cat]
                             : 'border-border text-muted-foreground hover:text-foreground'
@@ -740,7 +740,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                     {equipmentOptions.map((o) => (
                       <button key={o.value} type="button"
                         onClick={() => setPickerEquipmentFilter(pickerEquipmentFilter === o.value ? null : o.value)}
-                        className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold transition-colors ${
+                        className={`rounded-full border px-2 py-0.5 text-xs font-semibold transition-colors ${
                           pickerEquipmentFilter === o.value
                             ? 'border-primary/60 bg-primary/15 text-primary'
                             : 'border-border text-muted-foreground hover:text-foreground'
@@ -755,7 +755,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                   <button
                     type="button"
                     onClick={() => { setPickerCategoryFilter(null); setPickerEquipmentFilter(null); }}
-                    className="text-[10px] font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                    className="text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
                   >
                     Effacer les filtres
                   </button>

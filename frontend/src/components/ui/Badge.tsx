@@ -41,7 +41,7 @@ export default function Badge({ icon, name, unlocked, rarity = 'common', classNa
           <Lock className="absolute -bottom-1 -right-1 h-3.5 w-3.5 text-muted-foreground" />
         )}
       </div>
-      <span className="text-center text-[10px] font-medium leading-tight text-muted-foreground">
+      <span className="text-center text-xs font-medium leading-tight text-muted-foreground">
         {name}
       </span>
     </div>

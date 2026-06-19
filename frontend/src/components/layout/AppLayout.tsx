@@ -177,7 +177,7 @@ function BottomNav() {
           end={to === '/'}
           className={({ isActive }) =>
             cn(
-              'flex min-w-0 flex-1 flex-col items-center gap-0.5 px-1 py-1 text-[10px] transition',
+              'flex min-w-0 flex-1 flex-col items-center gap-0.5 px-1 py-1 text-xs transition',
               isActive ? 'text-primary bg-primary/10 rounded-lg' : 'text-muted-foreground hover:text-foreground',
             )
           }

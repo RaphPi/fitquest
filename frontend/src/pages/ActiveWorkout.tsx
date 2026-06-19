@@ -251,7 +251,7 @@ export default function ActiveWorkout() {
           <Pause className="h-4 w-4" />
         </button>
         <div className="text-center">
-          <div className="text-[10px]" style={{ fontFamily: PX }}>{session.sessionName.toUpperCase()}</div>
+          <div className="text-xs" style={{ fontFamily: PX }}>{session.sessionName.toUpperCase()}</div>
           <div className="mt-1 text-[11px] text-muted-foreground">
             <span className="font-display text-cyan-300">⏱ {fmt(elapsed)}</span> · {clock}
           </div>
@@ -276,7 +276,7 @@ export default function ActiveWorkout() {
       {/* BOSS HP */}
       <div className="z-20 px-4 pt-3">
         <div className="mb-1.5 flex items-baseline justify-between">
-          <span className="text-[10px] text-red-300" style={{ fontFamily: PX }}>{session.bossTitle.toUpperCase()}</span>
+          <span className="text-xs text-red-300" style={{ fontFamily: PX }}>{session.bossTitle.toUpperCase()}</span>
           <span className="font-display text-xs text-muted-foreground"><b className="text-foreground">{striking ? displayHp : bossHp}</b> / {bossMaxHp} PV</span>
         </div>
         <div className="relative h-4 overflow-hidden border-2 bg-[#1a0d12]" style={{ borderColor: 'rgba(239,68,68,.5)' }}>
@@ -291,12 +291,12 @@ export default function ActiveWorkout() {
       <div className="z-20 grid flex-1 grid-cols-1 lg:grid-cols-[260px_1fr_280px]">
         {/* Panneau gauche (desktop) : stats de séance */}
         <aside className="hidden flex-col gap-3 border-r border-border/60 p-5 lg:flex">
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Combat</div>
+          <div className="text-xs uppercase tracking-widest text-muted-foreground">Combat</div>
           <StatLine label="Durée" value={fmt(elapsed)} />
           <StatLine label="Heure" value={clock} />
           <StatLine label="Dégâts infligés" value={`${dealt}`} accent />
           <StatLine label="Séries faites" value={`${completed.length}`} />
-          <div className="mt-2 text-[10px] uppercase tracking-widest text-muted-foreground">Dernier coup</div>
+          <div className="mt-2 text-xs uppercase tracking-widest text-muted-foreground">Dernier coup</div>
           <div className="font-display text-2xl text-primary-soft">{combo > 0 ? `×${combo}` : '—'}</div>
         </aside>
 
@@ -326,7 +326,7 @@ export default function ActiveWorkout() {
 
         {/* Panneau droit (desktop) : liste des exercices */}
         <aside className="hidden flex-col gap-2 border-l border-border/60 p-5 lg:flex">
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Séance</div>
+          <div className="text-xs uppercase tracking-widest text-muted-foreground">Séance</div>
           {session.exercises.map((ex, i) => {
             const isCurrent = i === exerciseIndex;
             const isDone = i < exerciseIndex;
@@ -342,7 +342,7 @@ export default function ActiveWorkout() {
                 }`}
               >
                 {/* Pastille d'état */}
-                <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-[10px] font-black ${
+                <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-xs font-black ${
                   isDone ? 'bg-success text-[#04250f]' : isCurrent ? 'bg-primary text-white' : 'border border-border text-muted-foreground'
                 }`}>
                   {isDone ? '✓' : i + 1}
@@ -376,7 +376,7 @@ export default function ActiveWorkout() {
           style={cur.type === 'duration'
             ? { borderColor: 'rgba(34,211,238,.5)', background: 'rgba(34,211,238,.08)' }
             : { borderColor: 'rgba(255,255,255,.2)', background: 'rgba(255,255,255,.04)' }}>
-          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Objectif</span>
+          <span className="text-xs uppercase tracking-widest text-muted-foreground">Objectif</span>
           <span className="font-display text-5xl font-black leading-none"
             style={{ color: cur.type === 'duration' ? 'rgba(34,211,238,1)' : '#ffffff' }}>{cur.target}</span>
           <span className="text-sm font-bold text-muted-foreground">{cur.type === 'duration' ? 'sec' : 'reps'}</span>
@@ -389,7 +389,7 @@ export default function ActiveWorkout() {
         className="z-20 px-4 pt-3"
         style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.25rem)' }}
       >
-        <div className="mb-1 flex justify-between text-[10px] uppercase tracking-wide text-muted-foreground">
+        <div className="mb-1 flex justify-between text-xs uppercase tracking-wide text-muted-foreground">
           <span>Niveau {user?.level ?? 1}</span>
           <span className="font-display text-xp">{dealt} pts d'effort</span>
         </div>

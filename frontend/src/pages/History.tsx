@@ -217,7 +217,7 @@ function SummaryTile({
     <div className="flex flex-col gap-1 rounded-lg border border-border bg-card p-3">
       <div className="flex items-center gap-1.5 text-muted-foreground" style={color ? { color } : {}}>
         {icon}
-        <span className="font-display text-[10px] uppercase tracking-widest">{label}</span>
+        <span className="font-display text-xs uppercase tracking-widest">{label}</span>
       </div>
       <span className="font-display text-xl font-black" style={color ? { color } : {}}>
         {value}

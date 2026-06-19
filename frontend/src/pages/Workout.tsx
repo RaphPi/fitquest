@@ -188,7 +188,7 @@ export default function Workout() {
       {showFilters && (
         <div className="rounded-xl border border-border bg-card p-4 space-y-4">
           <div className="space-y-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Niveau</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Niveau</p>
             <div className="flex flex-wrap gap-2">
               {levelOptions.map((o) => (
                 <button
@@ -206,7 +206,7 @@ export default function Workout() {
             </div>
           </div>
           <div className="space-y-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Durée de séance</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Durée de séance</p>
             <div className="flex flex-wrap gap-2">
               {durationOptions.map((o) => (
                 <button

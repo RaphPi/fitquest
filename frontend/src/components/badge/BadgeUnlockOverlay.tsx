@@ -87,7 +87,7 @@ export default function BadgeUnlockOverlay({ badges, onClose }: Props) {
           })}
         </div>
 
-        <div className="text-[10px] uppercase tracking-[0.3em]" style={{ color: meta.color }}>
+        <div className="text-xs uppercase tracking-[0.3em]" style={{ color: meta.color }}>
           ★ Badge débloqué ★
         </div>
 

@@ -56,7 +56,7 @@ export default function StreakCard({ streak }: Props) {
       <span className="font-display text-xl font-black" style={{ color: animated ? outer : '' }}>
         {streak}
       </span>
-      <span className="text-[10px] uppercase tracking-widest text-muted-foreground whitespace-nowrap">
+      <span className="text-xs uppercase tracking-widest text-muted-foreground whitespace-nowrap">
         {animated ? badge : 'SÉRIE'}
       </span>
     </div>

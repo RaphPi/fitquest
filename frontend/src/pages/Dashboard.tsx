@@ -190,22 +190,22 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 gap-3">
               {hasWeeklyActivity && (
                 <div className="rounded-lg border border-border bg-card p-3">
-                  <h2 className="mb-2 font-display text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <h2 className="mb-2 font-display text-xs font-bold uppercase tracking-widest text-muted-foreground">
                     Fréq. hebdo
                   </h2>
                   <ResponsiveContainer width="100%" height={90}>
                     <BarChart data={weeklyData} margin={{ top: 2, right: 0, left: -32, bottom: 0 }}>
                       <XAxis
                         dataKey="label"
-                        tick={{ fontSize: 7, fill: 'var(--text-secondary)' }}
+                        tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
                         axisLine={false}
                         tickLine={false}
                         interval="preserveStartEnd"
                       />
                       <Tooltip
                         contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, padding: '4px 10px' }}
-                        labelStyle={{ color: 'var(--text-secondary)', fontSize: 10 }}
-                        itemStyle={{ color: 'var(--accent)', fontSize: 11 }}
+                        labelStyle={{ color: 'var(--text-secondary)', fontSize: 12 }}
+                        itemStyle={{ color: 'var(--accent)', fontSize: 12 }}
                         formatter={(v: number) => [v, v !== 1 ? 'séances' : 'séance']}
                         cursor={{ fill: 'rgba(99,102,241,0.08)' }}
                       />
@@ -217,7 +217,7 @@ export default function Dashboard() {
 
               {weightData ? (
                 <div className="rounded-lg border border-border bg-card p-3">
-                  <h2 className="mb-1 font-display text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <h2 className="mb-1 font-display text-xs font-bold uppercase tracking-widest text-muted-foreground">
                     Poids actuel
                   </h2>
                   <p className="font-display text-xl font-black" style={{ color: weightColor }}>
@@ -311,7 +311,7 @@ export default function Dashboard() {
                 <p className="text-xs text-muted-foreground">Aucun programme actif.</p>
                 <Link
                   to="/workout"
-                  className="rounded-lg border border-primary px-3 py-1.5 font-display text-[10px] font-bold uppercase tracking-widest text-primary transition-all hover:shadow-glow"
+                  className="rounded-lg border border-primary px-3 py-1.5 font-display text-xs font-bold uppercase tracking-widest text-primary transition-all hover:shadow-glow"
                 >
                   Lancer un programme
                 </Link>

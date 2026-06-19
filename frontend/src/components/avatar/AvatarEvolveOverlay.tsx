@@ -77,7 +77,7 @@ export default function AvatarEvolveOverlay({ classKey, level, onClose }: Props)
           })}
         </div>
 
-        <div className="text-[10px] uppercase tracking-[0.3em]" style={{ color: tier.color }}>
+        <div className="text-xs uppercase tracking-[0.3em]" style={{ color: tier.color }}>
           ✦ Évolution ✦
         </div>
 

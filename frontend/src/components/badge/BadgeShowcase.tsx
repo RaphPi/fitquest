@@ -68,7 +68,7 @@ export default function BadgeShowcase() {
         return (
           <div key={rarity}>
             <div className="mb-2 flex items-center gap-2">
-              <span className="text-[10px] uppercase tracking-widest" style={{ color: meta.color }}>
+              <span className="text-xs uppercase tracking-widest" style={{ color: meta.color }}>
                 {meta.fr}
               </span>
               <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${meta.glow}, transparent)` }} />
@@ -105,7 +105,7 @@ function BadgeTile({ badge, onClick }: { badge: BadgeState; onClick: () => void 
     >
       <BadgeIcon iconType={badge.iconType} rarity={badge.rarity} scale={4} locked={!obtained} />
       <span
-        className="line-clamp-2 text-[10px] font-semibold leading-tight"
+        className="line-clamp-2 text-xs font-semibold leading-tight"
         style={{ color: obtained ? meta.color : 'rgba(148,163,184,0.7)' }}
       >
         {badge.nameFr}
