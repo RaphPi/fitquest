@@ -12,6 +12,7 @@ import Avatar from '@/components/avatar/Avatar';
 import BadgeSummaryTile from '@/components/badge/BadgeSummaryTile';
 
 function AvatarPicker() {
+  const { t } = useTranslation();
   const user = useUserStore((s) => s.user);
   const updateProfile = useUserStore((s) => s.updateProfile);
   const [open, setOpen] = useState(false);
@@ -44,10 +45,12 @@ function AvatarPicker() {
       >
         <div>
           <h2 className="font-display text-sm font-bold uppercase tracking-widest">
-            Changer de personnage
+            {t('profile.avatarPicker.title')}
           </h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Classe actuelle : {AVATAR_CLASSES.find((a) => a.id === user.avatarStage)?.labelFr ?? '—'}
+            {t('profile.avatarPicker.currentClass', {
+              class: AVATAR_CLASSES.find((a) => a.id === user.avatarStage)?.labelFr ?? '—',
+            })}
           </p>
         </div>
         <ChevronDown
@@ -101,7 +104,7 @@ function AvatarPicker() {
           <div className="mt-4 flex items-center justify-end gap-3">
             {success && (
               <span className="flex items-center gap-1 text-xs text-green-400">
-                <Check className="h-3.5 w-3.5" /> Sauvegardé
+                <Check className="h-3.5 w-3.5" /> {t('profile.avatarPicker.saved')}
               </span>
             )}
             <button
@@ -110,7 +113,7 @@ function AvatarPicker() {
               disabled={unchanged || saving}
               className="rounded-lg bg-primary px-5 py-2 font-display text-sm font-bold uppercase tracking-widest text-white transition hover:bg-primary/90 disabled:opacity-40"
             >
-              {saving ? 'Sauvegarde…' : 'Enregistrer'}
+              {saving ? t('profile.avatarPicker.saving') : t('profile.avatarPicker.save')}
             </button>
           </div>
         </div>
@@ -129,7 +132,7 @@ export default function Profile() {
   return (
     <section className="space-y-5">
       <div>
-        <h1 className="font-display text-2xl font-bold">{t('nav.profile')}</h1>
+        <h1 className="font-display text-2xl font-bold">{t('profile.title')}</h1>
         {user && (
           <p className="mt-1 text-muted-foreground">
             <span className="font-semibold text-primary-soft">{user.username}</span> —{' '}
@@ -153,7 +156,7 @@ export default function Profile() {
                 {meta.name}
               </p>
               <p className="text-xs uppercase tracking-widest text-muted-foreground">
-                Stade {meta.stage} / {AVATAR_STAGE_COUNT} — {meta.tier.name}
+                {t('profile.stage', { stage: meta.stage, total: AVATAR_STAGE_COUNT, tier: meta.tier.name })}
               </p>
             </div>
 
@@ -169,8 +172,8 @@ export default function Profile() {
 
             <p className="text-xs text-muted-foreground">
               {nextLevel
-                ? <>Prochain stade au <span style={{ color: meta.tier.color }}>niveau {nextLevel}</span>.</>
-                : <>Stade ultime atteint — tu es une <span style={{ color: meta.tier.color }}>Légende</span>.</>}
+                ? t('profile.nextStage', { level: nextLevel })
+                : t('profile.ultimateStage')}
             </p>
           </div>
         </div>

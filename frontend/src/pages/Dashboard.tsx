@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { xpRequiredForLevel } from '@/lib/xp';
 import { avatarClassFromStage, getAvatarStageMeta } from '@/lib/avatar';
 import { buildActiveSession } from '@/lib/launchSession';
@@ -43,7 +44,7 @@ function resolveNextSession(programs: Program[], history: WorkoutLog[]) {
   return null;
 }
 
-function computeWeeklyData(history: WorkoutLog[]) {
+function computeWeeklyData(history: WorkoutLog[], locale: string) {
   const now = new Date();
   const dow = now.getDay();
   const daysToMon = dow === 0 ? 6 : dow - 1;
@@ -56,7 +57,7 @@ function computeWeeklyData(history: WorkoutLog[]) {
     weekStart.setDate(thisMonday.getDate() - (7 - i) * 7);
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 7);
-    const label = weekStart.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+    const label = weekStart.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
     const count = history.filter((l) => {
       const d = new Date(l.date);
       return d >= weekStart && d < weekEnd;
@@ -68,6 +69,7 @@ function computeWeeklyData(history: WorkoutLog[]) {
 // ── component ────────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user } = useUserStore();
   const history = useWorkoutStore((s) => s.history);
@@ -84,7 +86,7 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const weeklyData = useMemo(() => computeWeeklyData(history), [history]);
+  const weeklyData = useMemo(() => computeWeeklyData(history, i18n.language), [history, i18n.language]);
 
   const weightColor = useMemo(() => {
     try {
@@ -142,7 +144,7 @@ export default function Dashboard() {
           />
         )}
         <div>
-          <h1 className="font-display text-2xl font-bold">Tableau de bord</h1>
+          <h1 className="font-display text-2xl font-bold">{t('dashboard.title')}</h1>
           {user && stageMeta && (
             <>
               <p className="mt-0.5 text-sm">
@@ -150,7 +152,7 @@ export default function Dashboard() {
                 {' · '}
                 <span style={{ color: stageMeta.tier.color }}>{stageMeta.name}</span>
               </p>
-              <p className="mt-0.5 text-xs text-muted-foreground">Prêt à monter de niveau ?</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{t('dashboard.welcome')}</p>
             </>
           )}
         </div>
@@ -174,9 +176,9 @@ export default function Dashboard() {
           ) : (
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               <StreakCard streak={user.streak} />
-              <StatCard icon={Zap} value={user.totalXP} label="XP total" compact />
-              <StatCard icon={Trophy} value={user.level} label="Niveau" compact />
-              <StatCard icon={Calendar} value={history.length} label="Séances" compact />
+              <StatCard icon={Zap} value={user.totalXP} label={t('dashboard.stats.totalXp')} compact />
+              <StatCard icon={Trophy} value={user.level} label={t('dashboard.stats.level')} compact />
+              <StatCard icon={Calendar} value={history.length} label={t('dashboard.stats.sessions')} compact />
             </div>
           )}
 
@@ -191,7 +193,7 @@ export default function Dashboard() {
               {hasWeeklyActivity && (
                 <div className="rounded-lg border border-border bg-card p-3">
                   <h2 className="mb-2 font-display text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                    Fréq. hebdo
+                    {t('dashboard.weeklyFrequency')}
                   </h2>
                   <ResponsiveContainer width="100%" height={90}>
                     <BarChart data={weeklyData} margin={{ top: 2, right: 0, left: -32, bottom: 0 }}>
@@ -206,7 +208,7 @@ export default function Dashboard() {
                         contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, padding: '4px 10px' }}
                         labelStyle={{ color: 'var(--text-secondary)', fontSize: 12 }}
                         itemStyle={{ color: 'var(--accent)', fontSize: 12 }}
-                        formatter={(v: number) => [v, v !== 1 ? 'séances' : 'séance']}
+                        formatter={(v: number) => [v, v !== 1 ? t('dashboard.tooltip.sessions') : t('dashboard.tooltip.session')]}
                         cursor={{ fill: 'rgba(99,102,241,0.08)' }}
                       />
                       <Bar dataKey="count" fill="var(--accent)" fillOpacity={0.7} radius={[3, 3, 0, 0]} maxBarSize={20} />
@@ -218,7 +220,7 @@ export default function Dashboard() {
               {weightData ? (
                 <div className="rounded-lg border border-border bg-card p-3">
                   <h2 className="mb-1 font-display text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                    Poids actuel
+                    {t('dashboard.currentWeight')}
                   </h2>
                   <p className="font-display text-xl font-black" style={{ color: weightColor }}>
                     {weightData.current.toFixed(1)}{' '}
@@ -247,7 +249,7 @@ export default function Dashboard() {
           ) : (
           <div className="rounded-lg border border-border bg-card p-4">
             <h2 className="mb-2 font-display text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Prochaine séance
+              {t('dashboard.nextSession')}
             </h2>
             {nextSession ? (
               <div className="flex flex-col gap-3">
@@ -257,8 +259,8 @@ export default function Dashboard() {
                     <button
                       type="button"
                       onClick={() => setShowExercises((v) => !v)}
-                      aria-label={showExercises ? 'Masquer les exercices' : 'Voir les exercices'}
-                      title={showExercises ? 'Masquer les exercices' : 'Voir les exercices'}
+                      aria-label={showExercises ? t('dashboard.hideExercises') : t('dashboard.showExercises')}
+                      title={showExercises ? t('dashboard.hideExercises') : t('dashboard.showExercises')}
                       className="grid h-5 w-5 shrink-0 place-items-center rounded text-muted-foreground transition-colors hover:text-primary-soft focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
                     >
                       {showExercises
@@ -293,8 +295,7 @@ export default function Dashboard() {
                   )}
 
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {nextSession.session.exercises.length} exercice
-                    {nextSession.session.exercises.length !== 1 ? 's' : ''}
+                    {t('dashboard.exerciseCount', { count: nextSession.session.exercises.length })}
                   </p>
                 </div>
                 <button
@@ -302,18 +303,18 @@ export default function Dashboard() {
                   onClick={launchNext}
                   className="flex items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 font-display text-xs font-bold uppercase tracking-widest text-primary-soft transition-all hover:shadow-glow focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
                 >
-                  <Play className="h-3.5 w-3.5" /> Lancer
+                  <Play className="h-3.5 w-3.5" /> {t('dashboard.launch')}
                 </button>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-3 py-2 text-center">
                 <Swords className="h-5 w-5 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">Aucun programme actif.</p>
+                <p className="text-xs text-muted-foreground">{t('dashboard.noActiveProgram')}</p>
                 <Link
                   to="/workout"
                   className="rounded-lg border border-primary px-3 py-1.5 font-display text-xs font-bold uppercase tracking-widest text-primary transition-all hover:shadow-glow"
                 >
-                  Lancer un programme
+                  {t('dashboard.launchProgram')}
                 </Link>
               </div>
             )}
@@ -326,14 +327,14 @@ export default function Dashboard() {
       <div>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-display text-sm font-bold uppercase tracking-widest text-muted-foreground">
-            Activité récente
+            {t('dashboard.recentActivity')}
           </h2>
           {history.length > 5 && (
             <Link
               to="/history"
               className="flex items-center gap-1 text-xs font-semibold text-primary-soft hover:underline"
             >
-              Voir tout <ArrowRight className="h-3 w-3" />
+              {t('dashboard.seeAll')} <ArrowRight className="h-3 w-3" />
             </Link>
           )}
         </div>

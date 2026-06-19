@@ -37,6 +37,7 @@ const AUTH_ROUTES = ['/login', '/register'];
 
 
 function MobileHeader() {
+  const { t } = useTranslation();
   const { user } = useUserStore();
   if (!user) return null;
   const tier = getLevelTier(user.level);
@@ -60,7 +61,7 @@ function MobileHeader() {
             className="max-w-[140px] truncate text-[11px] font-semibold leading-none"
             style={{ color: tier.color }}
           >
-            Niv.&nbsp;{user.level}&nbsp;·&nbsp;{user.username}
+            {t('sidebar.levelFull', { level: user.level, username: user.username })}
           </p>
           <NavLink to="/settings" className="text-muted-foreground transition hover:text-foreground">
             <SettingsIcon className="h-5 w-5" />
@@ -147,7 +148,7 @@ function Sidebar() {
               <div className="hidden min-w-0 flex-1 lg:block">
                 <p className="truncate text-sm font-semibold leading-tight text-foreground">{user.username}</p>
                 <p className="mb-1.5 text-[11px] font-medium leading-tight" style={{ color: tier.color }}>
-                  {meta.name} · Niv {user.level}
+                  {meta.name} · {t('sidebar.level')} {user.level}
                 </p>
                 <XPBar
                   current={user.currentXP}

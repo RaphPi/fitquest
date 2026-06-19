@@ -1,35 +1,36 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@/stores/userStore';
 import { AVATAR_CLASSES } from '@/lib/avatar';
 import Avatar from '@/components/avatar/Avatar';
 import type { DigestFrequency } from '@/types';
 
 const LEVELS = [
-  { value: 'novice', label: 'Novice', desc: 'Je débute, tout est nouveau pour moi' },
-  { value: 'warrior', label: 'Guerrier en devenir', desc: 'Quelques bases, prêt à progresser' },
-  { value: 'fighter', label: 'Combattant', desc: 'Expérimenté, je cherche à repousser mes limites' },
+  { value: 'novice', labelKey: 'auth.register.step2.levels.novice', descKey: 'auth.register.step2.levels.noviceDesc' },
+  { value: 'warrior', labelKey: 'auth.register.step2.levels.warrior', descKey: 'auth.register.step2.levels.warriorDesc' },
+  { value: 'fighter', labelKey: 'auth.register.step2.levels.fighter', descKey: 'auth.register.step2.levels.fighterDesc' },
 ];
 
-const DIGESTS: { value: DigestFrequency; label: string }[] = [
-  { value: 'NONE', label: 'Jamais' },
-  { value: 'DAILY', label: 'Quotidien' },
-  { value: 'WEEKLY', label: 'Hebdo' },
-  { value: 'MONTHLY', label: 'Mensuel' },
+const DIGESTS: { value: DigestFrequency; labelKey: string }[] = [
+  { value: 'NONE', labelKey: 'auth.register.step3.digestNone' },
+  { value: 'DAILY', labelKey: 'auth.register.step3.digestDaily' },
+  { value: 'WEEKLY', labelKey: 'auth.register.step3.digestWeekly' },
+  { value: 'MONTHLY', labelKey: 'auth.register.step3.digestMonthly' },
 ];
 
 /* ── Password strength ──────────────────────────────────────── */
-function passwordStrength(pw: string): { score: number; label: string; color: string } {
-  if (pw.length === 0) return { score: 0, label: '', color: '' };
+function passwordStrength(pw: string): { score: number; labelKey: string; color: string } {
+  if (pw.length === 0) return { score: 0, labelKey: '', color: '' };
   let s = 0;
   if (pw.length >= 8) s++;
   if (pw.length >= 12) s++;
   if (/[A-Z]/.test(pw)) s++;
   if (/[0-9]/.test(pw)) s++;
   if (/[^A-Za-z0-9]/.test(pw)) s++;
-  if (s <= 1) return { score: s, label: 'Faible', color: '#ef4444' };
-  if (s <= 3) return { score: s, label: 'Moyen', color: '#f59e0b' };
-  return { score: s, label: 'Fort', color: '#22c55e' };
+  if (s <= 1) return { score: s, labelKey: 'auth.register.strength.weak', color: '#ef4444' };
+  if (s <= 3) return { score: s, labelKey: 'auth.register.strength.medium', color: '#f59e0b' };
+  return { score: s, labelKey: 'auth.register.strength.strong', color: '#22c55e' };
 }
 
 /* ── Step indicator ─────────────────────────────────────────── */
@@ -64,6 +65,7 @@ const continueCls =
 
 /* ── Main component ─────────────────────────────────────────── */
 export default function Register() {
+  const { t } = useTranslation();
   const { register, isLoading, error, clearError } = useUserStore();
   const navigate = useNavigate();
 
@@ -112,9 +114,9 @@ export default function Register() {
       <div className="flex min-h-screen flex-col items-center justify-center bg-background">
         <div className="animate-pulse text-center">
           <p className="font-display text-2xl font-bold tracking-widest text-primary-soft">
-            Ton aventure commence…
+            {t('auth.register.finishing')}
           </p>
-          <p className="mt-2 text-sm text-primary">LEVEL UP !</p>
+          <p className="mt-2 text-sm text-primary">{t('app.tagline')}</p>
         </div>
       </div>
     );
@@ -132,7 +134,9 @@ export default function Register() {
       <div className="w-full max-w-md rounded-xl border border-border bg-card p-8 shadow-2xl">
         <div className="mb-6 flex items-center justify-between">
           <StepDots current={step} total={4} />
-          <span className="text-xs text-muted-foreground">Étape {step + 1} / 4</span>
+          <span className="text-xs text-muted-foreground">
+            {t('auth.register.step', { current: step + 1, total: 4 })}
+          </span>
         </div>
 
         {error && (
@@ -145,16 +149,16 @@ export default function Register() {
         {step === 0 && (
           <div>
             <h2 className="mb-1 font-display text-xl font-bold text-foreground">
-              Qui es-tu, héros ?
+              {t('auth.register.step0.title')}
             </h2>
-            <p className="mb-6 text-sm text-muted-foreground">Choisis ton nom d'aventurier</p>
+            <p className="mb-6 text-sm text-muted-foreground">{t('auth.register.step0.subtitle')}</p>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               maxLength={20}
               autoFocus
-              placeholder="ton_pseudo"
+              placeholder={t('auth.register.step0.placeholder')}
               className={inputCls}
               style={{
                 boxShadow: username.length >= 3 ? '0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent)' : undefined,
@@ -166,7 +170,7 @@ export default function Register() {
               disabled={username.length < 3}
               className="mt-6 w-full rounded-lg bg-primary py-3 font-display text-sm font-bold uppercase tracking-widest text-white transition hover:bg-primary/90 disabled:opacity-40"
             >
-              Continuer →
+              {t('auth.register.continue')}
             </button>
           </div>
         )}
@@ -175,9 +179,9 @@ export default function Register() {
         {step === 1 && (
           <div>
             <h2 className="mb-1 font-display text-xl font-bold text-foreground">
-              Choisis ton avatar
+              {t('auth.register.step1.title')}
             </h2>
-            <p className="mb-6 text-sm text-muted-foreground">Qui représente le mieux ton style ?</p>
+            <p className="mb-6 text-sm text-muted-foreground">{t('auth.register.step1.subtitle')}</p>
             <div className="grid grid-cols-4 gap-3">
               {AVATAR_CLASSES.map((av) => (
                 <button
@@ -216,8 +220,8 @@ export default function Register() {
               ))}
             </div>
             <div className="mt-6 flex gap-3">
-              <button onClick={back} className={backCls}>← Retour</button>
-              <button onClick={next} className={continueCls}>Continuer →</button>
+              <button onClick={back} className={backCls}>{t('auth.register.back')}</button>
+              <button onClick={next} className={continueCls}>{t('auth.register.continue')}</button>
             </div>
           </div>
         )}
@@ -226,9 +230,9 @@ export default function Register() {
         {step === 2 && (
           <div>
             <h2 className="mb-1 font-display text-xl font-bold text-foreground">
-              Quel est ton niveau ?
+              {t('auth.register.step2.title')}
             </h2>
-            <p className="mb-6 text-sm text-muted-foreground">Sois honnête, ça aide à progresser !</p>
+            <p className="mb-6 text-sm text-muted-foreground">{t('auth.register.step2.subtitle')}</p>
             <div className="space-y-3">
               {LEVELS.map((l) => (
                 <button
@@ -248,15 +252,15 @@ export default function Register() {
                     className="font-display font-bold"
                     style={{ color: _level === l.value ? 'var(--accent-soft)' : 'var(--text-primary)' }}
                   >
-                    {l.label}
+                    {t(l.labelKey)}
                   </p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{l.desc}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{t(l.descKey)}</p>
                 </button>
               ))}
             </div>
             <div className="mt-6 flex gap-3">
-              <button onClick={back} className={backCls}>← Retour</button>
-              <button onClick={next} className={continueCls}>Continuer →</button>
+              <button onClick={back} className={backCls}>{t('auth.register.back')}</button>
+              <button onClick={next} className={continueCls}>{t('auth.register.continue')}</button>
             </div>
           </div>
         )}
@@ -265,20 +269,20 @@ export default function Register() {
         {step === 3 && (
           <div>
             <h2 className="mb-1 font-display text-xl font-bold text-foreground">
-              Finalise ton profil
+              {t('auth.register.step3.title')}
             </h2>
-            <p className="mb-6 text-sm text-muted-foreground">Plus qu'un dernier effort !</p>
+            <p className="mb-6 text-sm text-muted-foreground">{t('auth.register.step3.subtitle')}</p>
             <div className="space-y-4">
               <div>
                 <label className="mb-1 block text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                  Mot de passe *
+                  {t('auth.register.step3.passwordLabel')}
                 </label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="new-password"
-                  placeholder="min. 8 caractères"
+                  placeholder={t('auth.register.step3.passwordPlaceholder')}
                   className={inputCls}
                 />
                 {password.length > 0 && (
@@ -293,7 +297,7 @@ export default function Register() {
                       ))}
                     </div>
                     <span className="text-xs font-medium" style={{ color: strength.color }}>
-                      {strength.label}
+                      {strength.labelKey && t(strength.labelKey)}
                     </span>
                   </div>
                 )}
@@ -301,14 +305,15 @@ export default function Register() {
 
               <div>
                 <label className="mb-1 block text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                  Email <span className="normal-case text-muted-foreground/60">(optionnel)</span>
+                  {t('auth.register.step3.emailLabel')}{' '}
+                  <span className="normal-case text-muted-foreground/60">{t('auth.register.step3.emailOptional')}</span>
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
-                  placeholder="hero@exemple.com"
+                  placeholder={t('auth.register.step3.emailPlaceholder')}
                   className={inputCls}
                 />
               </div>
@@ -316,7 +321,7 @@ export default function Register() {
               {email && (
                 <div>
                   <label className="mb-1 block text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                    Synthèse par email
+                    {t('auth.register.step3.digestLabel')}
                   </label>
                   <div className="flex gap-2">
                     {DIGESTS.map((d) => (
@@ -331,7 +336,7 @@ export default function Register() {
                           color: emailDigest === d.value ? 'var(--accent-soft)' : 'var(--text-secondary)',
                         }}
                       >
-                        {d.label}
+                        {t(d.labelKey)}
                       </button>
                     ))}
                   </div>
@@ -340,13 +345,13 @@ export default function Register() {
             </div>
 
             <div className="mt-6 flex gap-3">
-              <button onClick={back} className={backCls}>← Retour</button>
+              <button onClick={back} className={backCls}>{t('auth.register.back')}</button>
               <button
                 onClick={handleSubmit}
                 disabled={isLoading || password.length < 8}
                 className="flex-1 rounded-lg bg-primary py-3 font-display text-sm font-bold uppercase tracking-widest text-white transition hover:bg-primary/90 disabled:opacity-40"
               >
-                {isLoading ? 'Création…' : '⚔ Créer mon héros'}
+                {isLoading ? t('auth.register.step3.submitting') : t('auth.register.step3.submit')}
               </button>
             </div>
           </div>
@@ -354,9 +359,9 @@ export default function Register() {
       </div>
 
       <p className="mt-5 text-sm text-muted-foreground">
-        Déjà un compte ?{' '}
+        {t('auth.register.alreadyAccount')}{' '}
         <a href="/login" className="text-primary-soft hover:underline">
-          Se connecter
+          {t('auth.register.login')}
         </a>
       </p>
     </div>

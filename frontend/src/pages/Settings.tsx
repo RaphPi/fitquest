@@ -18,43 +18,43 @@ import {
 
 const WIDGET_OPTIONS: {
   id: WidgetId;
-  label: string;
-  desc: string;
+  labelKey: string;
+  descKey: string;
   icon: React.ReactNode;
   color: string;
 }[] = [
   {
     id: 'streak',
-    label: 'Série',
-    desc: 'Jours consécutifs',
+    labelKey: 'settings.widgetLabels.streak',
+    descKey: 'settings.widgetDescs.streak',
     icon: <Flame className="h-5 w-5" />,
     color: 'rgba(249,115,22,1)',
   },
   {
     id: 'xp_remaining',
-    label: 'XP restants',
-    desc: 'Prochain niveau',
+    labelKey: 'settings.widgetLabels.xp_remaining',
+    descKey: 'settings.widgetDescs.xp_remaining',
     icon: <Zap className="h-5 w-5" />,
     color: 'rgba(234,179,8,1)',
   },
   {
     id: 'last_workout',
-    label: 'Dernière séance',
-    desc: 'Jours depuis',
+    labelKey: 'settings.widgetLabels.last_workout',
+    descKey: 'settings.widgetDescs.last_workout',
     icon: <Clock className="h-5 w-5" />,
     color: 'var(--text-secondary)',
   },
   {
     id: 'body_weight',
-    label: 'Poids',
-    desc: 'Dernière mesure',
+    labelKey: 'settings.widgetLabels.body_weight',
+    descKey: 'settings.widgetDescs.body_weight',
     icon: <Activity className="h-5 w-5" />,
     color: 'rgba(34,211,238,1)',
   },
   {
     id: 'badge_progress',
-    label: 'Badge',
-    desc: 'Prochain trophée',
+    labelKey: 'settings.widgetLabels.badge_progress',
+    descKey: 'settings.widgetDescs.badge_progress',
     icon: <Trophy className="h-5 w-5" />,
     color: 'rgba(99,102,241,1)',
   },
@@ -151,10 +151,11 @@ function SubLabel({ children, className }: { children: React.ReactNode; classNam
 
 /** Tuile « ajouter un pack » (extension future : packs téléchargeables). */
 function AddPackTile() {
+  const { t } = useTranslation();
   return (
     <div
       className="flex cursor-not-allowed flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-border p-3 opacity-60"
-      title="Packs téléchargeables — bientôt disponible"
+      title={t('settings.appearance.addPackTitle')}
     >
       <div className="grid h-20 place-items-center">
         <div className="relative">
@@ -163,7 +164,7 @@ function AddPackTile() {
         </div>
       </div>
       <span className="text-center text-xs font-bold uppercase tracking-wide text-muted-foreground">
-        Ajouter un pack<br />(bientôt)
+        {t('settings.appearance.addPack')}<br />{t('settings.appearance.addPackSoon')}
       </span>
     </div>
   );
@@ -205,18 +206,18 @@ export default function Settings() {
   return (
     <section className="space-y-3">
       <div className="mb-5">
-        <h1 className="font-display text-2xl font-bold">{t('nav.settings')}</h1>
-        <p className="mt-1 text-muted-foreground">Personnalise ton expérience de combat.</p>
+        <h1 className="font-display text-2xl font-bold">{t('settings.title')}</h1>
+        <p className="mt-1 text-muted-foreground">{t('settings.subtitle')}</p>
       </div>
 
       {/* ── Apparence ─────────────────────────────────────────────────── */}
       <SectionCard
         id="apparence"
-        title="Apparence"
+        title={t('settings.sections.appearance')}
         open={open === 'apparence'}
         onToggle={() => toggle('apparence')}
       >
-        <SubLabel>Thème</SubLabel>
+        <SubLabel>{t('settings.appearance.theme')}</SubLabel>
         <div className="flex flex-wrap gap-3">
           {THEME_LIST.map((th) => (
             <button
@@ -235,9 +236,9 @@ export default function Settings() {
           ))}
         </div>
 
-        <SubLabel className="mt-5">Langue</SubLabel>
+        <SubLabel className="mt-5">{t('settings.appearance.language')}</SubLabel>
         <div className="flex gap-3">
-          {([{ id: 'fr', label: 'Français' }, { id: 'en', label: 'English' }] as const).map(({ id, label }) => (
+          {(['fr', 'en'] as const).map((id) => (
             <button
               key={id}
               type="button"
@@ -249,19 +250,19 @@ export default function Settings() {
                   : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground',
               )}
             >
-              {label}
+              {t(id === 'fr' ? 'settings.appearance.languageFr' : 'settings.appearance.languageEn')}
             </button>
           ))}
         </div>
 
         <SubLabel className="mt-5">
-          Widgets sidebar
+          {t('settings.appearance.widgets')}
           <span className="ml-1 normal-case font-normal text-muted-foreground/60">
             ({sidebarWidgets.length}/2)
           </span>
         </SubLabel>
         <p className="mb-3 text-xs text-muted-foreground">
-          Informations affichées dans la barre latérale. Max 2.
+          {t('settings.appearance.widgetsHint')}
         </p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
           {WIDGET_OPTIONS.map((w) => {
@@ -297,9 +298,9 @@ export default function Settings() {
                     className="text-[11px] font-bold uppercase tracking-wide"
                     style={{ color: active ? w.color : 'var(--text-secondary)' }}
                   >
-                    {w.label}
+                    {t(w.labelKey)}
                   </p>
-                  <p className="text-[9px] text-muted-foreground">{w.desc}</p>
+                  <p className="text-[9px] text-muted-foreground">{t(w.descKey)}</p>
                 </div>
               </button>
             );
@@ -310,14 +311,14 @@ export default function Settings() {
       {/* ── Combat ───────────────────────────────────────────────────── */}
       <SectionCard
         id="combat"
-        title="Combat"
-        hint="Réglages du mode séance actif."
+        title={t('settings.sections.combat')}
+        hint={t('settings.sections.combatHint')}
         open={open === 'combat'}
         onToggle={() => toggle('combat')}
       >
         {/* Adversaire */}
-        <SubLabel>Adversaire</SubLabel>
-        <p className="mb-3 text-xs text-muted-foreground">Le boss que tu affrontes pendant tes séances.</p>
+        <SubLabel>{t('settings.combat.boss')}</SubLabel>
+        <p className="mb-3 text-xs text-muted-foreground">{t('settings.combat.bossHint')}</p>
         <div className="grid grid-cols-3 gap-3 sm:max-w-lg sm:grid-cols-4">
           {BOSS_KEYS.map((key) => (
             <button
@@ -341,8 +342,8 @@ export default function Settings() {
         </div>
 
         {/* Arme */}
-        <SubLabel className="mt-6">Arme</SubLabel>
-        <p className="mb-3 text-xs text-muted-foreground">Ton arme de prédilection (le bouclier reste constant).</p>
+        <SubLabel className="mt-6">{t('settings.combat.weapon')}</SubLabel>
+        <p className="mb-3 text-xs text-muted-foreground">{t('settings.combat.weaponHint')}</p>
         <div className="grid grid-cols-3 gap-3 sm:max-w-lg sm:grid-cols-4">
           {WEAPON_KEYS.map((key) => (
             <button
@@ -375,19 +376,19 @@ export default function Settings() {
                 ? <Volume2 className="h-5 w-5 text-primary-soft" />
                 : <VolumeX className="h-5 w-5 text-muted-foreground" />}
               <div>
-                <div className="text-sm font-semibold text-foreground">Sons de l'application</div>
-                <div className="text-xs text-muted-foreground">Fanfares de victoire, montée de niveau, reprise.</div>
+                <div className="text-sm font-semibold text-foreground">{t('settings.combat.sound')}</div>
+                <div className="text-xs text-muted-foreground">{t('settings.combat.soundHint')}</div>
               </div>
             </div>
             <Toggle on={soundEnabled} onChange={setSoundEnabled} />
           </div>
           <div className="flex items-center justify-between gap-4 p-4">
             <div>
-              <div className="text-sm font-semibold text-foreground">Enchaîner après le repos</div>
+              <div className="text-sm font-semibold text-foreground">{t('settings.combat.autoAdvance')}</div>
               <div className="text-xs text-muted-foreground">
                 {autoAdvanceRest
-                  ? 'La série suivante démarre automatiquement à la fin du repos.'
-                  : 'Le repos attend que tu appuies sur « Reprendre ».'}
+                  ? t('settings.combat.autoAdvanceOn')
+                  : t('settings.combat.autoAdvanceOff')}
               </div>
             </div>
             <Toggle on={autoAdvanceRest} onChange={setAutoAdvanceRest} />
@@ -398,7 +399,7 @@ export default function Settings() {
       {/* ── Compte ───────────────────────────────────────────────────── */}
       <SectionCard
         id="compte"
-        title="Compte"
+        title={t('settings.sections.account')}
         open={open === 'compte'}
         onToggle={() => toggle('compte')}
       >
@@ -406,11 +407,11 @@ export default function Settings() {
           <div className="flex items-center gap-3">
             <Mail className="h-5 w-5 shrink-0 text-muted-foreground" />
             <div>
-              <div className="text-sm font-semibold text-foreground">Adresse e-mail</div>
+              <div className="text-sm font-semibold text-foreground">{t('settings.account.email')}</div>
               <div className="text-xs text-muted-foreground">{user?.email ?? '—'}</div>
             </div>
           </div>
-          <Lock className="h-4 w-4 shrink-0 text-muted-foreground" aria-label="Lecture seule" />
+          <Lock className="h-4 w-4 shrink-0 text-muted-foreground" aria-label={t('settings.account.emailReadOnly')} />
         </div>
 
         <div className="mt-4 border-t border-border pt-4">
@@ -420,7 +421,7 @@ export default function Settings() {
             className="flex items-center gap-2 text-sm font-semibold text-red-400 transition-colors hover:text-red-300 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
           >
             <LogOut className="h-4 w-4" />
-            Se déconnecter
+            {t('settings.account.logout')}
           </button>
         </div>
       </SectionCard>
@@ -428,8 +429,8 @@ export default function Settings() {
       {/* ── Données ──────────────────────────────────────────────────── */}
       <SectionCard
         id="donnees"
-        title="Données"
-        hint="Import de contenu externe."
+        title={t('settings.sections.data')}
+        hint={t('settings.sections.dataHint')}
         open={open === 'donnees'}
         onToggle={() => toggle('donnees')}
       >
@@ -440,9 +441,9 @@ export default function Settings() {
         >
           <FileJson className="h-5 w-5 shrink-0 text-primary-soft" />
           <div>
-            <div className="text-sm font-semibold text-foreground">Import JSON</div>
+            <div className="text-sm font-semibold text-foreground">{t('settings.data.importJson')}</div>
             <div className="text-xs text-muted-foreground">
-              Importe exercices &amp; programmes depuis un fichier lfy_import.json.
+              {t('settings.data.importJsonHint')}
             </div>
           </div>
         </button>
