@@ -41,8 +41,18 @@ function WidgetTile({
   secondary?: string;
   accent?: string;
 }) {
+  // compact (md) : carré plein-largeur dans la colonne d'icônes 64px.
+  // xl/md (lg)   : plus grand carré inscrit dans la cellule (W×H) via unités cq.
+  const shell =
+    size === 'compact'
+      ? 'aspect-square w-full'
+      : 'aspect-square w-[min(100cqw,100cqh)] max-w-full';
+
   return (
-    <div className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-lg border border-border bg-card-shield px-1 transition-colors hover:border-primary/40">
+    <div className={cn(
+      'flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg border border-border bg-card-shield px-1 transition-colors hover:border-primary/40',
+      shell,
+    )}>
       <div className="shrink-0 text-muted-foreground">{icon}</div>
       <span
         className={cn(
@@ -245,13 +255,23 @@ export default function SidebarWidgets() {
 
   return (
     <div className="h-full border-t border-border">
-      {/* lg : une seule ligne */}
+      {/* lg : grille qui remplit toute la hauteur dispo ; chaque cellule = contexte
+          container-query (hauteur définie) pour borner le carré par W ET H. */}
       <div
-        className="hidden p-2 lg:grid lg:gap-2"
-        style={{ gridTemplateColumns: `repeat(${widgets.length}, 1fr)` }}
+        className="hidden h-full overflow-hidden p-2 lg:grid lg:gap-2"
+        style={{
+          gridTemplateColumns: `repeat(${widgets.length}, minmax(0, 1fr))`,
+          gridTemplateRows: '1fr',
+        }}
       >
         {widgets.map((id) => (
-          <WidgetDispatcher key={id} id={id} size={lgSize} />
+          <div
+            key={id}
+            className="flex min-h-0 min-w-0 items-end justify-center"
+            style={{ containerType: 'size' }}
+          >
+            <WidgetDispatcher id={id} size={lgSize} />
+          </div>
         ))}
       </div>
       {/* md (icônes seules) : colonne compacte */}
