@@ -42,7 +42,7 @@ function WidgetTile({
   accent?: string;
 }) {
   return (
-    <div className={cn("flex flex-col items-center justify-center gap-1 rounded-lg border border-border bg-card-shield px-1 transition-colors hover:border-primary/40", size === 'xl' ? 'h-[100px] w-full' : 'aspect-square')}>
+    <div className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-lg border border-border bg-card-shield px-1 transition-colors hover:border-primary/40">
       <div className="shrink-0 text-muted-foreground">{icon}</div>
       <span
         className={cn(
@@ -244,7 +244,7 @@ export default function SidebarWidgets() {
   const lgSize: TileSize = widgets.length === 1 ? 'xl' : 'md';
 
   return (
-    <div className="shrink-0 border-t border-border">
+    <div className="h-full border-t border-border">
       {/* lg : une seule ligne */}
       <div
         className="hidden p-2 lg:grid lg:gap-2"

@@ -104,7 +104,7 @@ function Sidebar() {
       </div>
 
       {/* Nav links — scrollable si viewport trop petit */}
-      <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-2 lg:p-3">
+      <nav className="flex shrink-0 flex-col gap-1 overflow-y-auto p-2 lg:p-3">
         {SIDEBAR_NAV.map(({ to, key, icon: Icon }) => (
           <NavLink
             key={to}
@@ -126,7 +126,9 @@ function Sidebar() {
         ))}
       </nav>
 
-      <SidebarWidgets />
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <SidebarWidgets />
+      </div>
 
       {/* Bloc héros — sticky bas de sidebar, masque le contenu qui défile */}
       {user && (() => {
