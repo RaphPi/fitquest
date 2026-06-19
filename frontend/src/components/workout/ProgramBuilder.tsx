@@ -324,7 +324,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
     <div className="relative flex flex-col gap-4 pb-24">
       <button
         onClick={onBack}
-        className="flex items-center gap-1.5 self-start text-sm text-muted-foreground hover:text-foreground"
+        className="font-display flex items-center gap-1.5 self-start text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         Retour
