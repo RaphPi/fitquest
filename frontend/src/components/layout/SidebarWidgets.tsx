@@ -25,8 +25,19 @@ function getStoredWeightColor(): string {
 
 // ── Tile shell ────────────────────────────────────────────────────────────────
 // size = 'xl' (1 widget seul), 'md' (2 widgets), 'compact' (md sidebar icônes)
+//
+// xl/md vivent dans une cellule `container-type: size` : leurs tailles internes
+// (icône, texte) s'expriment en `cqmin` (= côté du carré) pour suivre le carré
+// quand il rétrécit en hauteur. compact reste en rem fixes (pas de container cq).
 
 type TileSize = 'xl' | 'md' | 'compact';
+
+// Taille d'icône proportionnelle au carré (cqmin) sauf en compact.
+const ICON_CLS: Record<TileSize, string> = {
+  xl: 'h-[22cqmin] w-[22cqmin]',
+  md: 'h-[20cqmin] w-[20cqmin]',
+  compact: 'h-3.5 w-3.5',
+};
 
 function WidgetTile({
   size,
@@ -56,15 +67,19 @@ function WidgetTile({
       <div className="shrink-0 text-muted-foreground">{icon}</div>
       <span
         className={cn(
-          'leading-none font-bold tabular-nums',
-          size === 'xl' ? 'text-3xl' : size === 'md' ? 'text-lg' : 'text-[11px]',
+          'max-w-full truncate leading-none font-bold tabular-nums',
+          size === 'xl'
+            ? 'text-[clamp(0.8rem,26cqmin,2.3rem)]'
+            : size === 'md'
+              ? 'text-[clamp(0.7rem,22cqmin,1.4rem)]'
+              : 'text-[11px]',
         )}
         style={{ color: accent ?? 'var(--text-primary)' }}
       >
         {main}
       </span>
       {size !== 'compact' && secondary && (
-        <span className="w-full truncate text-center text-xs leading-tight text-muted-foreground px-1">
+        <span className="w-full truncate px-1 text-center leading-tight text-muted-foreground text-[clamp(0.55rem,10cqmin,0.85rem)]">
           {secondary}
         </span>
       )}
@@ -78,7 +93,7 @@ function StreakWidget({ size, streak }: { size: TileSize; streak: number }) {
   return (
     <WidgetTile
       size={size}
-      icon={<Flame className={size === 'xl' ? 'h-8 w-8' : size === 'md' ? 'h-5 w-5' : 'h-3.5 w-3.5'} style={{ color: 'rgba(249,115,22,1)' }} />}
+      icon={<Flame className={ICON_CLS[size]} style={{ color: 'rgba(249,115,22,1)' }} />}
       main={String(streak)}
       secondary="Série (jours)"
       accent="rgba(249,115,22,1)"
@@ -95,7 +110,7 @@ function XpRemainingWidget({ size, remaining, nextLevel }: { size: TileSize; rem
   return (
     <WidgetTile
       size={size}
-      icon={<Zap className={size === 'xl' ? 'h-8 w-8' : size === 'md' ? 'h-5 w-5' : 'h-3.5 w-3.5'} style={{ color: 'var(--xp)' }} />}
+      icon={<Zap className={ICON_CLS[size]} style={{ color: 'var(--xp)' }} />}
       main={fmt}
       secondary={`→ Niv. ${nextLevel}`}
       accent="var(--xp)"
@@ -119,7 +134,7 @@ function LastWorkoutWidget({ size, lastWorkout }: { size: TileSize; lastWorkout:
   return (
     <WidgetTile
       size={size}
-      icon={<Clock className={size === 'xl' ? 'h-8 w-8' : size === 'md' ? 'h-5 w-5' : 'h-3.5 w-3.5'} />}
+      icon={<Clock className={ICON_CLS[size]} />}
       main={main}
       secondary={secondary}
     />
@@ -145,7 +160,7 @@ function BodyWeightWidget({ size }: { size: TileSize }) {
     return (
       <WidgetTile
         size={size}
-        icon={<Activity className={size === 'xl' ? 'h-8 w-8' : size === 'md' ? 'h-5 w-5' : 'h-3.5 w-3.5'} />}
+        icon={<Activity className={ICON_CLS[size]} />}
         main="—"
         secondary="Poids"
       />
@@ -161,7 +176,7 @@ function BodyWeightWidget({ size }: { size: TileSize }) {
   return (
     <WidgetTile
       size={size}
-      icon={<Activity className={size === 'xl' ? 'h-8 w-8' : size === 'md' ? 'h-5 w-5' : 'h-3.5 w-3.5'} style={{ color: weightColor }} />}
+      icon={<Activity className={ICON_CLS[size]} style={{ color: weightColor }} />}
       main={`${current}kg`}
       secondary={secondary}
       accent={weightColor}
@@ -186,7 +201,7 @@ function BadgeProgressWidget({ size }: { size: TileSize }) {
     return (
       <WidgetTile
         size={size}
-        icon={<Trophy className={size === 'xl' ? 'h-8 w-8' : size === 'md' ? 'h-5 w-5' : 'h-3.5 w-3.5'} />}
+        icon={<Trophy className={ICON_CLS[size]} />}
         main="—"
         secondary="Badge"
       />
@@ -205,7 +220,7 @@ function BadgeProgressWidget({ size }: { size: TileSize }) {
             <PixelCanvas
               render={(c) => renderBadgeIcon(c, best.iconType, best.rarity, size === 'xl' ? 4 : 3, false)}
               deps={[best.id]}
-              className={size === 'xl' ? 'h-8' : 'h-5'}
+              className={size === 'xl' ? 'h-[22cqmin]' : 'h-[20cqmin]'}
             />
           )
       }
