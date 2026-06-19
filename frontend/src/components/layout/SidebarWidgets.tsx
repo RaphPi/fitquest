@@ -42,7 +42,7 @@ function WidgetTile({
   accent?: string;
 }) {
   return (
-    <div className="flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border border-border bg-card-shield px-1 transition-colors hover:border-primary/40">
+    <div className={cn("flex flex-col items-center justify-center gap-1 rounded-lg border border-border bg-card-shield px-1 transition-colors hover:border-primary/40", size === 'xl' ? 'h-[100px] w-full' : 'aspect-square')}>
       <div className="shrink-0 text-muted-foreground">{icon}</div>
       <span
         className={cn(

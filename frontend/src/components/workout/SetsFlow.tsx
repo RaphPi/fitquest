@@ -51,7 +51,7 @@ export default function SetsFlow({
             >
               {pillValue}
             </div>
-            <span className={`text-muted-foreground whitespace-nowrap ${compact ? 'text-[8px]' : 'text-[9px]'}`}>
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
               s{i + 1}
             </span>
           </div>
@@ -61,7 +61,7 @@ export default function SetsFlow({
             <div className="flex flex-col items-center px-1.5 pb-4 shrink-0">
               <div className="h-0.5 w-6" style={transitionLineStyle} />
               <span
-                className="mt-0.5 text-[9px] font-semibold whitespace-nowrap"
+                className="mt-0.5 text-xs font-semibold whitespace-nowrap"
                 style={{ color: VIOLET }}
               >
                 {restBetweenSetsSeconds}s
