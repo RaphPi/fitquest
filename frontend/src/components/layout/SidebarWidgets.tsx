@@ -10,6 +10,19 @@ import PixelCanvas from '@/components/workout/active/PixelCanvas';
 import { renderBadgeIcon } from '@/lib/badgeIcons';
 import type { BadgeState } from '@/types';
 
+// ── Color helpers ─────────────────────────────────────────────────────────────
+
+function getStoredWeightColor(): string {
+  try {
+    const stored = localStorage.getItem('fq_metric_colors');
+    if (stored) {
+      const map = JSON.parse(stored) as Record<string, string>;
+      if (map.weight) return map.weight;
+    }
+  } catch { /* ignore */ }
+  return '#f59e0b';
+}
+
 // ── Tile shell ────────────────────────────────────────────────────────────────
 // size = 'xl' (1 widget seul), 'md' (2 widgets), 'compact' (md sidebar icônes)
 
@@ -72,10 +85,10 @@ function XpRemainingWidget({ size, remaining, nextLevel }: { size: TileSize; rem
   return (
     <WidgetTile
       size={size}
-      icon={<Zap className={size === 'xl' ? 'h-8 w-8' : size === 'md' ? 'h-5 w-5' : 'h-3.5 w-3.5'} style={{ color: 'rgba(234,179,8,1)' }} />}
+      icon={<Zap className={size === 'xl' ? 'h-8 w-8' : size === 'md' ? 'h-5 w-5' : 'h-3.5 w-3.5'} style={{ color: 'var(--xp)' }} />}
       main={fmt}
       secondary={`→ Niv. ${nextLevel}`}
-      accent="rgba(234,179,8,1)"
+      accent="var(--xp)"
     />
   );
 }
@@ -105,6 +118,7 @@ function LastWorkoutWidget({ size, lastWorkout }: { size: TileSize; lastWorkout:
 
 function BodyWeightWidget({ size }: { size: TileSize }) {
   const metrics = useBodyStore((s) => s.metrics);
+  const weightColor = getStoredWeightColor();
 
   // Sème le store si vide (une seule fois, sans toucher isLoading)
   useEffect(() => {
@@ -137,10 +151,10 @@ function BodyWeightWidget({ size }: { size: TileSize }) {
   return (
     <WidgetTile
       size={size}
-      icon={<Activity className={size === 'xl' ? 'h-8 w-8' : size === 'md' ? 'h-5 w-5' : 'h-3.5 w-3.5'} style={{ color: 'rgba(34,211,238,1)' }} />}
+      icon={<Activity className={size === 'xl' ? 'h-8 w-8' : size === 'md' ? 'h-5 w-5' : 'h-3.5 w-3.5'} style={{ color: weightColor }} />}
       main={`${current}kg`}
       secondary={secondary}
-      accent="rgba(34,211,238,1)"
+      accent={weightColor}
     />
   );
 }

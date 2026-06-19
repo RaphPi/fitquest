@@ -86,6 +86,17 @@ export default function Dashboard() {
 
   const weeklyData = useMemo(() => computeWeeklyData(history), [history]);
 
+  const weightColor = useMemo(() => {
+    try {
+      const stored = localStorage.getItem('fq_metric_colors');
+      if (stored) {
+        const map = JSON.parse(stored) as Record<string, string>;
+        if (map.weight) return map.weight;
+      }
+    } catch { /* ignore */ }
+    return '#f59e0b';
+  }, []);
+
   const weightData = useMemo(() => {
     const withW = [...metrics]
       .filter((m) => m.weightKg != null)
@@ -209,7 +220,7 @@ export default function Dashboard() {
                   <h2 className="mb-1 font-display text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                     Poids actuel
                   </h2>
-                  <p className="font-display text-xl font-black text-xp">
+                  <p className="font-display text-xl font-black" style={{ color: weightColor }}>
                     {weightData.current.toFixed(1)}{' '}
                     <span className="text-xs font-normal text-muted-foreground">kg</span>
                   </p>
@@ -217,7 +228,7 @@ export default function Dashboard() {
                     <div className="mt-1.5">
                       <ResponsiveContainer width="100%" height={36}>
                         <LineChart data={weightData.sparkline} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
-                          <Line type="monotone" dataKey="v" stroke="var(--xp)" dot={false} strokeWidth={2} />
+                          <Line type="monotone" dataKey="v" stroke={weightColor} dot={false} strokeWidth={2} />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
