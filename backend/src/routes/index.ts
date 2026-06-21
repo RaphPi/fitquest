@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma';
+import adminRouter from './admin';
 import authRouter from './auth';
 import badgeRouter from './badges';
 import bodyRouter from './body';
@@ -27,6 +28,7 @@ router.get('/health', async (_req, res) => {
   });
 });
 
+router.use('/admin', adminRouter);
 router.use('/auth', authRouter);
 router.use('/badges', badgeRouter);
 router.use('/body', bodyRouter);

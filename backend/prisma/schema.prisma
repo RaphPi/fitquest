@@ -18,10 +18,16 @@ enum DigestFrequency {
   NONE
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
 model User {
   id           String           @id @default(cuid())
   username     String           @unique
   passwordHash String
+  role         Role             @default(USER)
   email        String?          @unique
   emailDigest  DigestFrequency?
   avatarStage  Int              @default(0)

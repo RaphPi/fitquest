@@ -15,9 +15,9 @@ const COOKIE_OPTS = {
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 jours
 };
 
-function makeToken(userId: string) {
+function makeToken(userId: string, role: string) {
   return jwt.sign(
-    { sub: userId },
+    { sub: userId, role },
     process.env.JWT_SECRET ?? 'dev_secret',
     { expiresIn: (process.env.JWT_EXPIRES_IN ?? '7d') as SignOptions['expiresIn'] },
   );
@@ -51,6 +51,10 @@ router.post('/register', async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 12);
 
+    // Le tout premier inscrit devient ADMIN automatiquement (instance self-hosted mono-user).
+    const userCount = await prisma.user.count();
+    const role = userCount === 0 ? 'ADMIN' : 'USER';
+
     const user = await prisma.user.create({
       data: {
         username,
@@ -58,15 +62,16 @@ router.post('/register', async (req, res) => {
         email: email || null,
         emailDigest: (emailDigest as any) ?? null,
         avatarStage: avatarStage ?? 0,
+        role,
       },
       select: {
         id: true, username: true, email: true, avatarStage: true,
         themeId: true, level: true, totalXP: true, currentXP: true,
-        xpBalance: true, streak: true, lastWorkout: true,
+        xpBalance: true, streak: true, lastWorkout: true, role: true,
       },
     });
 
-    res.cookie('token', makeToken(user.id), COOKIE_OPTS);
+    res.cookie('token', makeToken(user.id, user.role), COOKIE_OPTS);
     res.status(201).json({ user });
   } catch (err) {
     console.error('[auth/register]', err);
@@ -97,7 +102,7 @@ router.post('/login', async (req, res) => {
     }
 
     const { passwordHash: _, ...safe } = user;
-    res.cookie('token', makeToken(user.id), COOKIE_OPTS);
+    res.cookie('token', makeToken(user.id, user.role), COOKIE_OPTS);
     res.json({ user: safe });
   } catch (err) {
     console.error('[auth/login]', err);
@@ -131,7 +136,7 @@ router.patch('/me', requireAuth, async (req: AuthRequest, res) => {
       select: {
         id: true, username: true, email: true, avatarStage: true,
         themeId: true, level: true, totalXP: true, currentXP: true,
-        xpBalance: true, streak: true, lastWorkout: true,
+        xpBalance: true, streak: true, lastWorkout: true, role: true,
       },
     });
 
@@ -150,7 +155,7 @@ router.get('/me', requireAuth, async (req: AuthRequest, res) => {
       select: {
         id: true, username: true, email: true, avatarStage: true,
         themeId: true, level: true, totalXP: true, currentXP: true,
-        xpBalance: true, streak: true, lastWorkout: true,
+        xpBalance: true, streak: true, lastWorkout: true, role: true,
       },
     });
     if (!user) {
