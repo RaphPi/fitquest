@@ -238,12 +238,6 @@
         "other": "Other"
       }
     },
-    "export": {
-      "selectMode": "Select",
-      "cancelSelect": "Cancel",
-      "exportBtn": "Export ({{count}})",
-      "errorFetch": "Export failed"
-    },
     "history": {
       "loading": "Loading history…",
       "empty": "No sessions recorded yet.",
@@ -558,8 +552,23 @@
     },
     "data": {
       "importJson": "Import JSON",
-      "importJsonHint": "Import exercises & programs from a lfy_import.json file."
+      "importJsonHint": "Import exercises & programs from a lfy_import.json file.",
+      "exportJson": "Export JSON",
+      "exportJsonHint": "Export selected programs to a re-importable JSON file."
     }
+  },
+  "exportPrograms": {
+    "title": "Export programs",
+    "subtitle": "Select the programs to export. The generated JSON file can be re-imported directly.",
+    "backLink": "Back to settings",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "exportBtn": "Export ({{count}})",
+    "cancel": "Cancel",
+    "noPrograms": "No programs available.",
+    "errorFetch": "Export failed",
+    "sessions": "{{count}} session",
+    "sessions_plural": "{{count}} sessions"
   },
   "history": {
     "title": "History",

@@ -11,6 +11,7 @@ import Profile from '@/pages/Profile';
 import Trophees from '@/pages/Trophees';
 import Settings from '@/pages/Settings';
 import ImportLFY from '@/pages/ImportLFY';
+import ExportPrograms from '@/pages/ExportPrograms';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="/trophees" element={<ProtectedRoute><Trophees /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/import" element={<ProtectedRoute><ImportLFY /></ProtectedRoute>} />
+        <Route path="/export" element={<ProtectedRoute><ExportPrograms /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppLayout>

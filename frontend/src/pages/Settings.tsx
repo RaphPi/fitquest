@@ -434,19 +434,30 @@ export default function Settings() {
         open={open === 'donnees'}
         onToggle={() => toggle('donnees')}
       >
-        <button
-          type="button"
-          onClick={() => navigate('/import')}
-          className="flex w-full items-center gap-3 rounded-lg border border-border px-4 py-3 text-left transition-colors hover:bg-card-shield/40"
-        >
-          <FileJson className="h-5 w-5 shrink-0 text-primary-soft" />
-          <div>
-            <div className="text-sm font-semibold text-foreground">{t('settings.data.importJson')}</div>
-            <div className="text-xs text-muted-foreground">
-              {t('settings.data.importJsonHint')}
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={() => navigate('/import')}
+            className="flex w-full items-center gap-3 rounded-lg border border-border px-4 py-3 text-left transition-colors hover:bg-card-shield/40"
+          >
+            <FileJson className="h-5 w-5 shrink-0 text-primary-soft" />
+            <div>
+              <div className="text-sm font-semibold text-foreground">{t('settings.data.importJson')}</div>
+              <div className="text-xs text-muted-foreground">{t('settings.data.importJsonHint')}</div>
             </div>
-          </div>
-        </button>
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/export')}
+            className="flex w-full items-center gap-3 rounded-lg border border-border px-4 py-3 text-left transition-colors hover:bg-card-shield/40"
+          >
+            <FileJson className="h-5 w-5 shrink-0 text-primary-soft" />
+            <div>
+              <div className="text-sm font-semibold text-foreground">{t('settings.data.exportJson')}</div>
+              <div className="text-xs text-muted-foreground">{t('settings.data.exportJsonHint')}</div>
+            </div>
+          </button>
+        </div>
       </SectionCard>
     </section>
   );

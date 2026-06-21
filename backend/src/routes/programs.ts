@@ -72,13 +72,13 @@ router.get('/export', requireAuth, async (req: AuthRequest, res) => {
       daysPerWeek: p.daysPerWeek,
       durationWeeks: p.durationWeeks,
       equipment: p.equipment,
-      sessions: p.sessions.map((s) => ({
+      sessions: p.sessions.map((s, si) => ({
         nameFr: s.nameFr,
         nameEn: s.nameEn,
-        order: s.order,
-        exercises: s.exercises.map((e) => ({
+        order: si + 1,
+        exercises: s.exercises.map((e, ei) => ({
           exerciseId: e.exerciseId,
-          order: e.order,
+          order: ei + 1,
           sets: e.sets,
           reps: e.reps ?? null,
           durationSeconds: e.durationSeconds ?? null,
