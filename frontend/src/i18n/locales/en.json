@@ -557,7 +557,10 @@
       "importJson": "Import JSON",
       "importJsonHint": "Import exercises & programs from a lfy_import.json file.",
       "exportJson": "Export JSON",
-      "exportJsonHint": "Export selected programs to a re-importable JSON file."
+      "exportJsonHint": "Export selected programs to a re-importable JSON file.",
+      "exportZip": "Export my data (ZIP)",
+      "exportZipHint": "Download all your data as a ZIP file (GDPR compliance).",
+      "exportZipError": "Export failed. Please try again."
     }
   },
   "exportPrograms": {

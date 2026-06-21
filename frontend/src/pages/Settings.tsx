@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Volume2, VolumeX, Plus, Lock, LogOut, Mail, ChevronDown, FileJson, Flame, Zap, Clock, Activity, Trophy, Check, ShieldCheck } from 'lucide-react';
+import { Volume2, VolumeX, Plus, Lock, LogOut, Mail, ChevronDown, FileJson, Flame, Zap, Clock, Activity, Trophy, Check, ShieldCheck, Archive, Loader2 } from 'lucide-react';
 import { useSettingsStore, type WidgetId } from '@/stores/settingsStore';
 import { useUserStore } from '@/stores/userStore';
 import { cn } from '@/lib/utils';
@@ -192,6 +192,32 @@ export default function Settings() {
   const logout = useUserStore((s) => s.logout);
 
   const toggle = (id: SectionId) => setOpen((prev) => (prev === id ? null : id));
+
+  const [zipExporting, setZipExporting] = useState(false);
+  const [zipError, setZipError] = useState<string | null>(null);
+
+  const handleExportZip = async () => {
+    setZipExporting(true);
+    setZipError(null);
+    try {
+      const res = await fetch('/api/v1/export/me', { credentials: 'include' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const cd = res.headers.get('Content-Disposition') ?? '';
+      const match = cd.match(/filename="([^"]+)"/);
+      const filename = match?.[1] ?? `fitquest-data-${new Date().toISOString().slice(0, 10)}.zip`;
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setZipError(t('settings.data.exportZipError'));
+    } finally {
+      setZipExporting(false);
+    }
+  };
 
   const handleLang = (lang: string) => {
     void i18n.changeLanguage(lang);
@@ -476,6 +502,25 @@ export default function Settings() {
               <div className="text-xs text-muted-foreground">{t('settings.data.exportJsonHint')}</div>
             </div>
           </button>
+          <button
+            type="button"
+            onClick={() => void handleExportZip()}
+            disabled={zipExporting}
+            className="flex w-full items-center gap-3 rounded-lg border border-border px-4 py-3 text-left transition-colors hover:bg-card-shield/40 disabled:opacity-60"
+          >
+            {zipExporting
+              ? <Loader2 className="h-5 w-5 shrink-0 animate-spin text-primary-soft" />
+              : <Archive className="h-5 w-5 shrink-0 text-primary-soft" />}
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-semibold text-foreground">{t('settings.data.exportZip')}</div>
+              <div className="text-xs text-muted-foreground">{t('settings.data.exportZipHint')}</div>
+            </div>
+          </button>
+          {zipError && (
+            <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs text-red-400">
+              {zipError}
+            </div>
+          )}
         </div>
       </SectionCard>
     </section>
