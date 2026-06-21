@@ -5,6 +5,7 @@ import authRouter from './auth';
 import badgeRouter from './badges';
 import bodyRouter from './body';
 import exerciseRouter from './exercises';
+import exportRouter from './export';
 import programRouter from './programs';
 import workoutRouter from './workouts';
 
@@ -33,6 +34,7 @@ router.use('/auth', authRouter);
 router.use('/badges', badgeRouter);
 router.use('/body', bodyRouter);
 router.use('/exercises', exerciseRouter);
+router.use('/export', exportRouter);
 router.use('/programs', programRouter);
 router.use('/workouts', workoutRouter);
 
