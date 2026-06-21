@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, FileJson, Download, Loader2, CheckCircle2, Circle } from 'lucide-react';
+import { ArrowLeft, FileJson, Download, Loader2, CheckCircle2, Circle, Search } from 'lucide-react';
 import { getLevelTier } from '@/lib/levelTier';
 import type { Program, Level } from '@/types';
 import { cn } from '@/lib/utils';
@@ -13,6 +13,8 @@ function levelColor(level: Level) {
   return tier.color;
 }
 
+const LEVELS: Level[] = ['beginner', 'intermediate', 'advanced'];
+
 export default function ExportPrograms() {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -23,25 +25,50 @@ export default function ExportPrograms() {
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Filters
+  const [search, setSearch] = useState('');
+  const [levelFilter, setLevelFilter] = useState<Level[]>([]);
+
   useEffect(() => {
     fetch('/api/v1/programs', { credentials: 'include' })
       .then((r) => r.json())
-      .then((data: { programs: Program[] }) => {
-        setPrograms(data.programs ?? []);
-      })
+      .then((data: { programs: Program[] }) => setPrograms(data.programs ?? []))
       .catch(() => setError(t('exportPrograms.errorFetch')))
       .finally(() => setLoading(false));
   }, [t]);
 
-  const allSelected = programs.length > 0 && selectedIds.size === programs.length;
+  const filtered = useMemo(() => {
+    let list = programs;
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter((p) => p.nameFr.toLowerCase().includes(q) || p.nameEn.toLowerCase().includes(q));
+    }
+    if (levelFilter.length > 0) {
+      list = list.filter((p) => levelFilter.includes(p.level as Level));
+    }
+    return list;
+  }, [programs, search, levelFilter]);
+
+  const allFilteredSelected = filtered.length > 0 && filtered.every((p) => selectedIds.has(p.id));
 
   const toggleAll = () => {
-    if (allSelected) {
-      setSelectedIds(new Set());
+    if (allFilteredSelected) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        filtered.forEach((p) => next.delete(p.id));
+        return next;
+      });
     } else {
-      setSelectedIds(new Set(programs.map((p) => p.id)));
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        filtered.forEach((p) => next.add(p.id));
+        return next;
+      });
     }
   };
+
+  const toggleLevel = (l: Level) =>
+    setLevelFilter((prev) => prev.includes(l) ? prev.filter((x) => x !== l) : [...prev, l]);
 
   const toggleOne = (id: string) => {
     setSelectedIds((prev) => {
@@ -78,7 +105,7 @@ export default function ExportPrograms() {
   };
 
   return (
-    <section className="max-w-lg space-y-4">
+    <section className="max-w-lg pb-28">
       <div className="mb-5">
         <button
           type="button"
@@ -91,6 +118,39 @@ export default function ExportPrograms() {
         <h1 className="font-display text-2xl font-bold">{t('exportPrograms.title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t('exportPrograms.subtitle')}</p>
       </div>
+
+      {/* Filters */}
+      {!loading && programs.length > 0 && (
+        <div className="mb-4 space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder={t('workout.searchPlaceholder')}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full rounded-lg border border-border bg-card py-2.5 pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none focus:ring-1 focus:ring-primary/40"
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {LEVELS.map((l) => (
+              <button
+                key={l}
+                type="button"
+                onClick={() => toggleLevel(l)}
+                className={cn(
+                  'rounded-full border px-3 py-1 text-xs font-semibold transition-colors',
+                  levelFilter.includes(l)
+                    ? 'border-primary/60 bg-primary/15 text-primary'
+                    : 'border-border text-muted-foreground hover:border-primary/30 hover:text-foreground',
+                )}
+              >
+                {t(`workout.level.${l}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {loading && (
         <div className="flex justify-center py-12">
@@ -110,12 +170,12 @@ export default function ExportPrograms() {
 
       {!loading && programs.length > 0 && (
         <div className="overflow-hidden rounded-xl border border-border bg-card">
-          {/* Header row: select all */}
+          {/* Header row: select all filtered */}
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <div className="flex items-center gap-2">
               <FileJson className="h-4 w-4 text-primary-soft" />
               <span className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
-                {programs.length} prog.
+                {filtered.length} / {programs.length}
               </span>
             </div>
             <button
@@ -123,47 +183,51 @@ export default function ExportPrograms() {
               onClick={toggleAll}
               className="text-xs font-semibold text-primary underline-offset-2 hover:underline"
             >
-              {allSelected ? t('exportPrograms.deselectAll') : t('exportPrograms.selectAll')}
+              {allFilteredSelected ? t('exportPrograms.deselectAll') : t('exportPrograms.selectAll')}
             </button>
           </div>
 
           {/* Program list */}
-          <ul className="divide-y divide-border">
-            {programs.map((p) => {
-              const selected = selectedIds.has(p.id);
-              const color = levelColor(p.level as Level);
-              return (
-                <li key={p.id}>
-                  <button
-                    type="button"
-                    onClick={() => toggleOne(p.id)}
-                    className={cn(
-                      'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-card-shield/30',
-                      selected && 'bg-primary/5',
-                    )}
-                  >
-                    {selected
-                      ? <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
-                      : <Circle className="h-4 w-4 shrink-0 text-muted-foreground/40" />}
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-foreground">{p.nameFr}</p>
-                      <p className="text-[11px] text-muted-foreground">
-                        <span style={{ color }}>{t(`workout.level.${p.level}`)}</span>
-                        {' · '}
-                        {t('exportPrograms.sessions', { count: p.sessions.length })}
-                      </p>
-                    </div>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+          {filtered.length === 0 ? (
+            <p className="px-4 py-6 text-center text-sm text-muted-foreground">{t('workout.noResults')}</p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {filtered.map((p) => {
+                const selected = selectedIds.has(p.id);
+                const color = levelColor(p.level as Level);
+                return (
+                  <li key={p.id}>
+                    <button
+                      type="button"
+                      onClick={() => toggleOne(p.id)}
+                      className={cn(
+                        'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-card-shield/30',
+                        selected && 'bg-primary/5',
+                      )}
+                    >
+                      {selected
+                        ? <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
+                        : <Circle className="h-4 w-4 shrink-0 text-muted-foreground/40" />}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-foreground">{p.nameFr}</p>
+                        <p className="text-[11px] text-muted-foreground">
+                          <span style={{ color }}>{t(`workout.level.${p.level}`)}</span>
+                          {' · '}
+                          {t('exportPrograms.sessions', { count: p.sessions.length })}
+                        </p>
+                      </div>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
       )}
 
-      {/* Actions */}
+      {/* Sticky action bar */}
       {!loading && programs.length > 0 && (
-        <div className="flex gap-3">
+        <div className="fixed bottom-0 left-0 right-0 flex gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-sm sm:left-auto sm:right-auto sm:w-full sm:max-w-lg sm:px-0">
           <button
             type="button"
             onClick={() => void handleExport()}
