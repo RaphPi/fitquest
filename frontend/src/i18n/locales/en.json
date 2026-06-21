@@ -507,7 +507,7 @@
       "combatHint": "Active session mode settings.",
       "account": "Account",
       "data": "Data",
-      "dataHint": "Import external content."
+      "dataHint": "Import and export external content."
     },
     "appearance": {
       "theme": "Theme",

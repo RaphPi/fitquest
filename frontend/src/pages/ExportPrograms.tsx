@@ -105,7 +105,7 @@ export default function ExportPrograms() {
   };
 
   return (
-    <section className="max-w-lg pb-28">
+    <section className="max-w-lg pb-40 md:pb-4">
       <div className="mb-5">
         <button
           type="button"
@@ -227,7 +227,7 @@ export default function ExportPrograms() {
 
       {/* Sticky action bar */}
       {!loading && programs.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 flex gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-sm sm:left-auto sm:right-auto sm:w-full sm:max-w-lg sm:px-0">
+        <div className="fixed inset-x-0 bottom-16 z-30 flex gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-sm md:bottom-0">
           <button
             type="button"
             onClick={() => void handleExport()}

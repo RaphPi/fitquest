@@ -507,7 +507,7 @@
       "combatHint": "Réglages du mode séance actif.",
       "account": "Compte",
       "data": "Données",
-      "dataHint": "Import de contenu externe."
+      "dataHint": "Import et export de contenu externe."
     },
     "appearance": {
       "theme": "Thème",
