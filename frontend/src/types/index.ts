@@ -201,10 +201,13 @@ export interface AuthResponse {
   user: UserProfile;
 }
 
+export type UserRole = 'USER' | 'ADMIN';
+
 export interface UserProfile {
   id: string;
   username: string;
   email?: string | null;
+  role: UserRole;
   avatarStage: number;
   themeId: ThemeId;
   level: number;

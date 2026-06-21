@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Dumbbell, BookOpen, User, Settings as SettingsIcon, Scale } from 'lucide-react';
+import { LayoutDashboard, Dumbbell, BookOpen, User, Settings as SettingsIcon, Scale, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { xpRequiredForLevel } from '@/lib/xp';
@@ -63,6 +63,15 @@ function MobileHeader() {
           >
             {t('sidebar.levelFull', { level: user.level, username: user.username })}
           </p>
+          {user.role === 'ADMIN' && (
+            <NavLink
+              to="/admin"
+              aria-label={t('nav.admin')}
+              className="text-muted-foreground transition hover:text-foreground"
+            >
+              <ShieldCheck className="h-5 w-5" />
+            </NavLink>
+          )}
           <NavLink to="/settings" className="text-muted-foreground transition hover:text-foreground">
             <SettingsIcon className="h-5 w-5" />
           </NavLink>
@@ -125,6 +134,23 @@ function Sidebar() {
             <span className="hidden lg:block">{t(`nav.${key}`)}</span>
           </NavLink>
         ))}
+        {user?.role === 'ADMIN' && (
+          <NavLink
+            to="/admin"
+            aria-label={t('nav.admin')}
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition',
+                isActive
+                  ? 'bg-card-shield text-primary shadow-glow'
+                  : 'text-muted-foreground hover:bg-card-shield/50 hover:text-foreground',
+              )
+            }
+          >
+            <ShieldCheck className="h-5 w-5 shrink-0" />
+            <span className="hidden lg:block">{t('nav.admin')}</span>
+          </NavLink>
+        )}
       </nav>
 
       <div className="flex-1 min-h-0 overflow-hidden">

@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import AdminRoute from '@/components/auth/AdminRoute';
 import Dashboard from '@/pages/Dashboard';
 import History from '@/pages/History';
 import Body from '@/pages/Body';
@@ -12,6 +13,7 @@ import Trophees from '@/pages/Trophees';
 import Settings from '@/pages/Settings';
 import ImportLFY from '@/pages/ImportLFY';
 import ExportPrograms from '@/pages/ExportPrograms';
+import AdminPanel from '@/pages/AdminPanel';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 
@@ -35,6 +37,7 @@ export default function App() {
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/import" element={<ProtectedRoute><ImportLFY /></ProtectedRoute>} />
         <Route path="/export" element={<ProtectedRoute><ExportPrograms /></ProtectedRoute>} />
+        <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppLayout>

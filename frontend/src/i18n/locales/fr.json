@@ -9,7 +9,8 @@
     "body": "Corps",
     "library": "Exercices",
     "profile": "Profil",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "admin": "Admin"
   },
   "navShort": {
     "dashboard": "Accueil",
@@ -660,5 +661,36 @@
   "sidebar": {
     "level": "Niv",
     "levelFull": "Niv. {{level}} · {{username}}"
+  },
+  "admin": {
+    "title": "Administration",
+    "subtitle": "Gestion de l'instance et des comptes.",
+    "stats": {
+      "users": "Utilisateurs",
+      "workouts": "Séances",
+      "programs": "Programmes",
+      "version": "Version"
+    },
+    "users": {
+      "title": "Utilisateurs",
+      "colUser": "Utilisateur",
+      "colRole": "Rôle",
+      "colCreated": "Créé le",
+      "colActions": "Actions",
+      "you": "vous",
+      "promote": "Promouvoir admin",
+      "demote": "Rétrograder",
+      "confirmDelete": "Supprimer définitivement le compte « {{username}} » et toutes ses données ?"
+    },
+    "danger": {
+      "title": "Zone dangereuse",
+      "desc": "Réinitialise la progression de TOUS les utilisateurs : séances, mesures, badges et photos. Les comptes et les programmes sont conservés. Cette action est irréversible.",
+      "ack": "Je comprends que cette action est irréversible et efface les données de progression de tous les utilisateurs.",
+      "confirmReset": "Dernière confirmation : réinitialiser toutes les données de progression ?",
+      "resetBtn": "Réinitialiser les données",
+      "resetDone": "Réinitialisation effectuée — {{photos}} photo(s) supprimée(s).",
+      "versionLabel": "Version actuelle :",
+      "releasesLink": "Voir les releases sur GitHub"
+    }
   }
 }

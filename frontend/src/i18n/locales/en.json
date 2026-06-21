@@ -9,7 +9,8 @@
     "body": "Body",
     "library": "Exercises",
     "profile": "Profile",
-    "settings": "Settings"
+    "settings": "Settings",
+    "admin": "Admin"
   },
   "navShort": {
     "dashboard": "Home",
@@ -660,5 +661,36 @@
   "sidebar": {
     "level": "Lv",
     "levelFull": "Lv. {{level}} · {{username}}"
+  },
+  "admin": {
+    "title": "Administration",
+    "subtitle": "Manage the instance and accounts.",
+    "stats": {
+      "users": "Users",
+      "workouts": "Workouts",
+      "programs": "Programs",
+      "version": "Version"
+    },
+    "users": {
+      "title": "Users",
+      "colUser": "User",
+      "colRole": "Role",
+      "colCreated": "Created",
+      "colActions": "Actions",
+      "you": "you",
+      "promote": "Make admin",
+      "demote": "Demote",
+      "confirmDelete": "Permanently delete account \"{{username}}\" and all its data?"
+    },
+    "danger": {
+      "title": "Danger zone",
+      "desc": "Resets progression for ALL users: workouts, measurements, badges and photos. Accounts and programs are kept. This action is irreversible.",
+      "ack": "I understand this action is irreversible and erases progression data for all users.",
+      "confirmReset": "Final confirmation: reset all progression data?",
+      "resetBtn": "Reset data",
+      "resetDone": "Reset complete — {{photos}} photo(s) deleted.",
+      "versionLabel": "Current version:",
+      "releasesLink": "View releases on GitHub"
+    }
   }
 }
