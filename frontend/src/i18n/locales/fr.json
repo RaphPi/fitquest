@@ -549,7 +549,9 @@
     "account": {
       "email": "Adresse e-mail",
       "emailReadOnly": "Lecture seule",
-      "logout": "Se déconnecter"
+      "logout": "Se déconnecter",
+      "adminPanel": "Panel d'administration",
+      "adminPanelHint": "Gérer l'instance et les comptes."
     },
     "data": {
       "importJson": "Import JSON",

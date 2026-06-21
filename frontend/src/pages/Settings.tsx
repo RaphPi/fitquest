@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Volume2, VolumeX, Plus, Lock, LogOut, Mail, ChevronDown, FileJson, Flame, Zap, Clock, Activity, Trophy, Check } from 'lucide-react';
+import { Volume2, VolumeX, Plus, Lock, LogOut, Mail, ChevronDown, FileJson, Flame, Zap, Clock, Activity, Trophy, Check, ShieldCheck } from 'lucide-react';
 import { useSettingsStore, type WidgetId } from '@/stores/settingsStore';
 import { useUserStore } from '@/stores/userStore';
 import { cn } from '@/lib/utils';
@@ -413,6 +413,25 @@ export default function Settings() {
           </div>
           <Lock className="h-4 w-4 shrink-0 text-muted-foreground" aria-label={t('settings.account.emailReadOnly')} />
         </div>
+
+        {user?.role === 'ADMIN' && (
+          <div className="mt-4 border-t border-border pt-4">
+            <button
+              type="button"
+              onClick={() => navigate('/admin')}
+              className="flex w-full items-center justify-between gap-3 rounded-lg border border-primary/40 bg-primary/10 px-4 py-3 text-left transition-colors hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+            >
+              <span className="flex items-center gap-3">
+                <ShieldCheck className="h-5 w-5 shrink-0 text-primary" />
+                <span>
+                  <span className="block text-sm font-semibold text-foreground">{t('settings.account.adminPanel')}</span>
+                  <span className="block text-xs text-muted-foreground">{t('settings.account.adminPanelHint')}</span>
+                </span>
+              </span>
+              <ChevronDown className="h-4 w-4 shrink-0 -rotate-90 text-muted-foreground" />
+            </button>
+          </div>
+        )}
 
         <div className="mt-4 border-t border-border pt-4">
           <button
