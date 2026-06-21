@@ -238,6 +238,12 @@
         "other": "Autre"
       }
     },
+    "export": {
+      "selectMode": "Sélectionner",
+      "cancelSelect": "Annuler",
+      "exportBtn": "Exporter ({{count}})",
+      "errorFetch": "Erreur lors de l'export"
+    },
     "history": {
       "loading": "Chargement de l'historique…",
       "empty": "Aucune séance enregistrée pour l'instant.",

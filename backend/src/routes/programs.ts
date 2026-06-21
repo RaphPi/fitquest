@@ -28,6 +28,95 @@ router.get('/', requireAuth, async (_req: AuthRequest, res) => {
   }
 });
 
+// GET /api/v1/programs/export?ids=id1,id2 OR ?ids=all
+router.get('/export', requireAuth, async (req: AuthRequest, res) => {
+  const { ids } = req.query;
+  if (!ids || typeof ids !== 'string') {
+    res.status(400).json({ error: 'Paramètre ids requis (ex: ?ids=all ou ?ids=id1,id2)' });
+    return;
+  }
+
+  try {
+    let programs;
+    if (ids === 'all') {
+      programs = await prisma.program.findMany({ include, orderBy: { nameFr: 'asc' } });
+    } else {
+      const idList = ids.split(',').map((s) => s.trim()).filter(Boolean);
+      if (idList.length === 0) {
+        res.status(400).json({ error: "Liste d'ids vide" });
+        return;
+      }
+      programs = await prisma.program.findMany({ where: { id: { in: idList } }, include });
+    }
+
+    const exerciseIds = new Set<string>();
+    for (const prog of programs) {
+      for (const session of prog.sessions) {
+        for (const ex of session.exercises) {
+          exerciseIds.add(ex.exerciseId);
+        }
+      }
+    }
+
+    const exercises = await prisma.exercise.findMany({
+      where: { id: { in: [...exerciseIds] } },
+      orderBy: { nameFr: 'asc' },
+    });
+
+    const exportedPrograms = programs.map((p) => ({
+      nameFr: p.nameFr,
+      nameEn: p.nameEn,
+      descFr: p.descFr,
+      descEn: p.descEn,
+      level: p.level,
+      daysPerWeek: p.daysPerWeek,
+      durationWeeks: p.durationWeeks,
+      equipment: p.equipment,
+      sessions: p.sessions.map((s) => ({
+        nameFr: s.nameFr,
+        nameEn: s.nameEn,
+        order: s.order,
+        exercises: s.exercises.map((e) => ({
+          exerciseId: e.exerciseId,
+          order: e.order,
+          sets: e.sets,
+          reps: e.reps ?? null,
+          durationSeconds: e.durationSeconds ?? null,
+          restBetweenSetsSeconds: e.restBetweenSetsSeconds,
+          restAfterExerciseSeconds: e.restAfterExerciseSeconds,
+        })),
+      })),
+    }));
+
+    const exportedExercises = exercises.map((e) => ({
+      id: e.id,
+      nameFr: e.nameFr,
+      nameEn: e.nameEn,
+      category: e.category,
+      musclesPrimary: e.musclesPrimary,
+      musclesSecondary: e.musclesSecondary,
+      equipment: e.equipment,
+      level: e.level,
+      type: e.type,
+      instructionsFr: e.instructionsFr,
+      instructionsEn: e.instructionsEn,
+      tipsFr: e.tipsFr ?? null,
+      tipsEn: e.tipsEn ?? null,
+      variations: e.variations,
+    }));
+
+    res.json({
+      version: '1.0',
+      exportedAt: new Date().toISOString(),
+      programs: exportedPrograms,
+      exercises: exportedExercises,
+    });
+  } catch (e) {
+    console.error('[programs/export]', e);
+    res.status(500).json({ error: "Erreur lors de l'export" });
+  }
+});
+
 // GET /api/v1/programs/:id
 router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
   const { id } = req.params;

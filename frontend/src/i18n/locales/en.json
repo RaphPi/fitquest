@@ -238,6 +238,12 @@
         "other": "Other"
       }
     },
+    "export": {
+      "selectMode": "Select",
+      "cancelSelect": "Cancel",
+      "exportBtn": "Export ({{count}})",
+      "errorFetch": "Export failed"
+    },
     "history": {
       "loading": "Loading history…",
       "empty": "No sessions recorded yet.",

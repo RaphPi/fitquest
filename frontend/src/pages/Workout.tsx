@@ -1,5 +1,5 @@
-import { useEffect, useState, useMemo } from 'react';
-import { Plus, Search, X, SlidersHorizontal } from 'lucide-react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
+import { Plus, Search, X, SlidersHorizontal, Download } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useProgramStore } from '@/stores/programStore';
 import type { Program, Level } from '@/types';
@@ -37,6 +37,49 @@ export default function Workout() {
   const [showFilters, setShowFilters] = useState(false);
   const [levelFilter, setLevelFilter] = useState<Level[]>([]);
   const [durationFilter, setDurationFilter] = useState<DurationFilter>('any');
+
+  // Export selection mode
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const exitSelectMode = () => {
+    setSelectMode(false);
+    setSelectedIds(new Set());
+    setExportError(null);
+  };
+
+  const handleExport = async () => {
+    if (selectedIds.size === 0) return;
+    setExportError(null);
+    try {
+      const idsParam = [...selectedIds].join(',');
+      const res = await fetch(`/api/v1/programs/export?ids=${encodeURIComponent(idsParam)}`, {
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const date = new Date().toISOString().slice(0, 10);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `fitquest_programs_${date}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      exitSelectMode();
+    } catch {
+      setExportError(t('workout.export.errorFetch'));
+    }
+  };
 
   useEffect(() => {
     fetchPrograms();
@@ -143,10 +186,29 @@ export default function Workout() {
             {isLoading ? t('workout.loading') : t('workout.programCount', { count: filtered.length })}
           </p>
         </div>
-        <GlowButton variant="primary" size="sm" onClick={openCreate}>
-          <Plus className="mr-1.5 h-4 w-4" />
-          {t('workout.create')}
-        </GlowButton>
+        <div className="flex items-center gap-2">
+          {selectMode ? (
+            <button
+              onClick={exitSelectMode}
+              className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground"
+            >
+              {t('workout.export.cancelSelect')}
+            </button>
+          ) : (
+            <button
+              onClick={() => setSelectMode(true)}
+              className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground"
+            >
+              {t('workout.export.selectMode')}
+            </button>
+          )}
+          {!selectMode && (
+            <GlowButton variant="primary" size="sm" onClick={openCreate}>
+              <Plus className="mr-1.5 h-4 w-4" />
+              {t('workout.create')}
+            </GlowButton>
+          )}
+        </div>
       </div>
 
       {/* Search + filter toggle */}
@@ -268,6 +330,9 @@ export default function Workout() {
               key={p.id}
               program={p}
               onClick={() => openDetail(p)}
+              selectable={selectMode}
+              selected={selectedIds.has(p.id)}
+              onToggle={() => toggleSelect(p.id)}
             />
           ))}
         </div>
@@ -276,6 +341,23 @@ export default function Workout() {
       {isSaving && (
         <div className="fixed bottom-20 left-1/2 -translate-x-1/2 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground shadow-lg sm:bottom-4">
           {t('workout.saving')}
+        </div>
+      )}
+
+      {selectMode && selectedIds.size > 0 && (
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 sm:bottom-4">
+          {exportError && (
+            <span className="rounded-full border border-danger/30 bg-danger/10 px-3 py-1 text-xs text-red-400">
+              {exportError}
+            </span>
+          )}
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 rounded-full border border-primary/60 bg-primary/10 px-5 py-2.5 text-sm font-bold text-primary shadow-glow hover:bg-primary/20 transition-colors"
+          >
+            <Download className="h-4 w-4" />
+            {t('workout.export.exportBtn', { count: selectedIds.size })}
+          </button>
         </div>
       )}
     </section>
