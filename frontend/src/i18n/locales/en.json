@@ -503,7 +503,10 @@
       "hint": "Export your RPG sheet as PDF.",
       "button": "Export",
       "generating": "Generating…",
-      "error": "Generation failed, try again."
+      "error": "Generation failed, try again.",
+      "optEvolution": "Body evolution",
+      "optPhotos": "Before/after photos",
+      "optBadges": "Trophies"
     }
   },
   "settings": {

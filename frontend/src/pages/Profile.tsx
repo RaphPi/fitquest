@@ -129,6 +129,18 @@ function AvatarPicker() {
 /** Bouton d'export de la fiche de personnage en PDF.
  *  L'avatar pixel art est rendu hors-écran en PNG puis envoyé au backend
  *  (qui génère le PDF via Puppeteer) pour un rendu fidèle au jeu. */
+// Options d'export persistées en localStorage (défaut : évolution + trophées ON, photos OFF).
+const PDF_OPT_KEYS = {
+  evolution: 'fq_pdf_evolution',
+  photos: 'fq_pdf_photos',
+  badges: 'fq_pdf_badges',
+} as const;
+
+function readOpt(key: string, fallback: boolean): boolean {
+  const v = localStorage.getItem(key);
+  return v === null ? fallback : v === '1';
+}
+
 function ExportSheetButton() {
   const { t } = useTranslation();
   const user = useUserStore((s) => s.user);
@@ -137,8 +149,16 @@ function ExportSheetButton() {
   const fetchBadges = useBadgeStore((s) => s.fetchBadges);
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState(false);
+  const [includeEvolution, setIncludeEvolution] = useState(() => readOpt(PDF_OPT_KEYS.evolution, true));
+  const [includePhotos, setIncludePhotos] = useState(() => readOpt(PDF_OPT_KEYS.photos, false));
+  const [includeBadges, setIncludeBadges] = useState(() => readOpt(PDF_OPT_KEYS.badges, true));
 
   if (!user) return null;
+
+  function toggle(key: string, value: boolean, setter: (v: boolean) => void) {
+    localStorage.setItem(key, value ? '1' : '0');
+    setter(value);
+  }
 
   async function handleExport() {
     if (!user || exporting) return;
@@ -157,27 +177,32 @@ function ExportSheetButton() {
       const avatarPng = canvas.toDataURL('image/png');
 
       // Icônes de trophées obtenus → PNG pixel art, indexées par "iconType__rarity"
-      // (clé reconstruite côté backend pour chaque UserBadge).
-      let badgeList = badges;
-      if (badgeList.length === 0) {
-        await fetchBadges();
-        badgeList = useBadgeStore.getState().badges;
-      }
+      // (clé reconstruite côté backend pour chaque UserBadge). Inutile si trophées exclus.
       const iconMap: Record<string, string> = {};
-      for (const b of badgeList) {
-        if (!b.obtained) continue;
-        const key = `${b.iconType}__${b.rarity}`;
-        if (iconMap[key]) continue;
-        const c = document.createElement('canvas');
-        renderBadgeIcon(c, b.iconType, b.rarity, 6, false);
-        iconMap[key] = c.toDataURL('image/png');
+      if (includeBadges) {
+        let badgeList = badges;
+        if (badgeList.length === 0) {
+          await fetchBadges();
+          badgeList = useBadgeStore.getState().badges;
+        }
+        for (const b of badgeList) {
+          if (!b.obtained) continue;
+          const key = `${b.iconType}__${b.rarity}`;
+          if (iconMap[key]) continue;
+          const c = document.createElement('canvas');
+          renderBadgeIcon(c, b.iconType, b.rarity, 6, false);
+          iconMap[key] = c.toDataURL('image/png');
+        }
       }
 
       const res = await fetch('/api/v1/profile/pdf', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ avatarPng, themeId: theme, iconMap }),
+        body: JSON.stringify({
+          avatarPng, themeId: theme, iconMap,
+          includeEvolution, includePhotos, includeBadges,
+        }),
       });
       if (!res.ok) throw new Error('export failed');
 
@@ -197,25 +222,47 @@ function ExportSheetButton() {
     }
   }
 
+  const checkbox = (label: string, checked: boolean, onChange: (v: boolean) => void) => (
+    <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="h-3.5 w-3.5 accent-primary"
+      />
+      {label}
+    </label>
+  );
+
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card px-5 py-4">
-      <div className="min-w-0">
-        <h2 className="font-display text-sm font-bold uppercase tracking-widest">
-          {t('profile.exportSheet.title')}
-        </h2>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          {error ? t('profile.exportSheet.error') : t('profile.exportSheet.hint')}
-        </p>
+    <div className="space-y-3 rounded-xl border border-border bg-card px-5 py-4">
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h2 className="font-display text-sm font-bold uppercase tracking-widest">
+            {t('profile.exportSheet.title')}
+          </h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {error ? t('profile.exportSheet.error') : t('profile.exportSheet.hint')}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => void handleExport()}
+          disabled={exporting}
+          className="flex shrink-0 items-center gap-2 rounded-lg bg-primary px-4 py-2 font-display text-sm font-bold uppercase tracking-widest text-white transition hover:bg-primary/90 disabled:opacity-40"
+        >
+          {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
+          {exporting ? t('profile.exportSheet.generating') : t('profile.exportSheet.button')}
+        </button>
       </div>
-      <button
-        type="button"
-        onClick={() => void handleExport()}
-        disabled={exporting}
-        className="flex shrink-0 items-center gap-2 rounded-lg bg-primary px-4 py-2 font-display text-sm font-bold uppercase tracking-widest text-white transition hover:bg-primary/90 disabled:opacity-40"
-      >
-        {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
-        {exporting ? t('profile.exportSheet.generating') : t('profile.exportSheet.button')}
-      </button>
+      <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-border pt-3">
+        {checkbox(t('profile.exportSheet.optEvolution'), includeEvolution,
+          (v) => toggle(PDF_OPT_KEYS.evolution, v, setIncludeEvolution))}
+        {checkbox(t('profile.exportSheet.optPhotos'), includePhotos,
+          (v) => toggle(PDF_OPT_KEYS.photos, v, setIncludePhotos))}
+        {checkbox(t('profile.exportSheet.optBadges'), includeBadges,
+          (v) => toggle(PDF_OPT_KEYS.badges, v, setIncludeBadges))}
+      </div>
     </div>
   );
 }

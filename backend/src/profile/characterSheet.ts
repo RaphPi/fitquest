@@ -1,14 +1,12 @@
 // S14 — Génération du HTML "fiche de personnage RPG" pour l'export PDF (Puppeteer).
-// Le HTML est autonome (CSS inline) : il est chargé tel quel par Chromium headless.
-// Police arcade VT323 chargée via Google Fonts (comme l'app) — le conteneur a Internet ;
-// fallback gracieux sinon. Icônes (avatar + badges) fournies en PNG par le front
-// (rendu pixel art fidèle) ; le logo est un SVG inline.
-// Palettes de thème/paliers dupliquées volontairement depuis le front (3 constantes).
+// HTML autonome (CSS inline), chargé tel quel par Chromium headless.
+// Police arcade VT323 via Google Fonts (comme l'app). Icônes (avatar + badges) et
+// photos fournies/intégrées en images ; logo SVG inline.
+// Palettes thème/paliers dupliquées volontairement depuis le front (quelques constantes).
 
 export type ThemeId = 'void_rpg' | 'forest_warrior' | 'solar_blaze';
 
 interface ThemeTokens {
-  bgMain: string;
   bgCard: string;
   bgShield: string;
   border: string;
@@ -20,23 +18,19 @@ interface ThemeTokens {
 
 const THEMES: Record<ThemeId, ThemeTokens> = {
   void_rpg: {
-    bgMain: '#0a0a0f', bgCard: '#0f1117', bgShield: '#0d0b1e', border: '#1e2030',
-    accent: '#6366f1', accentSoft: '#a78bfa',
-    textPrimary: '#f1f5f9', textSecondary: '#94a3b8',
+    bgCard: '#0f1117', bgShield: '#0d0b1e', border: '#1e2030',
+    accent: '#6366f1', accentSoft: '#a78bfa', textPrimary: '#f1f5f9', textSecondary: '#94a3b8',
   },
   forest_warrior: {
-    bgMain: '#0d1f0f', bgCard: '#10260f', bgShield: '#0a1a0a', border: '#1a3020',
-    accent: '#22c55e', accentSoft: '#4ade80',
-    textPrimary: '#f1f5f9', textSecondary: '#94a3b8',
+    bgCard: '#10260f', bgShield: '#0a1a0a', border: '#1a3020',
+    accent: '#22c55e', accentSoft: '#4ade80', textPrimary: '#f1f5f9', textSecondary: '#94a3b8',
   },
   solar_blaze: {
-    bgMain: '#1a0f00', bgCard: '#241608', bgShield: '#140b00', border: '#2e1f00',
-    accent: '#f59e0b', accentSoft: '#fbbf24',
-    textPrimary: '#f1f5f9', textSecondary: '#94a3b8',
+    bgCard: '#241608', bgShield: '#140b00', border: '#2e1f00',
+    accent: '#f59e0b', accentSoft: '#fbbf24', textPrimary: '#f1f5f9', textSecondary: '#94a3b8',
   },
 };
 
-// Paliers (couleurs) alignés sur frontend/src/lib/levelTier.ts.
 const TIERS = [
   { name: 'Bronze', color: 'rgb(168,120,80)', light: 'rgb(205,155,115)' },
   { name: 'Argent', color: 'rgb(192,204,218)', light: 'rgb(221,229,240)' },
@@ -55,15 +49,17 @@ function tierIndex(level: number): number {
 }
 
 const RARITY_COLORS: Record<string, string> = {
-  common: '#94a3b8',
-  rare: '#38bdf8',
-  epic: '#a855f7',
-  legendary: '#f59e0b',
+  common: '#94a3b8', rare: '#38bdf8', epic: '#a855f7', legendary: '#f59e0b',
 };
+
+// Palette de couleurs des courbes (lisibles sur fond sombre, indépendantes du thème).
+export const SERIES_PALETTE = [
+  '#a78bfa', '#38bdf8', '#4ade80', '#fbbf24', '#f472b6',
+  '#22d3ee', '#fb923c', '#a3e635', '#e879f9', '#60a5fa',
+];
 
 const CLASS_LABELS = ['Guerrier', 'Archer', 'Mage', 'Chevalier'];
 
-// Logo FitQuest (bouclier + épée), repris de frontend/src/assets/logo/fitquest-icon.svg.
 const LOGO_SVG = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#a78bfa"/></linearGradient>
@@ -80,13 +76,15 @@ const LOGO_SVG = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
 </svg>`;
 
 export interface SeriesPoint { date: Date; value: number; }
-
-export interface MeasurementStat {
-  label: string;
+export interface MetricSeries {
+  name: string;
+  color: string;
+  points: SeriesPoint[];
   latest: number;
-  delta: number | null; // variation depuis la 1re mesure (null si une seule)
-  unit: string;
+  delta: number | null; // variation depuis le 1er relevé (null si un seul point)
 }
+export interface MetricGroup { unit: string; series: MetricSeries[]; }
+export interface ProgressPhoto { dataUrl: string; date: Date; }
 
 export interface CharacterSheetData {
   username: string;
@@ -101,49 +99,57 @@ export interface CharacterSheetData {
   totalWorkouts: number;
   programsCreated: number;
   lastWorkout: { sessionName: string; date: Date } | null;
-  badges: { nameFr: string; rarity: string; iconPng: string | null; unlockedAt: Date }[];
   avatarPng: string | null;
-  weightSeries: SeriesPoint[];
-  measurements: MeasurementStat[];
+  metricGroups: MetricGroup[];
+  photos: ProgressPhoto[];
+  badges: { nameFr: string; rarity: string; iconPng: string | null; unlockedAt: Date }[];
+  showBadges: boolean;
 }
 
 function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
-
 function fmtDate(d: Date): string {
   return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
 }
-
 function fmtNum(n: number): string {
   return Number.isInteger(n) ? String(n) : n.toFixed(1);
 }
 
-/** Mini line chart SVG (poids). Renvoie '' si moins de 2 points. */
-function buildWeightChartSvg(series: SeriesPoint[], color: string, grid: string): string {
-  if (series.length < 2) return '';
-  const W = 360, H = 120, padL = 6, padR = 6, padT = 14, padB = 14;
-  const values = series.map((p) => p.value);
-  let min = Math.min(...values);
-  let max = Math.max(...values);
-  if (min === max) { min -= 1; max += 1; }
-  const innerW = W - padL - padR;
-  const innerH = H - padT - padB;
-  const x = (i: number) => padL + (innerW * i) / (series.length - 1);
-  const y = (v: number) => padT + innerH * (1 - (v - min) / (max - min));
+/** Graphe multi-lignes pour un groupe d'unité (axe X = temps, axe Y = valeurs de l'unité). */
+function buildGroupChartSvg(group: MetricGroup, gridColor: string): string {
+  const all = group.series.flatMap((s) => s.points);
+  if (all.length === 0) return '';
+  const times = all.map((p) => p.date.getTime());
+  let tMin = Math.min(...times), tMax = Math.max(...times);
+  if (tMin === tMax) { tMin -= 1; tMax += 1; }
+  const vals = all.map((p) => p.value);
+  let vMin = Math.min(...vals), vMax = Math.max(...vals);
+  if (vMin === vMax) { vMin -= 1; vMax += 1; }
 
-  const pts = series.map((p, i) => `${x(i).toFixed(1)},${y(p.value).toFixed(1)}`).join(' ');
-  const area = `${padL},${(padT + innerH).toFixed(1)} ${pts} ${(padL + innerW).toFixed(1)},${(padT + innerH).toFixed(1)}`;
-  const dots = series
-    .map((p, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="2.5" fill="${color}"/>`)
-    .join('');
+  const W = 340, H = 120, padL = 6, padR = 6, padT = 14, padB = 10;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const x = (t: number) => padL + (innerW * (t - tMin)) / (tMax - tMin);
+  const y = (v: number) => padT + innerH * (1 - (v - vMin) / (vMax - vMin));
+
+  const lines = group.series.map((s) => {
+    const pts = s.points
+      .slice()
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .map((p) => `${x(p.date.getTime()).toFixed(1)},${y(p.value).toFixed(1)}`);
+    const dots = s.points
+      .map((p) => `<circle cx="${x(p.date.getTime()).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="2.2" fill="${s.color}"/>`)
+      .join('');
+    const poly = pts.length > 1
+      ? `<polyline points="${pts.join(' ')}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`
+      : '';
+    return poly + dots;
+  }).join('');
 
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="none" style="display:block">
-    <polyline points="${area}" fill="${color}22" stroke="none"/>
-    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-    ${dots}
-    <text x="${padL}" y="10" fill="${grid}" font-size="11">${fmtNum(max)} kg</text>
-    <text x="${padL}" y="${H - 2}" fill="${grid}" font-size="11">${fmtNum(min)} kg</text>
+    ${lines}
+    <text x="${padL}" y="10" fill="${gridColor}" font-size="10">${fmtNum(vMax)} ${esc(group.unit)}</text>
+    <text x="${padL}" y="${H - 1}" fill="${gridColor}" font-size="10">${fmtNum(vMin)} ${esc(group.unit)}</text>
   </svg>`;
 }
 
@@ -157,11 +163,7 @@ export function buildCharacterSheetHtml(data: CharacterSheetData): string {
   const xpPct = data.xpRequired > 0 ? Math.min(100, Math.round((data.currentXP / data.xpRequired) * 100)) : 0;
 
   const statCard = (label: string, value: string) => `
-    <div class="stat">
-      <div class="stat-value">${esc(value)}</div>
-      <div class="stat-label">${esc(label)}</div>
-    </div>`;
-
+    <div class="stat"><div class="stat-value">${esc(value)}</div><div class="stat-label">${esc(label)}</div></div>`;
   const stats = [
     statCard('Séances totales', String(data.totalWorkouts)),
     statCard('Série en cours', `${data.streak} j`),
@@ -173,51 +175,60 @@ export function buildCharacterSheetHtml(data: CharacterSheetData): string {
     ? `<span class="hero-meta">Dernière séance : <b>${esc(data.lastWorkout.sessionName)}</b> · ${fmtDate(data.lastWorkout.date)}</span>`
     : `<span class="hero-meta">Aucune séance enregistrée pour l'instant.</span>`;
 
-  const badgesHtml = data.badges.length
-    ? data.badges.map((b) => {
+  // ── Évolution physique : un graphe par unité + légende alignée ──
+  const evolutionHtml = data.metricGroups.length ? `
+    <div class="section-title">Évolution physique</div>
+    <div class="evolution">
+      ${data.metricGroups.map((g) => {
+        const legend = g.series.map((s) => {
+          const deltaHtml = s.delta === null
+            ? '<span class="lg-delta"></span>'
+            : `<span class="lg-delta" style="color:${s.delta < 0 ? '#22c55e' : s.delta > 0 ? '#f59e0b' : th.textSecondary}">${s.delta > 0 ? '+' : ''}${fmtNum(s.delta)}</span>`;
+          return `
+            <span class="lg-name"><i style="background:${s.color}"></i>${esc(s.name)}</span>
+            <span class="lg-val">${fmtNum(s.latest)} ${esc(g.unit)}</span>
+            ${deltaHtml}`;
+        }).join('');
+        return `
+          <div class="metric-card">
+            <div class="mc-title">Unité : ${esc(g.unit)}</div>
+            ${buildGroupChartSvg(g, th.textSecondary)}
+            <div class="legend">${legend}</div>
+          </div>`;
+      }).join('')}
+    </div>` : '';
+
+  // ── Photos avant / après ──
+  const photosHtml = data.photos.length ? `
+    <div class="section-title">Progression photo</div>
+    <div class="photos">
+      ${data.photos.map((p, i) => `
+        <div class="photo">
+          <img src="${p.dataUrl}" alt="" />
+          <div class="cap">${i === 0 ? 'Avant' : 'Après'} · ${fmtDate(p.date)}</div>
+        </div>`).join('')}
+    </div>` : '';
+
+  // ── Trophées ──
+  const badgesInner = data.badges.length
+    ? `<div class="badges">${data.badges.map((b) => {
         const c = RARITY_COLORS[b.rarity] ?? RARITY_COLORS.common;
-        const icon = b.iconPng
-          ? `<img class="badge-img" src="${b.iconPng}" alt="" />`
-          : `<div class="badge-img"></div>`;
+        const icon = b.iconPng ? `<img class="badge-img" src="${b.iconPng}" alt="" />` : `<div class="badge-img"></div>`;
         return `
           <div class="badge" style="border-color:${c};box-shadow:0 0 12px -4px ${c}">
             <div class="badge-icon" style="background:radial-gradient(circle at 50% 35%, ${c}33, transparent 70%)">${icon}</div>
             <div class="badge-name" style="color:${c}">${esc(b.nameFr)}</div>
             <div class="badge-date">${fmtDate(b.unlockedAt)}</div>
           </div>`;
-      }).join('')
+      }).join('')}</div>`
     : `<p class="empty">Aucun trophée débloqué pour l'instant. Lance une séance pour commencer ta légende !</p>`;
+  const badgesHtml = data.showBadges
+    ? `<div class="section-title">Trophées débloqués (${data.badges.length})</div>${badgesInner}`
+    : '';
 
   const avatarHtml = data.avatarPng
     ? `<img class="avatar" src="${data.avatarPng}" alt="Avatar" />`
     : `<div class="avatar avatar-fallback">${LOGO_SVG}</div>`;
-
-  // ── Section Évolution (poids + mensurations) ──
-  const weightSvg = buildWeightChartSvg(data.weightSeries, tier.color, th.textSecondary);
-  const hasEvolution = weightSvg !== '' || data.measurements.length > 0;
-
-  const measurementChips = data.measurements.map((m) => {
-    const deltaHtml = m.delta === null
-      ? ''
-      : `<span class="mes-delta" style="color:${m.delta < 0 ? '#22c55e' : m.delta > 0 ? '#f59e0b' : th.textSecondary}">${m.delta > 0 ? '+' : ''}${fmtNum(m.delta)}</span>`;
-    return `
-      <div class="mes">
-        <div class="mes-label">${esc(m.label)}</div>
-        <div class="mes-value">${fmtNum(m.latest)}<span class="mes-unit">${esc(m.unit)}</span> ${deltaHtml}</div>
-      </div>`;
-  }).join('');
-
-  const evolutionHtml = hasEvolution ? `
-    <div class="section-title">Évolution physique</div>
-    <div class="evolution">
-      <div class="chart-box">
-        <div class="chart-title">Poids</div>
-        ${weightSvg || `<p class="chart-empty">Pas encore assez de relevés de poids.</p>`}
-      </div>
-      <div class="mes-grid">
-        ${measurementChips || `<p class="chart-empty">Aucune mensuration enregistrée.</p>`}
-      </div>
-    </div>` : '';
 
   return `<!doctype html>
 <html lang="fr">
@@ -230,30 +241,12 @@ export function buildCharacterSheetHtml(data: CharacterSheetData): string {
   @page { size: A4; margin: 0; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root { --display: 'VT323', 'Courier New', monospace; --body: 'Inter', system-ui, sans-serif; }
-  body {
-    width: 210mm; min-height: 297mm;
-    font-family: var(--body);
-    color: ${th.textPrimary};
-    background: #ffffff;
-    padding: 12mm;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
-  }
-  .sheet {
-    border: 2px solid ${th.border};
-    border-radius: 18px;
-    background: ${th.bgCard};
-    background-image:
-      radial-gradient(circle at 18% 10%, ${tier.color}26, transparent 42%),
-      radial-gradient(circle at 85% 92%, ${th.accent}26, transparent 45%);
-    box-shadow: inset 0 0 60px ${tier.color}14;
-    overflow: hidden;
-  }
+  body { width: 210mm; min-height: 297mm; font-family: var(--body); color: ${th.textPrimary}; background: #fff; padding: 12mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .sheet { border: 2px solid ${th.border}; border-radius: 18px; background: ${th.bgCard};
+    background-image: radial-gradient(circle at 18% 10%, ${tier.color}26, transparent 42%), radial-gradient(circle at 85% 92%, ${th.accent}26, transparent 45%);
+    box-shadow: inset 0 0 60px ${tier.color}14; overflow: hidden; }
   .topbar { height: 6px; background: linear-gradient(90deg, ${tier.color}, ${tier.light}); }
-  .title {
-    text-align: center; padding: 12px 0 4px;
-    font-family: var(--display); letter-spacing: 6px; font-size: 22px; text-transform: uppercase;
-    color: ${th.textSecondary};
-  }
+  .title { text-align: center; padding: 12px 0 4px; font-family: var(--display); letter-spacing: 6px; font-size: 22px; text-transform: uppercase; color: ${th.textSecondary}; }
   .title b { color: ${th.accentSoft}; }
   .hero { display: flex; gap: 26px; align-items: center; padding: 6px 30px 18px; border-bottom: 1px solid ${th.border}; }
   .avatar { width: 120px; height: 180px; image-rendering: pixelated; filter: drop-shadow(0 0 10px ${tier.color}88); }
@@ -264,11 +257,7 @@ export function buildCharacterSheetHtml(data: CharacterSheetData): string {
   .hero-class { margin-top: 4px; font-size: 13px; letter-spacing: 1px; color: ${tier.color}; font-weight: 700; }
   .hero-class .sep { color: ${th.textSecondary}; margin: 0 8px; }
   .level-row { display: flex; align-items: center; gap: 14px; margin: 14px 0 8px; }
-  .level-badge {
-    width: 56px; height: 56px; border-radius: 50%; flex-direction: column;
-    display: flex; align-items: center; justify-content: center;
-    background: ${th.bgShield}; border: 2px solid ${tier.color}; box-shadow: 0 0 14px ${tier.color}66;
-  }
+  .level-badge { width: 56px; height: 56px; border-radius: 50%; flex-direction: column; display: flex; align-items: center; justify-content: center; background: ${th.bgShield}; border: 2px solid ${tier.color}; box-shadow: 0 0 14px ${tier.color}66; }
   .level-badge .lvl-label { font-size: 8px; letter-spacing: 1px; color: ${th.textSecondary}; }
   .level-badge .lvl-num { font-family: var(--display); font-size: 30px; color: ${tier.light}; line-height: 0.9; }
   .xp-wrap { flex: 1; }
@@ -284,25 +273,29 @@ export function buildCharacterSheetHtml(data: CharacterSheetData): string {
   .stat-value { font-family: var(--display); font-size: 36px; line-height: 0.9; color: ${th.accentSoft}; }
   .stat-label { margin-top: 6px; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: ${th.textSecondary}; }
 
-  .evolution { display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; padding: 0 30px; align-items: stretch; }
-  .chart-box, .mes-grid { background: ${th.bgShield}; border: 1px solid ${th.border}; border-radius: 12px; padding: 12px 14px; }
-  .chart-title { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: ${th.textSecondary}; margin-bottom: 4px; }
-  .chart-empty { font-size: 11px; font-style: italic; color: ${th.textSecondary}; padding: 8px 0; }
-  .mes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; align-content: center; }
-  .mes-label { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: ${th.textSecondary}; }
-  .mes-value { font-family: var(--display); font-size: 24px; line-height: 1; color: ${th.textPrimary}; }
-  .mes-unit { font-size: 11px; color: ${th.textSecondary}; margin-left: 2px; }
-  .mes-delta { font-family: var(--body); font-size: 11px; font-weight: 700; margin-left: 4px; }
+  .evolution { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; padding: 0 30px; }
+  .metric-card { background: ${th.bgShield}; border: 1px solid ${th.border}; border-radius: 12px; padding: 12px 14px; }
+  .mc-title { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: ${th.textSecondary}; margin-bottom: 4px; }
+  .legend { display: grid; grid-template-columns: 1fr auto auto; gap: 3px 12px; margin-top: 8px; font-size: 11px; align-items: baseline; }
+  .lg-name { color: ${th.textPrimary}; display: flex; align-items: center; gap: 6px; }
+  .lg-name i { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+  .lg-val { font-family: var(--display); font-size: 16px; text-align: right; color: ${th.textPrimary}; }
+  .lg-delta { font-weight: 700; text-align: right; min-width: 30px; }
 
-  .badges { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 0 30px 22px; }
+  .photos { display: flex; gap: 16px; padding: 0 30px; }
+  .photo { flex: 1; text-align: center; }
+  .photo img { width: 100%; max-height: 200px; object-fit: contain; border: 1px solid ${th.border}; border-radius: 10px; background: ${th.bgShield}; }
+  .photo .cap { margin-top: 6px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: ${th.textSecondary}; }
+
+  .badges { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 0 30px; }
   .badge { background: ${th.bgShield}; border: 1.5px solid; border-radius: 12px; padding: 12px 8px; text-align: center; }
   .badge-icon { width: 48px; height: 48px; margin: 0 auto 8px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
   .badge-img { width: 39px; height: 39px; image-rendering: pixelated; }
   .badge-name { font-size: 11px; font-weight: 700; line-height: 1.2; }
   .badge-date { margin-top: 4px; font-size: 9px; color: ${th.textSecondary}; }
-  .empty { padding: 0 30px 22px; font-size: 13px; font-style: italic; color: ${th.textSecondary}; }
+  .empty { padding: 0 30px; font-size: 13px; font-style: italic; color: ${th.textSecondary}; }
 
-  .footer { border-top: 1px solid ${th.border}; padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; letter-spacing: 1px; color: ${th.textSecondary}; }
+  .footer { margin-top: 22px; border-top: 1px solid ${th.border}; padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; letter-spacing: 1px; color: ${th.textSecondary}; }
   .footer .brand { display: flex; align-items: center; gap: 7px; color: ${th.accentSoft}; font-weight: 700; }
   .footer .brand svg { width: 18px; height: 18px; }
 </style>
@@ -332,9 +325,8 @@ export function buildCharacterSheetHtml(data: CharacterSheetData): string {
     <div class="stats">${stats}</div>
 
     ${evolutionHtml}
-
-    <div class="section-title">Trophées débloqués (${data.badges.length})</div>
-    ${data.badges.length ? `<div class="badges">${badgesHtml}</div>` : badgesHtml}
+    ${photosHtml}
+    ${badgesHtml}
 
     <div class="footer">
       <span>Héros enrôlé le ${fmtDate(data.createdAt)}</span>
