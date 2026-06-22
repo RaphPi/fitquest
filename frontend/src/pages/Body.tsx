@@ -145,12 +145,14 @@ function fmtLong(s: string) {
 }
 
 function getMeasureValue(m: BodyMetric, key: string): number | null {
+  if (key === 'bodyFatPct') return m.bodyFatPct ?? null;
   const stdDef = STD.find((s) => s.key === key);
   if (stdDef) return (m as unknown as Record<string, number | null>)[key] ?? null;
   return m.customMetrics?.find((c) => c.name === key)?.value ?? null;
 }
 
 function getMeasureUnit(key: string, metrics: BodyMetric[]): string {
+  if (key === 'bodyFatPct') return '%';
   const stdItem = STD.find((s) => s.key === key);
   if (stdItem) return stdItem.unit;
   for (const m of metrics) {
@@ -546,6 +548,7 @@ function MeasureChart({
   const { t } = useTranslation();
   const availableKeys = useMemo(() => {
     const keys: string[] = [];
+    if (metrics.some((m) => m.bodyFatPct != null)) keys.push('bodyFatPct');
     STD.forEach(({ key }) => {
       if (metrics.some((m) => m[key] != null)) keys.push(key);
     });
@@ -561,8 +564,8 @@ function MeasureChart({
     : (availableKeys[0] ?? '');
 
   const color = getColor(selectedKey);
-  const isStdKey = STD.some((s) => s.key === selectedKey);
-  const label = isStdKey ? t(`body.metrics.${selectedKey}`) : getMeasureLabel(selectedKey);
+  const isKnownKey = STD.some((s) => s.key === selectedKey) || selectedKey === 'bodyFatPct';
+  const label = isKnownKey ? t(`body.metrics.${selectedKey}`) : getMeasureLabel(selectedKey);
   const unit = getMeasureUnit(selectedKey, metrics);
 
   const data = useMemo(
@@ -592,7 +595,9 @@ function MeasureChart({
           className="h-8 rounded-lg border border-border bg-card px-3 text-sm text-foreground focus:border-primary focus:outline-none"
         >
           {availableKeys.map((k) => (
-            <option key={k} value={k}>{STD.some((s) => s.key === k) ? t(`body.metrics.${k}`) : getMeasureLabel(k)}</option>
+            <option key={k} value={k}>
+              {STD.some((s) => s.key === k) || k === 'bodyFatPct' ? t(`body.metrics.${k}`) : getMeasureLabel(k)}
+            </option>
           ))}
         </select>
       </div>
