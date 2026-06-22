@@ -30,6 +30,11 @@ model User {
   role         Role             @default(USER)
   email        String?          @unique
   emailDigest  DigestFrequency?
+  smtpHost     String?
+  smtpPort     Int?
+  smtpUser     String?
+  smtpPass     String?          // chiffré AES-256-GCM (jamais en clair)
+  smtpSecure   Boolean?
   avatarStage  Int              @default(0)
   themeId      String           @default("void_rpg")
   level        Int              @default(1)

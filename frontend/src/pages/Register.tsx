@@ -4,19 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@/stores/userStore';
 import { AVATAR_CLASSES } from '@/lib/avatar';
 import Avatar from '@/components/avatar/Avatar';
-import type { DigestFrequency } from '@/types';
 
 const LEVELS = [
   { value: 'novice', labelKey: 'auth.register.step2.levels.novice', descKey: 'auth.register.step2.levels.noviceDesc' },
   { value: 'warrior', labelKey: 'auth.register.step2.levels.warrior', descKey: 'auth.register.step2.levels.warriorDesc' },
   { value: 'fighter', labelKey: 'auth.register.step2.levels.fighter', descKey: 'auth.register.step2.levels.fighterDesc' },
-];
-
-const DIGESTS: { value: DigestFrequency; labelKey: string }[] = [
-  { value: 'NONE', labelKey: 'auth.register.step3.digestNone' },
-  { value: 'DAILY', labelKey: 'auth.register.step3.digestDaily' },
-  { value: 'WEEKLY', labelKey: 'auth.register.step3.digestWeekly' },
-  { value: 'MONTHLY', labelKey: 'auth.register.step3.digestMonthly' },
 ];
 
 /* ── Password strength ──────────────────────────────────────── */
@@ -77,8 +69,6 @@ export default function Register() {
   const [avatarStage, setAvatarStage] = useState(0);
   const [_level, setLevel] = useState('novice');
   const [password, setPassword] = useState('');
-  const [email, setEmail] = useState('');
-  const [emailDigest, setEmailDigest] = useState<DigestFrequency>('NONE');
 
   const strength = passwordStrength(password);
 
@@ -97,8 +87,6 @@ export default function Register() {
       await register({
         username,
         password,
-        email: email || undefined,
-        emailDigest: emailDigest !== 'NONE' ? emailDigest : undefined,
         avatarStage,
       });
       setFinishing(true);
@@ -302,46 +290,6 @@ export default function Register() {
                   </div>
                 )}
               </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                  {t('auth.register.step3.emailLabel')}{' '}
-                  <span className="normal-case text-muted-foreground/60">{t('auth.register.step3.emailOptional')}</span>
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="email"
-                  placeholder={t('auth.register.step3.emailPlaceholder')}
-                  className={inputCls}
-                />
-              </div>
-
-              {email && (
-                <div>
-                  <label className="mb-1 block text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                    {t('auth.register.step3.digestLabel')}
-                  </label>
-                  <div className="flex gap-2">
-                    {DIGESTS.map((d) => (
-                      <button
-                        key={d.value}
-                        type="button"
-                        onClick={() => setEmailDigest(d.value)}
-                        className="flex-1 rounded-lg border py-2 text-xs font-medium transition"
-                        style={{
-                          borderColor: emailDigest === d.value ? 'var(--accent)' : 'var(--border)',
-                          background: emailDigest === d.value ? 'var(--bg-shield)' : 'transparent',
-                          color: emailDigest === d.value ? 'var(--accent-soft)' : 'var(--text-secondary)',
-                        }}
-                      >
-                        {t(d.labelKey)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="mt-6 flex gap-3">

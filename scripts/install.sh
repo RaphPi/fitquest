@@ -97,6 +97,8 @@ DATABASE_URL=postgresql://fitquest:${DB_PASS}@db:5432/fitquest
 JWT_SECRET=${JWT_SECRET}
 JWT_EXPIRES_IN=7d
 
+SMTP_ENC_KEY=$(gen_secret)
+
 AI_PROVIDER=none
 CLAUDE_API_KEY=
 OLLAMA_URL=

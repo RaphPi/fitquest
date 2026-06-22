@@ -20,6 +20,13 @@ msg_info "Récupération des dernières modifications…"
 git pull origin "$BRANCH" || die "git pull a échoué."
 msg_ok "Dépôt à jour"
 
+# 1b. Garde-fou : ajoute SMTP_ENC_KEY au .env existant s'il manque (chiffrement SMTP par user).
+if [[ -f .env ]] && ! grep -q '^SMTP_ENC_KEY=' .env; then
+  gen_secret() { openssl rand -hex 32 2>/dev/null || head -c32 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | head -c48; }
+  echo "SMTP_ENC_KEY=$(gen_secret)" >> .env
+  msg_ok "SMTP_ENC_KEY ajouté au .env"
+fi
+
 # shellcheck disable=SC1091
 set -a; [[ -f .env ]] && source .env; set +a
 

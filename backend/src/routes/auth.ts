@@ -3,8 +3,24 @@ import bcrypt from 'bcryptjs';
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import { prisma } from '../lib/prisma';
 import { requireAuth, type AuthRequest } from '../middleware/requireAuth';
+import { encrypt } from '../lib/crypto';
 
 const router = Router();
+
+// Champs renvoyés au front. `smtpPass` est inclus pour calculer smtpPassSet,
+// puis retiré par toSafeUser — jamais exposé en clair.
+const USER_SELECT = {
+  id: true, username: true, email: true, emailDigest: true, avatarStage: true,
+  themeId: true, level: true, totalXP: true, currentXP: true,
+  xpBalance: true, streak: true, lastWorkout: true, role: true,
+  smtpHost: true, smtpPort: true, smtpUser: true, smtpSecure: true, smtpPass: true,
+} as const;
+
+// Retire smtpPass (chiffré) et expose un booléen smtpPassSet à la place.
+function toSafeUser<T extends { smtpPass?: string | null }>(u: T) {
+  const { smtpPass, ...rest } = u;
+  return { ...rest, smtpPassSet: Boolean(smtpPass) };
+}
 
 // COOKIE_SECURE=true uniquement si HTTPS est activé côté reverse proxy.
 // En self-hosted HTTP (LXC sans TLS), laisser à false (défaut).
@@ -26,11 +42,9 @@ function makeToken(userId: string, role: string) {
 // POST /api/v1/auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { username, password, email, emailDigest, avatarStage } = req.body as {
+    const { username, password, avatarStage } = req.body as {
       username?: string;
       password?: string;
-      email?: string;
-      emailDigest?: string;
       avatarStage?: number;
     };
 
@@ -59,20 +73,14 @@ router.post('/register', async (req, res) => {
       data: {
         username,
         passwordHash,
-        email: email || null,
-        emailDigest: (emailDigest as any) ?? null,
         avatarStage: avatarStage ?? 0,
         role,
       },
-      select: {
-        id: true, username: true, email: true, avatarStage: true,
-        themeId: true, level: true, totalXP: true, currentXP: true,
-        xpBalance: true, streak: true, lastWorkout: true, role: true,
-      },
+      select: USER_SELECT,
     });
 
     res.cookie('token', makeToken(user.id, user.role), COOKIE_OPTS);
-    res.status(201).json({ user });
+    res.status(201).json({ user: toSafeUser(user) });
   } catch (err) {
     console.error('[auth/register]', err);
     res.status(500).json({ error: 'Erreur interne du serveur' });
@@ -103,7 +111,7 @@ router.post('/login', async (req, res) => {
 
     const { passwordHash: _, ...safe } = user;
     res.cookie('token', makeToken(user.id, user.role), COOKIE_OPTS);
-    res.json({ user: safe });
+    res.json({ user: toSafeUser(safe) });
   } catch (err) {
     console.error('[auth/login]', err);
     res.status(500).json({ error: 'Erreur interne du serveur' });
@@ -116,31 +124,87 @@ router.post('/logout', (_req, res) => {
   res.json({ ok: true });
 });
 
-// PATCH /api/v1/auth/me — met à jour le profil (avatarStage)
+// PATCH /api/v1/auth/me — met à jour le profil (avatarStage + notifications email/SMTP)
 router.patch('/me', requireAuth, async (req: AuthRequest, res) => {
   try {
-    const { avatarStage } = req.body as { avatarStage?: unknown };
+    const {
+      avatarStage, email, emailDigest,
+      smtpHost, smtpPort, smtpUser, smtpPass, smtpSecure,
+    } = req.body as {
+      avatarStage?: unknown;
+      email?: unknown;
+      emailDigest?: unknown;
+      smtpHost?: unknown;
+      smtpPort?: unknown;
+      smtpUser?: unknown;
+      smtpPass?: unknown;
+      smtpSecure?: unknown;
+    };
+
+    const data: Record<string, unknown> = {};
 
     if (avatarStage !== undefined) {
       if (!Number.isInteger(avatarStage) || (avatarStage as number) < 0 || (avatarStage as number) > 3) {
         res.status(400).json({ error: 'avatarStage doit être entre 0 et 3' });
         return;
       }
+      data.avatarStage = avatarStage as number;
+    }
+
+    if (email !== undefined) {
+      if (email !== null && typeof email !== 'string') {
+        res.status(400).json({ error: 'email invalide' });
+        return;
+      }
+      data.email = email ? (email as string) : null;
+    }
+
+    if (emailDigest !== undefined) {
+      const allowed = ['DAILY', 'WEEKLY', 'MONTHLY', 'NONE'];
+      // NONE = désabonné → on stocke null.
+      if (emailDigest !== null && !allowed.includes(emailDigest as string)) {
+        res.status(400).json({ error: 'emailDigest invalide' });
+        return;
+      }
+      data.emailDigest = emailDigest && emailDigest !== 'NONE' ? (emailDigest as string) : null;
+    }
+
+    if (smtpHost !== undefined) data.smtpHost = smtpHost ? (smtpHost as string) : null;
+    if (smtpUser !== undefined) data.smtpUser = smtpUser ? (smtpUser as string) : null;
+    if (smtpSecure !== undefined) data.smtpSecure = smtpSecure === null ? null : Boolean(smtpSecure);
+
+    if (smtpPort !== undefined) {
+      if (smtpPort === null || smtpPort === '') {
+        data.smtpPort = null;
+      } else {
+        const port = Number(smtpPort);
+        if (!Number.isInteger(port) || port < 1 || port > 65535) {
+          res.status(400).json({ error: 'smtpPort invalide' });
+          return;
+        }
+        data.smtpPort = port;
+      }
+    }
+
+    // smtpPass : chiffré à l'écriture. '' explicite = effacer. Absent = inchangé.
+    if (smtpPass !== undefined) {
+      if (smtpPass === null || smtpPass === '') {
+        data.smtpPass = null;
+      } else if (typeof smtpPass === 'string') {
+        data.smtpPass = encrypt(smtpPass);
+      } else {
+        res.status(400).json({ error: 'smtpPass invalide' });
+        return;
+      }
     }
 
     const user = await prisma.user.update({
       where: { id: req.userId },
-      data: {
-        ...(avatarStage !== undefined && { avatarStage: avatarStage as number }),
-      },
-      select: {
-        id: true, username: true, email: true, avatarStage: true,
-        themeId: true, level: true, totalXP: true, currentXP: true,
-        xpBalance: true, streak: true, lastWorkout: true, role: true,
-      },
+      data,
+      select: USER_SELECT,
     });
 
-    res.json({ user });
+    res.json({ user: toSafeUser(user) });
   } catch (err) {
     console.error('[auth/me PATCH]', err);
     res.status(500).json({ error: 'Erreur interne du serveur' });
@@ -152,17 +216,13 @@ router.get('/me', requireAuth, async (req: AuthRequest, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.userId },
-      select: {
-        id: true, username: true, email: true, avatarStage: true,
-        themeId: true, level: true, totalXP: true, currentXP: true,
-        xpBalance: true, streak: true, lastWorkout: true, role: true,
-      },
+      select: USER_SELECT,
     });
     if (!user) {
       res.status(404).json({ error: 'Utilisateur introuvable' });
       return;
     }
-    res.json({ user });
+    res.json({ user: toSafeUser(user) });
   } catch (err) {
     console.error('[auth/me]', err);
     res.status(500).json({ error: 'Erreur interne du serveur' });
