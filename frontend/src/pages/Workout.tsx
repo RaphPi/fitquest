@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { Plus, Search, X, SlidersHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useProgramStore } from '@/stores/programStore';
+import { useUserStore } from '@/stores/userStore';
 import type { Program, Level } from '@/types';
 import ProgramCard from '@/components/workout/ProgramCard';
 import ProgramDetail from '@/components/workout/ProgramDetail';
@@ -28,6 +29,7 @@ export default function Workout() {
   ];
 
   const { programs, isLoading, isSaving, error, fetchPrograms, deleteProgram } = useProgramStore();
+  const user = useUserStore((s) => s.user);
   const [view, setView] = useState<View>('list');
   const [activeProgram, setActiveProgram] = useState<Program | null>(null);
   const [editingProgram, setEditingProgram] = useState<Program | undefined>(undefined);
@@ -62,8 +64,16 @@ export default function Workout() {
         return min > 60;
       });
     }
+    if (user?.primaryGoal) {
+      const goal = user.primaryGoal;
+      list = [...list].sort((a, b) => {
+        const aRec = a.goals.includes(goal) ? 0 : 1;
+        const bRec = b.goals.includes(goal) ? 0 : 1;
+        return aRec - bRec;
+      });
+    }
     return list;
-  }, [programs, search, levelFilter, durationFilter]);
+  }, [programs, search, levelFilter, durationFilter, user?.primaryGoal]);
 
   const hasFilters = levelFilter.length > 0 || durationFilter !== 'any';
 
@@ -268,6 +278,7 @@ export default function Workout() {
               key={p.id}
               program={p}
               onClick={() => openDetail(p)}
+              recommended={!!user?.primaryGoal && p.goals.includes(user.primaryGoal)}
             />
           ))}
         </div>

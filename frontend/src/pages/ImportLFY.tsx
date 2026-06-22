@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useUserStore } from '@/stores/userStore';
 import {
   Upload, FileJson, CheckCircle2, XCircle, Loader2, AlertCircle,
   ArrowLeft, Trash2, TriangleAlert, History,
@@ -19,6 +20,7 @@ interface ImportLog {
 interface ImportPayloadPreview {
   exercises: number;
   programs: number;
+  programsData: { nameFr: string; nameEn?: string; goals: string[] }[];
 }
 
 interface ImportResult {
@@ -39,6 +41,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 export default function ImportLFY() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const user = useUserStore((s) => s.user);
 
   // ── Import state ──────────────────────────────────────────────────────────
   const [status, setStatus] = useState<PageStatus>('idle');
@@ -86,9 +89,18 @@ export default function ImportLFY() {
       try {
         const parsed = JSON.parse(raw) as { exercises?: unknown[]; programs?: unknown[] };
         setJsonContent(raw);
+        const progs = Array.isArray(parsed.programs) ? parsed.programs : [];
         setPreview({
           exercises: Array.isArray(parsed.exercises) ? parsed.exercises.length : 0,
-          programs: Array.isArray(parsed.programs) ? parsed.programs.length : 0,
+          programs: progs.length,
+          programsData: progs.map((p) => {
+            const prog = p as Record<string, unknown>;
+            return {
+              nameFr: typeof prog.nameFr === 'string' ? prog.nameFr : '',
+              nameEn: typeof prog.nameEn === 'string' ? prog.nameEn : undefined,
+              goals: Array.isArray(prog.goals) ? (prog.goals as unknown[]).filter((g): g is string => typeof g === 'string') : [],
+            };
+          }),
         });
         setStatus('preview');
       } catch {
@@ -245,6 +257,24 @@ export default function ImportLFY() {
               </p>
             </div>
           </div>
+          {preview.programsData.length > 0 && (
+            <ul className="space-y-1.5 border-t border-border px-5 py-4">
+              {preview.programsData.map((p, i) => {
+                const isRec = !!user?.primaryGoal && p.goals.includes(user.primaryGoal);
+                const name = (i18n.language === 'en' && p.nameEn) ? p.nameEn : p.nameFr;
+                return (
+                  <li key={i} className="flex items-center gap-2 text-sm text-foreground">
+                    <span className="min-w-0 flex-1 truncate">{name || p.nameFr}</span>
+                    {isRec && (
+                      <span className="shrink-0 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-400">
+                        {t('programs.recommended')}
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
           <div className="flex gap-3 border-t border-border px-5 py-4">
             <button
               type="button"

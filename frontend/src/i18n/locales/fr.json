@@ -574,6 +574,9 @@
     "forme_generale": "Forme générale",
     "remise_en_forme": "Remise en forme"
   },
+  "programs": {
+    "recommended": "Recommandé pour toi"
+  },
   "settings": {
     "title": "Paramètres",
     "subtitle": "Personnalise ton expérience de combat.",

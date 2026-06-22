@@ -574,6 +574,9 @@
     "forme_generale": "General fitness",
     "remise_en_forme": "Getting back in shape"
   },
+  "programs": {
+    "recommended": "Recommended for you"
+  },
   "settings": {
     "title": "Settings",
     "subtitle": "Customize your combat experience.",

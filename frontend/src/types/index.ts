@@ -60,6 +60,7 @@ export interface Program {
   equipment: Equipment[];
   isCustom: boolean;
   isAiGen: boolean;
+  goals: string[];
   sessions: WorkoutSession[];
 }
 

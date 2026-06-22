@@ -13,6 +13,7 @@ interface ProgramCardProps {
   program: Program;
   onClick: () => void;
   className?: string;
+  recommended?: boolean;
 }
 
 const LEVEL_REP: Record<Level, number> = { beginner: 1, intermediate: 20, advanced: 50 };
@@ -26,7 +27,7 @@ function tierBadgeStyle(level: Level) {
   };
 }
 
-export default function ProgramCard({ program, onClick, className }: ProgramCardProps) {
+export default function ProgramCard({ program, onClick, className, recommended }: ProgramCardProps) {
   const { t } = useTranslation();
   const level = program.level as Level;
   const avgMin = estimateProgramMinutes(program);
@@ -43,12 +44,19 @@ export default function ProgramCard({ program, onClick, className }: ProgramCard
       {/* Main clickable area */}
       <button className="flex flex-col gap-3 p-4 text-left w-full" onClick={onClick}>
         <div className="flex items-start justify-between gap-2">
-          <span
-            className="rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider"
-            style={tierBadgeStyle(level)}
-          >
-            {t(`workout.level.${level}`)}
-          </span>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span
+              className="rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider"
+              style={tierBadgeStyle(level)}
+            >
+              {t(`workout.level.${level}`)}
+            </span>
+            {recommended && (
+              <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400">
+                {t('programs.recommended')}
+              </span>
+            )}
+          </div>
           <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
         </div>
 
