@@ -183,3 +183,11 @@ model UserBadge {
 
   @@unique([userId, badgeId])
 }
+
+model ImportLog {
+  id            String   @id @default(cuid())
+  sourcePrefix  String
+  importedAt    DateTime @default(now())
+  programCount  Int
+  exerciseCount Int
+}

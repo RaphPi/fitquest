@@ -355,25 +355,41 @@ const ImportPayloadSchema = z.object({
   exercises: z.array(ExerciseImportItemSchema),
 });
 
-// DELETE /api/v1/programs/import/lfy
-// Supprime tous les exercices (id lfy_*) et programmes (nameFr LFY*) de la BDD.
-// Sessions et SessionExercises sont supprimés en cascade via le schéma Prisma.
-router.delete('/import/lfy', requireAuth, async (_req: AuthRequest, res) => {
+// GET /api/v1/programs/import/logs
+// Retourne l'historique de tous les imports, du plus récent au plus ancien.
+router.get('/import/logs', requireAuth, async (_req: AuthRequest, res) => {
+  try {
+    const logs = await prisma.importLog.findMany({ orderBy: { importedAt: 'desc' } });
+    res.json(logs);
+  } catch (e) {
+    console.error('[programs/import/logs GET]', e);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// DELETE /api/v1/programs/import/:prefix
+// Purge générique par sourcePrefix : supprime exercices (id prefix_*),
+// programmes (nameFr PREFIX*) et entrées ImportLog associées.
+router.delete('/import/:prefix', requireAuth, async (req: AuthRequest, res) => {
+  const { prefix } = req.params;
+  if (!prefix || prefix.trim() === '') {
+    res.status(400).json({ error: 'Préfixe invalide' });
+    return;
+  }
   try {
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Programmes : cascade vers Sessions → SessionExercises (onDelete: Cascade)
       const { count: programs } = await tx.program.deleteMany({
-        where: { nameFr: { startsWith: 'LFY' } },
+        where: { nameFr: { startsWith: prefix.toUpperCase() } },
       });
-      // 2. Exercices : pas de FK contrainte sur SessionExercise.exerciseId → suppression directe
       const { count: exercises } = await tx.exercise.deleteMany({
-        where: { id: { startsWith: 'lfy_' } },
+        where: { id: { startsWith: `${prefix}_` } },
       });
+      await tx.importLog.deleteMany({ where: { sourcePrefix: prefix } });
       return { programs, exercises };
     }, { timeout: 30000 });
     res.json({ deleted: result });
   } catch (e) {
-    console.error('[programs/import/lfy DELETE]', e);
+    console.error('[programs/import/:prefix DELETE]', e);
     res.status(500).json({ error: 'Erreur lors de la suppression' });
   }
 });
@@ -454,6 +470,13 @@ router.post('/import', requireAuth, async (req: AuthRequest, res) => {
         importedPrograms++;
       }
     }, { timeout: 30000 });
+
+    const sp = parsed.data.sourcePrefix?.trim();
+    if (sp && (importedExercises + importedPrograms) > 0) {
+      prisma.importLog.create({
+        data: { sourcePrefix: sp, programCount: importedPrograms, exerciseCount: importedExercises },
+      }).catch((logErr) => console.error('[programs/import] ImportLog non-bloquant:', logErr));
+    }
 
     res.json({ imported: { exercises: importedExercises, programs: importedPrograms }, skipped, errors: [] });
   } catch (e) {

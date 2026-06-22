@@ -1,11 +1,19 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Upload, FileJson, CheckCircle2, XCircle, Loader2, AlertCircle,
-  ArrowLeft, Trash2, TriangleAlert,
+  ArrowLeft, Trash2, TriangleAlert, History,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+interface ImportLog {
+  id: string;
+  sourcePrefix: string;
+  importedAt: string;
+  programCount: number;
+  exerciseCount: number;
+}
 
 interface ImportPayloadPreview {
   exercises: number;
@@ -18,12 +26,7 @@ interface ImportResult {
   errors: string[];
 }
 
-interface PurgeResult {
-  deleted: { programs: number; exercises: number };
-}
-
 type PageStatus = 'idle' | 'preview' | 'loading' | 'success' | 'error';
-type PurgeStatus = 'idle' | 'confirm' | 'purging' | 'done' | 'error';
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, { credentials: 'include', ...init });
@@ -34,7 +37,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 
 export default function ImportLFY() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // ── Import state ──────────────────────────────────────────────────────────
   const [status, setStatus] = useState<PageStatus>('idle');
@@ -45,10 +48,28 @@ export default function ImportLFY() {
   const [jsonContent, setJsonContent] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // ── Purge state ───────────────────────────────────────────────────────────
-  const [purgeStatus, setPurgeStatus] = useState<PurgeStatus>('idle');
-  const [purgeResult, setPurgeResult] = useState<PurgeResult | null>(null);
-  const [purgeError, setPurgeError] = useState('');
+  // ── Logs state ────────────────────────────────────────────────────────────
+  const [logs, setLogs] = useState<ImportLog[]>([]);
+  const [logsLoading, setLogsLoading] = useState(true);
+  const [confirmLogId, setConfirmLogId] = useState<string | null>(null);
+  const [purgingPrefix, setPurgingPrefix] = useState<string | null>(null);
+  const [purgeError, setPurgeError] = useState<string | null>(null);
+
+  // ── Fetch logs ────────────────────────────────────────────────────────────
+
+  async function fetchLogs() {
+    setLogsLoading(true);
+    try {
+      const data = await apiFetch<ImportLog[]>('/api/v1/programs/import/logs');
+      setLogs(data);
+    } catch {
+      // silent — la section reste vide
+    } finally {
+      setLogsLoading(false);
+    }
+  }
+
+  useEffect(() => { void fetchLogs(); }, []);
 
   // ── Import handlers ───────────────────────────────────────────────────────
 
@@ -100,6 +121,7 @@ export default function ImportLFY() {
       });
       setResult(res);
       setStatus('success');
+      void fetchLogs();
     } catch (e) {
       setErrorMsg(e instanceof Error ? e.message : t('common.unknownError'));
       setStatus('error');
@@ -117,17 +139,20 @@ export default function ImportLFY() {
 
   // ── Purge handlers ────────────────────────────────────────────────────────
 
-  async function handlePurge() {
-    setPurgeStatus('purging');
+  async function handlePurge(prefix: string) {
+    setConfirmLogId(null);
+    setPurgingPrefix(prefix);
+    setPurgeError(null);
     try {
-      const res = await apiFetch<PurgeResult>('/api/v1/programs/import/lfy', {
-        method: 'DELETE',
-      });
-      setPurgeResult(res);
-      setPurgeStatus('done');
+      await apiFetch<{ deleted: { programs: number; exercises: number } }>(
+        `/api/v1/programs/import/${encodeURIComponent(prefix)}`,
+        { method: 'DELETE' },
+      );
+      await fetchLogs();
     } catch (e) {
       setPurgeError(e instanceof Error ? e.message : t('common.unknownError'));
-      setPurgeStatus('error');
+    } finally {
+      setPurgingPrefix(null);
     }
   }
 
@@ -311,100 +336,98 @@ export default function ImportLFY() {
         </>
       )}
 
-      {/* ── Zone de danger : purge LFY ───────────────────────────────────── */}
-      <div className="mt-8 overflow-hidden rounded-xl border border-red-500/20 bg-card">
-        <div className="flex items-center gap-3 border-b border-red-500/20 px-5 py-4">
-          <Trash2 className="h-4 w-4 text-red-400" />
-          <h2 className="font-display text-sm font-bold uppercase tracking-widest text-red-400">
-            {t('import.purge.title')}
+      {/* ── Historique des imports ─────────────────────────────────────────── */}
+      <div className="mt-8 overflow-hidden rounded-xl border border-border bg-card">
+        <div className="flex items-center gap-3 border-b border-border px-5 py-4">
+          <History className="h-4 w-4 text-muted-foreground" />
+          <h2 className="font-display text-sm font-bold uppercase tracking-widest">
+            {t('import.logs.title')}
           </h2>
         </div>
 
-        <div className="p-5">
-          {purgeStatus === 'idle' && (
-            <>
-              <p className="mb-4 text-xs text-muted-foreground">
-                {t('import.purge.hint')}
-              </p>
-              <button
-                type="button"
-                onClick={() => setPurgeStatus('confirm')}
-                className="flex items-center gap-2 rounded-lg border border-red-500/30 px-4 py-2 text-sm font-semibold text-red-400 transition-colors hover:bg-red-500/10"
-              >
-                <Trash2 className="h-4 w-4" />
-                {t('import.purge.purge')}
-              </button>
-            </>
-          )}
+        {purgeError && (
+          <div className="flex items-start gap-3 border-b border-red-500/20 bg-red-500/10 px-5 py-3">
+            <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
+            <p className="flex-1 text-xs text-red-400">{purgeError}</p>
+            <button
+              type="button"
+              onClick={() => setPurgeError(null)}
+              className="text-xs text-muted-foreground underline underline-offset-2"
+            >
+              {t('import.logs.purgeRetry')}
+            </button>
+          </div>
+        )}
 
-          {purgeStatus === 'confirm' && (
-            <div className="flex flex-col gap-3">
-              <div className="flex items-start gap-3 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3">
-                <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-yellow-400" />
-                <p className="text-xs text-yellow-400">
-                  {t('import.purge.confirm')}
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => void handlePurge()}
-                  className="flex-1 rounded-lg bg-red-500/80 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-red-500"
-                >
-                  {t('import.purge.confirmBtn')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPurgeStatus('idle')}
-                  className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  {t('import.purge.cancel')}
-                </button>
-              </div>
-            </div>
-          )}
+        {logsLoading ? (
+          <div className="flex items-center gap-3 p-5">
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          </div>
+        ) : logs.length === 0 ? (
+          <p className="p-5 text-sm text-muted-foreground">{t('import.logs.empty')}</p>
+        ) : (
+          <div className="divide-y divide-border">
+            {logs.map((log) => (
+              <div key={log.id} className="px-5 py-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      <span className="rounded bg-primary/15 px-1.5 py-0.5 font-mono text-xs font-semibold text-primary">
+                        {log.sourcePrefix}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(log.importedAt).toLocaleString(i18n.language)}
+                      </span>
+                    </div>
+                    <div className="mt-1 flex gap-4 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      <span>{log.exerciseCount} {t('import.preview.exercises').toLowerCase()}</span>
+                      <span>{log.programCount} {t('import.preview.programs').toLowerCase()}</span>
+                    </div>
+                  </div>
+                  {purgingPrefix === log.sourcePrefix ? (
+                    <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
+                  ) : confirmLogId !== log.id && (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmLogId(log.id)}
+                      className="mt-0.5 shrink-0 rounded-lg border border-red-500/30 p-1.5 text-red-400 transition-colors hover:bg-red-500/10"
+                      title={t('import.logs.purgeBtn')}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
 
-          {purgeStatus === 'purging' && (
-            <div className="flex items-center gap-3">
-              <Loader2 className="h-5 w-5 animate-spin text-red-400" />
-              <p className="text-sm text-muted-foreground">{t('import.purge.purging')}</p>
-            </div>
-          )}
-
-          {purgeStatus === 'done' && purgeResult && (
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
-                <p className="text-sm font-semibold text-foreground">
-                  {t('import.purge.doneMsg', { programs: purgeResult.deleted.programs, exercises: purgeResult.deleted.exercises, count: purgeResult.deleted.programs })}
-                </p>
+                {confirmLogId === log.id && (
+                  <div className="mt-3 flex flex-col gap-2">
+                    <div className="flex items-start gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-2.5">
+                      <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-yellow-400" />
+                      <p className="text-xs text-yellow-400">
+                        {t('import.logs.purgeConfirm', { prefix: log.sourcePrefix })}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void handlePurge(log.sourcePrefix)}
+                        className="flex-1 rounded-lg bg-red-500/80 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-red-500"
+                      >
+                        {t('import.logs.purgeConfirmBtn')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmLogId(null)}
+                        className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        {t('import.logs.purgeCancel')}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-              <button
-                type="button"
-                onClick={() => { setPurgeStatus('idle'); setPurgeResult(null); }}
-                className="w-fit text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
-              >
-                {t('import.purge.reset')}
-              </button>
-            </div>
-          )}
-
-          {purgeStatus === 'error' && (
-            <div className="flex flex-col gap-3">
-              <div className="flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/10 p-3">
-                <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
-                <p className="text-xs text-red-400">{purgeError}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setPurgeStatus('idle')}
-                className="w-fit text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
-              >
-                {t('import.purge.retry')}
-              </button>
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -688,18 +688,15 @@
       "notJson": "Le fichier doit être un .json",
       "invalidJson": "Fichier JSON invalide ou mal formé"
     },
-    "purge": {
-      "title": "Purger les données LFY",
-      "hint": "Supprime tous les exercices et programmes LFY de la base. À utiliser avant une réimportation pour corriger les données.",
-      "purge": "Purger",
-      "confirm": "Cette action est irréversible. Tous les exercices et programmes LFY seront supprimés.",
-      "confirmBtn": "Confirmer la suppression",
-      "cancel": "Annuler",
+    "logs": {
+      "title": "Historique des imports",
+      "empty": "Aucun import enregistré.",
+      "purgeBtn": "Purger",
+      "purgeConfirm": "Supprimer tous les exercices et programmes « {{prefix}} » ? Cette action est irréversible.",
+      "purgeConfirmBtn": "Confirmer la suppression",
+      "purgeCancel": "Annuler",
       "purging": "Suppression en cours…",
-      "doneMsg": "{{programs}} programme et {{exercises}} exercice supprimés.",
-      "doneMsg_plural": "{{programs}} programmes et {{exercises}} exercices supprimés.",
-      "reset": "Réinitialiser",
-      "retry": "Réessayer"
+      "purgeRetry": "Réessayer"
     }
   },
   "sidebar": {
