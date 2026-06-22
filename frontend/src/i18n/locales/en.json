@@ -364,6 +364,21 @@
       "noMeasureData": "No measurements recorded.",
       "noMeasureDataSingle": "No data for this measurement."
     },
+    "fitnessIndex": {
+      "title": "Fitness Index",
+      "basedOn": "Based on your entry from {{date}}",
+      "ffmi": "FFMI",
+      "ffmiNorm": "Normalized FFMI",
+      "leanMass": "Lean mass",
+      "fatMass": "Fat mass",
+      "imc": "BMI",
+      "whtr": "Waist-to-height",
+      "evolution": "Index evolution",
+      "needWeight": "Record an entry with your weight to get started.",
+      "cta": "Add your height and body fat % to unlock the Fitness Index.",
+      "ctaHeightLink": "Set my height",
+      "hintBodyFat": "Add your body fat % in an entry to unlock FFMI and body composition."
+    },
     "photos": {
       "newPhoto": "New photo",
       "photoType": "Photo type",

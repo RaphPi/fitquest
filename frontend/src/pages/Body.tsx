@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Scale, Camera, Plus, Trash2, Pencil, X, Check, Upload, ArrowLeftRight, Eye, EyeOff, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import {
   LineChart,
   Line,
@@ -8,10 +9,13 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
   ResponsiveContainer,
 } from 'recharts';
 import { useBodyStore } from '@/stores/bodyStore';
+import { useUserStore } from '@/stores/userStore';
 import NumberStepper from '@/components/ui/NumberStepper';
+import { computeFitnessIndex } from '@/lib/fitnessIndex';
 import type { BodyMetric, BodyPhoto, CustomMetric, MetricPayload } from '@/types';
 
 // ─── Color system ─────────────────────────────────────────────────────────────
@@ -33,6 +37,8 @@ const DEFAULT_COLORS: Record<string, string> = {
   chestCm: '#8b5cf6',
   bicepCm: '#10b981',
   thighCm: '#0ea5e9',
+  fitnessIndex: '#14b8a6', // teal — courbe FFMI
+  imc: '#f43f5e',          // rose — courbe IMC
 };
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -719,6 +725,189 @@ function MetricCard({ metric, onEdit, onDelete, getColor }: MetricCardProps) {
   );
 }
 
+// ─── FitnessIndexCard ─────────────────────────────────────────────────────────
+
+/** Petite tuile chiffre/libellé — même pattern visuel que les chips de MetricCard. */
+function StatBox({ label, value, color }: { label: string; value: string; color: string }) {
+  return (
+    <div
+      className="rounded-lg border px-2.5 py-1.5"
+      style={{ borderColor: hexToRgba(color, 0.35), background: hexToRgba(color, 0.08) }}
+    >
+      <p className="text-sm font-bold leading-tight" style={{ color }}>{value}</p>
+      <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground">{label}</p>
+    </div>
+  );
+}
+
+/**
+ * Carte "Indice de Forme" — calculée à la volée pour le dernier relevé pesé.
+ * Affichage à dégradation gracieuse selon les données disponibles (cf. fitnessIndex.ts).
+ */
+function FitnessIndexCard({
+  metrics,
+  heightCm,
+  getColor,
+}: {
+  metrics: BodyMetric[];
+  heightCm: number | null;
+  getColor: (key: string) => string;
+}) {
+  const { t } = useTranslation();
+  const color = getColor('fitnessIndex');
+
+  // Dernier relevé avec un poids (metrics est trié du plus récent au plus ancien).
+  const latest = useMemo(() => metrics.find((m) => m.weightKg != null) ?? null, [metrics]);
+  const result = useMemo(
+    () =>
+      computeFitnessIndex(
+        latest?.weightKg ?? null,
+        heightCm,
+        latest?.bodyFatPct ?? null,
+        latest?.waistCm ?? null,
+      ),
+    [latest, heightCm],
+  );
+
+  const header = (
+    <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+      <span style={{ color }}>●</span> {t('body.fitnessIndex.title')}
+    </h3>
+  );
+
+  // État dégradé : pas de poids, ou poids sans taille → on invite à compléter.
+  if (result.mode === null || result.mode === 'weight') {
+    return (
+      <div className="rounded-xl border bg-card p-4" style={{ borderColor: hexToRgba(color, 0.3) }}>
+        {header}
+        <p className="mt-2 text-sm text-muted-foreground">
+          {result.mode === null ? t('body.fitnessIndex.needWeight') : t('body.fitnessIndex.cta')}
+        </p>
+        {result.mode === 'weight' && (
+          <Link
+            to="/profile"
+            className="mt-3 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
+            style={{ color, background: hexToRgba(color, 0.12), border: `1px solid ${hexToRgba(color, 0.35)}` }}
+          >
+            {t('body.fitnessIndex.ctaHeightLink')}
+          </Link>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border bg-card p-4" style={{ borderColor: hexToRgba(color, 0.3) }}>
+      {header}
+      {latest && (
+        <p className="mt-0.5 text-[11px] text-muted-foreground">
+          {t('body.fitnessIndex.basedOn', { date: fmtLong(latest.date) })}
+        </p>
+      )}
+      <div className="mt-3 flex flex-wrap gap-2">
+        {result.mode === 'full' && (
+          <>
+            <StatBox label={t('body.fitnessIndex.ffmi')} value={`${result.ffmi}`} color={color} />
+            <StatBox label={t('body.fitnessIndex.ffmiNorm')} value={`${result.ffmiNorm}`} color={color} />
+            <StatBox label={t('body.fitnessIndex.leanMass')} value={`${result.leanMass} kg`} color={color} />
+            <StatBox label={t('body.fitnessIndex.fatMass')} value={`${result.fatMass} kg`} color={color} />
+          </>
+        )}
+        {result.imc != null && (
+          <StatBox label={t('body.fitnessIndex.imc')} value={`${result.imc}`} color={color} />
+        )}
+        {result.whtr != null && (
+          <StatBox label={t('body.fitnessIndex.whtr')} value={`${result.whtr}`} color={color} />
+        )}
+      </div>
+      {result.mode === 'imc' && (
+        <p className="mt-3 text-[11px] text-muted-foreground">{t('body.fitnessIndex.hintBodyFat')}</p>
+      )}
+    </div>
+  );
+}
+
+// ─── FitnessIndexChart ────────────────────────────────────────────────────────
+
+/**
+ * Évolution de l'indice : FFMI + IMC recalculés pour chaque relevé daté.
+ * On ne fabrique aucune donnée — un relevé sans %MG n'a pas de point FFMI
+ * (mais un point IMC si la taille est connue). Retourne `null` si rien à tracer.
+ */
+function FitnessIndexChart({
+  metrics,
+  heightCm,
+  getColor,
+}: {
+  metrics: BodyMetric[];
+  heightCm: number | null;
+  getColor: (key: string) => string;
+}) {
+  const { t } = useTranslation();
+  const ffmiColor = getColor('fitnessIndex');
+  const imcColor = getColor('imc');
+
+  const data = useMemo(
+    () =>
+      [...metrics]
+        .reverse()
+        .map((m) => {
+          const r = computeFitnessIndex(m.weightKg ?? null, heightCm, m.bodyFatPct ?? null);
+          return { date: fmtShort(m.date), ffmi: r.ffmi, imc: r.imc };
+        })
+        .filter((d) => d.ffmi != null || d.imc != null),
+    [metrics, heightCm],
+  );
+
+  const hasFfmi = data.some((d) => d.ffmi != null);
+  const hasImc = data.some((d) => d.imc != null);
+
+  // Moins de 2 points exploitables → pas de courbe pertinente.
+  if (data.length < 2 || (!hasFfmi && !hasImc)) return null;
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-4">
+      <h3 className="mb-3 text-sm font-semibold text-foreground">{t('body.fitnessIndex.evolution')}</h3>
+      <ResponsiveContainer width="100%" height={180}>
+        <LineChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+          <XAxis dataKey="date" tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 10 }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 10 }} axisLine={false} tickLine={false} domain={['auto', 'auto']} />
+          <Tooltip
+            contentStyle={{ background: 'rgba(15,15,25,0.95)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '6px 12px' }}
+            labelStyle={{ color: 'rgba(255,255,255,0.55)', fontSize: 11 }}
+          />
+          <Legend wrapperStyle={{ fontSize: 11 }} />
+          {hasFfmi && (
+            <Line
+              type="monotone"
+              dataKey="ffmi"
+              name={t('body.fitnessIndex.ffmi')}
+              connectNulls={false}
+              stroke={ffmiColor}
+              strokeWidth={2}
+              dot={{ fill: ffmiColor, r: 3, strokeWidth: 0 }}
+              activeDot={{ r: 5, fill: ffmiColor, strokeWidth: 0 }}
+            />
+          )}
+          {hasImc && (
+            <Line
+              type="monotone"
+              dataKey="imc"
+              name={t('body.fitnessIndex.imc')}
+              connectNulls={false}
+              stroke={imcColor}
+              strokeWidth={2}
+              dot={{ fill: imcColor, r: 3, strokeWidth: 0 }}
+              activeDot={{ r: 5, fill: imcColor, strokeWidth: 0 }}
+            />
+          )}
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 // ─── MetricsTab ───────────────────────────────────────────────────────────────
 
 function MetricsTab() {
@@ -728,6 +917,7 @@ function MetricsTab() {
   const [showAddForm, setShowAddForm] = useState(false);
   const editRef = useRef<HTMLDivElement>(null);
   const { getColor, setColor } = useColorMap();
+  const heightCm = useUserStore((s) => s.user?.heightCm ?? null);
 
   useEffect(() => { fetchMetrics(); }, [fetchMetrics]);
 
@@ -752,6 +942,12 @@ function MetricsTab() {
 
   return (
     <div className="space-y-5">
+      {/* Indice de Forme — carte en tête + évolution */}
+      {metrics.length > 0 && (
+        <FitnessIndexCard metrics={metrics} heightCm={heightCm} getColor={getColor} />
+      )}
+      <FitnessIndexChart metrics={metrics} heightCm={heightCm} getColor={getColor} />
+
       {/* Graphiques */}
       {metrics.length > 1 && (
         <div className="grid gap-4 md:grid-cols-2">

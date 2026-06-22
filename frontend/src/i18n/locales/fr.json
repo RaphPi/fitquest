@@ -364,6 +364,21 @@
       "noMeasureData": "Aucune mensuration enregistrée.",
       "noMeasureDataSingle": "Aucune donnée pour cette mensuration."
     },
+    "fitnessIndex": {
+      "title": "Indice de Forme",
+      "basedOn": "D'après ton relevé du {{date}}",
+      "ffmi": "FFMI",
+      "ffmiNorm": "FFMI normalisé",
+      "leanMass": "Masse maigre",
+      "fatMass": "Masse grasse",
+      "imc": "IMC",
+      "whtr": "Tour de taille / taille",
+      "evolution": "Évolution de l'indice",
+      "needWeight": "Enregistre un relevé avec ton poids pour commencer.",
+      "cta": "Ajoute ta taille et ton % de masse grasse pour débloquer l'Indice de Forme.",
+      "ctaHeightLink": "Renseigner ma taille",
+      "hintBodyFat": "Ajoute ton % de masse grasse dans un relevé pour débloquer le FFMI et la composition corporelle."
+    },
     "photos": {
       "newPhoto": "Nouvelle photo",
       "photoType": "Type de photo",
