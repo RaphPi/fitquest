@@ -15,7 +15,9 @@ export type BadgeConditionType =
   | 'level' // niveau ≥ threshold
   | 'first_custom_program' // ≥ 1 programme custom créé
   | 'body_metric_count' // ≥ threshold relevés de métriques corporelles
-  | 'body_photo_count'; // ≥ threshold photos de progression
+  | 'body_photo_count' // ≥ threshold photos de progression
+  | 'full_body_metric' // ≥ 1 relevé poids+%MG ET taille (User.heightCm) renseignée
+  | 'bodyfat_metric_count'; // ≥ threshold relevés avec %MG renseigné
 
 export type BadgeCategory = 'sessions' | 'streak' | 'level' | 'program' | 'body';
 
@@ -192,6 +194,32 @@ export const BADGES: BadgeDef[] = [
     order: 120,
   },
   {
+    id: 'full_body_complete',
+    nameFr: 'Bilan complet',
+    nameEn: 'Full Assessment',
+    descFr: 'Enregistre un relevé avec poids et %MG, taille renseignée.',
+    descEn: 'Log an entry with weight and body fat %, with your height set.',
+    rarity: 'rare',
+    iconType: 'scroll',
+    category: 'body',
+    conditionType: 'full_body_metric',
+    threshold: null,
+    order: 140,
+  },
+  {
+    id: 'analyst',
+    nameFr: 'Analyste',
+    nameEn: 'Analyst',
+    descFr: 'Enregistre 5 relevés avec ton %MG renseigné.',
+    descEn: 'Log 5 entries with your body fat % filled in.',
+    rarity: 'rare',
+    iconType: 'crystal',
+    category: 'body',
+    conditionType: 'bodyfat_metric_count',
+    threshold: 5,
+    order: 150,
+  },
+  {
     id: 'photographer',
     nameFr: 'Photographe',
     nameEn: 'Photographer',
@@ -215,6 +243,8 @@ export interface BadgeContext {
   customProgramCount: number;
   bodyMetricCount: number; // total de relevés de métriques corporelles
   bodyPhotoCount: number; // total de photos de progression
+  bodyFatMetricCount: number; // relevés avec bodyFatPct renseigné
+  hasFullBodyMetric: boolean; // taille connue ET ≥1 relevé poids+%MG
 }
 
 /** Une condition de badge est-elle satisfaite par le contexte courant ? */
@@ -234,6 +264,10 @@ export function isUnlocked(badge: BadgeDef, ctx: BadgeContext): boolean {
       return ctx.bodyMetricCount >= (badge.threshold ?? Infinity);
     case 'body_photo_count':
       return ctx.bodyPhotoCount >= (badge.threshold ?? Infinity);
+    case 'full_body_metric':
+      return ctx.hasFullBodyMetric;
+    case 'bodyfat_metric_count':
+      return ctx.bodyFatMetricCount >= (badge.threshold ?? Infinity);
     default:
       return false;
   }
@@ -268,6 +302,9 @@ export function badgeProgress(
     case 'body_photo_count':
       current = ctx.bodyPhotoCount;
       break;
+    case 'bodyfat_metric_count':
+      current = ctx.bodyFatMetricCount;
+      break;
     default:
       return null;
   }
@@ -285,14 +322,29 @@ export async function buildBadgeContext(
   streak: number,
 ): Promise<BadgeContext> {
   const sevenDaysAgo = new Date(Date.now() - 7 * 86_400_000);
-  const [sessionCount, sessionsLast7Days, customProgramCount, bodyMetricCount, bodyPhotoCount] = await Promise.all([
+  const [
+    sessionCount, sessionsLast7Days, customProgramCount,
+    bodyMetricCount, bodyPhotoCount, bodyFatMetricCount, fullBodyMetric, user,
+  ] = await Promise.all([
     prisma.workoutLog.count({ where: { userId, xpEarned: { gt: 0 } } }),
     prisma.workoutLog.count({ where: { userId, xpEarned: { gt: 0 }, date: { gte: sevenDaysAgo } } }),
     prisma.program.count({ where: { createdBy: userId, isCustom: true } }),
     prisma.bodyMetric.count({ where: { userId } }),
     prisma.bodyPhoto.count({ where: { userId } }),
+    prisma.bodyMetric.count({ where: { userId, bodyFatPct: { not: null } } }),
+    // Existe-t-il un relevé complet (poids + %MG) ? (taille testée via User ci-dessous)
+    prisma.bodyMetric.findFirst({
+      where: { userId, weightKg: { not: null }, bodyFatPct: { not: null } },
+      select: { id: true },
+    }),
+    prisma.user.findUnique({ where: { id: userId }, select: { heightCm: true } }),
   ]);
-  return { sessionCount, sessionsLast7Days, customProgramCount, bodyMetricCount, bodyPhotoCount, level, streak };
+  // « Bilan complet » récompense le SUIVI : taille renseignée (User) + un relevé poids+%MG.
+  const hasFullBodyMetric = user?.heightCm != null && fullBodyMetric != null;
+  return {
+    sessionCount, sessionsLast7Days, customProgramCount,
+    bodyMetricCount, bodyPhotoCount, bodyFatMetricCount, hasFullBodyMetric, level, streak,
+  };
 }
 
 /**

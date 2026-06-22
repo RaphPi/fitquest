@@ -3,7 +3,7 @@ import { applyTheme } from '@/lib/theme';
 import type { Lang, ThemeId } from '@/types';
 import type { BossKey, WeaponKey } from '@/lib/pixelSprites';
 
-export type WidgetId = 'streak' | 'xp_remaining' | 'last_workout' | 'body_weight' | 'badge_progress';
+export type WidgetId = 'streak' | 'xp_remaining' | 'last_workout' | 'body_weight' | 'badge_progress' | 'fitness_index';
 
 const BOSS_KEY = 'fq_boss';
 const WEAPON_KEY = 'fq_weapon';
@@ -12,7 +12,7 @@ const AUTO_REST_KEY = 'fq_autorest';
 const WIDGETS_KEY = 'fq_widgets';
 
 const DEFAULT_WIDGETS: WidgetId[] = ['streak', 'xp_remaining'];
-const ALL_WIDGET_IDS: WidgetId[] = ['streak', 'xp_remaining', 'last_workout', 'body_weight', 'badge_progress'];
+const ALL_WIDGET_IDS: WidgetId[] = ['streak', 'xp_remaining', 'last_workout', 'body_weight', 'badge_progress', 'fitness_index'];
 
 function readWidgets(): WidgetId[] {
   try {

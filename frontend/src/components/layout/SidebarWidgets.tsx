@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Flame, Zap, Clock, Activity, Trophy } from 'lucide-react';
+import { Flame, Zap, Clock, Activity, Trophy, Gauge } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUserStore } from '@/stores/userStore';
 import { useSettingsStore, type WidgetId } from '@/stores/settingsStore';
@@ -8,19 +8,24 @@ import { useBadgeStore } from '@/stores/badgeStore';
 import { xpRequiredForLevel } from '@/lib/xp';
 import PixelCanvas from '@/components/workout/active/PixelCanvas';
 import { renderBadgeIcon } from '@/lib/badgeIcons';
+import { computeFitnessIndex } from '@/lib/fitnessIndex';
 import type { BadgeState } from '@/types';
 
 // ── Color helpers ─────────────────────────────────────────────────────────────
 
-function getStoredWeightColor(): string {
+function getStoredColor(key: string, fallback: string): string {
   try {
     const stored = localStorage.getItem('fq_metric_colors');
     if (stored) {
       const map = JSON.parse(stored) as Record<string, string>;
-      if (map.weight) return map.weight;
+      if (map[key]) return map[key];
     }
   } catch { /* ignore */ }
-  return '#f59e0b';
+  return fallback;
+}
+
+function getStoredWeightColor(): string {
+  return getStoredColor('weight', '#f59e0b');
 }
 
 // ── Tile shell ────────────────────────────────────────────────────────────────
@@ -184,6 +189,46 @@ function BodyWeightWidget({ size }: { size: TileSize }) {
   );
 }
 
+function FitnessIndexWidget({ size, heightCm }: { size: TileSize; heightCm: number | null }) {
+  const metrics = useBodyStore((s) => s.metrics);
+  const color = getStoredColor('fitnessIndex', '#14b8a6');
+
+  // Sème le store si vide (même logique que BodyWeightWidget)
+  useEffect(() => {
+    if (useBodyStore.getState().metrics.length > 0) return;
+    fetch('/api/v1/body/metrics', { credentials: 'include' })
+      .then((r) => r.json())
+      .then(({ metrics: fetched }) => useBodyStore.setState({ metrics: fetched }))
+      .catch(() => {});
+  }, []);
+
+  // Indice calculé à la volée pour le dernier relevé pesé.
+  const latest = metrics.find((m) => m.weightKg !== null);
+  const result = latest
+    ? computeFitnessIndex(latest.weightKg, heightCm, latest.bodyFatPct ?? null, latest.waistCm ?? null)
+    : null;
+
+  let main = '—';
+  let secondary = 'Indice de Forme';
+  if (result?.mode === 'full' && result.ffmiNorm !== null) {
+    main = String(result.ffmiNorm);
+    secondary = 'FFMI norm.';
+  } else if (result?.mode === 'imc' && result.imc !== null) {
+    main = String(result.imc);
+    secondary = 'IMC';
+  }
+
+  return (
+    <WidgetTile
+      size={size}
+      icon={<Gauge className={ICON_CLS[size]} style={{ color: main === '—' ? undefined : color }} />}
+      main={main}
+      secondary={secondary}
+      accent={main === '—' ? undefined : color}
+    />
+  );
+}
+
 function BadgeProgressWidget({ size }: { size: TileSize }) {
   const badges = useBadgeStore((s) => s.badges);
 
@@ -254,6 +299,8 @@ function WidgetDispatcher({ id, size }: { id: WidgetId; size: TileSize }) {
       return <BodyWeightWidget size={size} />;
     case 'badge_progress':
       return <BadgeProgressWidget size={size} />;
+    case 'fitness_index':
+      return <FitnessIndexWidget size={size} heightCm={user.heightCm ?? null} />;
   }
 }
 

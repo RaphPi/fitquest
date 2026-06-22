@@ -4,6 +4,7 @@ import jwt, { type SignOptions } from 'jsonwebtoken';
 import { prisma } from '../lib/prisma';
 import { requireAuth, type AuthRequest } from '../middleware/requireAuth';
 import { encrypt } from '../lib/crypto';
+import { detectBadges } from '../lib/badges';
 
 const router = Router();
 
@@ -218,6 +219,12 @@ router.patch('/me', requireAuth, async (req: AuthRequest, res) => {
       data,
       select: USER_SELECT,
     });
+
+    // Renseigner sa taille peut compléter le bilan corporel → réévaluer les badges
+    // (sinon « Bilan complet » n'aurait été détecté qu'au prochain relevé).
+    if ('heightCm' in data && data.heightCm != null) {
+      await detectBadges(req.userId!, user.level, user.streak);
+    }
 
     res.json({ user: toSafeUser(user) });
   } catch (err) {

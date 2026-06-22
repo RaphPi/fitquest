@@ -583,14 +583,16 @@
       "xp_remaining": "XP remaining",
       "last_workout": "Last session",
       "body_weight": "Weight",
-      "badge_progress": "Badge"
+      "badge_progress": "Badge",
+      "fitness_index": "Fitness Index"
     },
     "widgetDescs": {
       "streak": "Consecutive days",
       "xp_remaining": "Next level",
       "last_workout": "Days since",
       "body_weight": "Last measurement",
-      "badge_progress": "Next trophy"
+      "badge_progress": "Next trophy",
+      "fitness_index": "FFMI or BMI from latest entry"
     },
     "combat": {
       "boss": "Opponent",

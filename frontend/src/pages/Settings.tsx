@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Volume2, VolumeX, Plus, Lock, LogOut, Mail, ChevronDown, FileJson, Flame, Zap, Clock, Activity, Trophy, Check, ShieldCheck, Archive, Loader2, Send } from 'lucide-react';
+import { Volume2, VolumeX, Plus, Lock, LogOut, Mail, ChevronDown, FileJson, Flame, Zap, Clock, Activity, Trophy, Gauge, Check, ShieldCheck, Archive, Loader2, Send } from 'lucide-react';
 import { useSettingsStore, type WidgetId } from '@/stores/settingsStore';
 import { useUserStore } from '@/stores/userStore';
 import { cn } from '@/lib/utils';
@@ -57,6 +57,13 @@ const WIDGET_OPTIONS: {
     descKey: 'settings.widgetDescs.badge_progress',
     icon: <Trophy className="h-5 w-5" />,
     color: 'rgba(99,102,241,1)',
+  },
+  {
+    id: 'fitness_index',
+    labelKey: 'settings.widgetLabels.fitness_index',
+    descKey: 'settings.widgetDescs.fitness_index',
+    icon: <Gauge className="h-5 w-5" />,
+    color: 'rgba(20,184,166,1)',
   },
 ];
 
