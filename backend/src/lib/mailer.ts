@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import type Mail from 'nodemailer/lib/mailer';
 import { prisma } from './prisma';
 import { decrypt } from './crypto';
 
@@ -6,7 +7,12 @@ import { decrypt } from './crypto';
  * Envoie un email via les paramètres SMTP de l'utilisateur.
  * Lève une erreur explicite si la config est incomplète.
  */
-export async function sendMail(userId: string, subject: string, html: string): Promise<void> {
+export async function sendMail(
+  userId: string,
+  subject: string,
+  html: string,
+  attachments?: Mail.Attachment[],
+): Promise<void> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
@@ -41,5 +47,6 @@ export async function sendMail(userId: string, subject: string, html: string): P
     to: user.email,
     subject,
     html,
+    attachments,
   });
 }
