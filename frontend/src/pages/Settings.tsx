@@ -204,6 +204,8 @@ export default function Settings() {
     smtpSecure: false,
   });
   const [emailSaveState, setEmailSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [testState, setTestState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [testError, setTestError] = useState<string | null>(null);
   const emailFormInit = useRef(false);
 
   useEffect(() => {
@@ -238,6 +240,26 @@ export default function Settings() {
       setTimeout(() => setEmailSaveState('idle'), 3000);
     } catch {
       setEmailSaveState('error');
+    }
+  };
+
+  const handleTestEmail = async () => {
+    setTestState('sending');
+    setTestError(null);
+    try {
+      const res = await fetch('/api/v1/digest/test', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      const body = await res.json() as { ok?: boolean; error?: string };
+      if (!res.ok || !body.ok) {
+        throw new Error(body.error ?? `HTTP ${res.status}`);
+      }
+      setTestState('sent');
+      setTimeout(() => setTestState('idle'), 4000);
+    } catch (err) {
+      setTestError(err instanceof Error ? err.message : 'Erreur inconnue');
+      setTestState('error');
     }
   };
 
@@ -606,14 +628,27 @@ export default function Settings() {
           </button>
           <button
             type="button"
-            disabled
-            title={t('settings.account.testEmailSoon')}
-            className="flex cursor-not-allowed items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold text-muted-foreground opacity-50 focus-visible:outline-none"
+            onClick={() => void handleTestEmail()}
+            disabled={testState === 'sending'}
+            className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none disabled:opacity-60"
           >
-            <Send className="h-4 w-4" />
-            {t('settings.account.testEmail')}
+            {testState === 'sending'
+              ? <Loader2 className="h-4 w-4 animate-spin" />
+              : testState === 'sent'
+                ? <Check className="h-4 w-4 text-green-400" />
+                : <Send className="h-4 w-4" />}
+            {testState === 'sending'
+              ? t('settings.account.testEmailSending')
+              : testState === 'sent'
+                ? t('settings.account.testEmailSent')
+                : t('settings.account.testEmail')}
           </button>
         </div>
+        {testState === 'error' && testError && (
+          <div className="mt-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs text-red-400">
+            {testError}
+          </div>
+        )}
         {emailSaveState === 'error' && (
           <div className="mt-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs text-red-400">
             {t('settings.account.saveEmailError')}

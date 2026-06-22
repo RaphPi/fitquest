@@ -574,7 +574,9 @@
       "savedEmailSettings": "Enregistré",
       "saveEmailError": "Erreur de sauvegarde",
       "testEmail": "Tester l'envoi",
-      "testEmailSoon": "bientôt disponible"
+      "testEmailSoon": "bientôt disponible",
+      "testEmailSending": "Envoi en cours…",
+      "testEmailSent": "Email envoyé ✓"
     },
     "data": {
       "importJson": "Import JSON",
