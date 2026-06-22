@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Volume2, VolumeX, Plus, Lock, LogOut, Mail, ChevronDown, FileJson, Flame, Zap, Clock, Activity, Trophy, Check, ShieldCheck, Archive, Loader2, Server, Send } from 'lucide-react';
+import { Volume2, VolumeX, Plus, Lock, LogOut, Mail, ChevronDown, FileJson, Flame, Zap, Clock, Activity, Trophy, Check, ShieldCheck, Archive, Loader2, Send } from 'lucide-react';
 import { useSettingsStore, type WidgetId } from '@/stores/settingsStore';
 import { useUserStore } from '@/stores/userStore';
 import { cn } from '@/lib/utils';
-import type { ThemeId, DigestFrequency } from '@/types';
+import type { ThemeId } from '@/types';
 import PixelCanvas from '@/components/workout/active/PixelCanvas';
 import {
   BOSSES,
@@ -190,76 +190,42 @@ export default function Settings() {
   }
   const user = useUserStore((s) => s.user);
   const logout = useUserStore((s) => s.logout);
-  const updateProfile = useUserStore((s) => s.updateProfile);
 
   const toggle = (id: SectionId) => setOpen((prev) => (prev === id ? null : id));
 
-  const [emailForm, setEmailForm] = useState({
-    email: '',
-    emailDigest: 'NONE' as DigestFrequency,
-    smtpHost: '',
-    smtpPort: 587,
-    smtpUser: '',
-    smtpPass: '',
-    smtpSecure: false,
-  });
-  const [emailSaveState, setEmailSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-  const [testState, setTestState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
-  const [testError, setTestError] = useState<string | null>(null);
-  const emailFormInit = useRef(false);
+  type ActiveFreq = 'DAILY' | 'WEEKLY' | 'MONTHLY';
+  const defaultSendFreq = (): ActiveFreq => {
+    const d = user?.emailDigest;
+    return d === 'DAILY' || d === 'WEEKLY' || d === 'MONTHLY' ? d : 'WEEKLY';
+  };
+  const [sendFreq, setSendFreq] = useState<ActiveFreq>('WEEKLY');
+  const [sendState, setSendState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [sendError, setSendError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user && !emailFormInit.current) {
-      emailFormInit.current = true;
-      setEmailForm({
-        email: user.email ?? '',
-        emailDigest: (user.emailDigest as DigestFrequency | null) ?? 'NONE',
-        smtpHost: user.smtpHost ?? '',
-        smtpPort: user.smtpPort ?? 587,
-        smtpUser: user.smtpUser ?? '',
-        smtpPass: '',
-        smtpSecure: user.smtpSecure ?? false,
-      });
-    }
+    if (user) setSendFreq(defaultSendFreq());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const handleSaveEmailSettings = async () => {
-    setEmailSaveState('saving');
-    try {
-      const payload: Parameters<typeof updateProfile>[0] = {
-        email: emailForm.email || null,
-        emailDigest: emailForm.emailDigest,
-        smtpHost: emailForm.smtpHost || null,
-        smtpPort: emailForm.smtpPort || null,
-        smtpUser: emailForm.smtpUser || null,
-        smtpSecure: emailForm.smtpSecure,
-      };
-      if (emailForm.smtpPass !== '') payload.smtpPass = emailForm.smtpPass;
-      await updateProfile(payload);
-      setEmailSaveState('saved');
-      setTimeout(() => setEmailSaveState('idle'), 3000);
-    } catch {
-      setEmailSaveState('error');
-    }
-  };
+  const smtpReady = !!(user?.email && user?.smtpHost && user?.smtpPassSet);
 
-  const handleTestEmail = async () => {
-    setTestState('sending');
-    setTestError(null);
+  const handleSendNow = async () => {
+    setSendState('sending');
+    setSendError(null);
     try {
-      const res = await fetch('/api/v1/digest/test', {
+      const res = await fetch('/api/v1/digest/send', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
+        body: JSON.stringify({ freq: sendFreq }),
       });
       const body = await res.json() as { ok?: boolean; error?: string };
-      if (!res.ok || !body.ok) {
-        throw new Error(body.error ?? `HTTP ${res.status}`);
-      }
-      setTestState('sent');
-      setTimeout(() => setTestState('idle'), 4000);
+      if (!res.ok || !body.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
+      setSendState('sent');
+      setTimeout(() => setSendState('idle'), 4000);
     } catch (err) {
-      setTestError(err instanceof Error ? err.message : 'Erreur inconnue');
-      setTestState('error');
+      setSendError(err instanceof Error ? err.message : 'Erreur inconnue');
+      setSendState('error');
     }
   };
 
@@ -499,159 +465,68 @@ export default function Settings() {
         open={open === 'compte'}
         onToggle={() => toggle('compte')}
       >
-        {/* ── Notifications email ─── */}
-        <SubLabel className="flex items-center gap-2">
-          <Mail className="h-3.5 w-3.5" />
-          {t('settings.account.emailNotifications')}
-        </SubLabel>
+        {/* ── Notifications email — bouton de navigation ─── */}
+        <button
+          type="button"
+          onClick={() => navigate('/settings/email')}
+          className="flex w-full items-center justify-between gap-3 rounded-lg border border-border px-4 py-3 text-left transition-colors hover:bg-card-shield/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+        >
+          <span className="flex items-center gap-3">
+            <Mail className="h-5 w-5 shrink-0 text-primary-soft" />
+            <span>
+              <span className="block text-sm font-semibold text-foreground">{t('settings.account.emailSettingsBtn')}</span>
+              <span className="block text-xs text-muted-foreground">{t('settings.account.emailSettingsBtnHint')}</span>
+            </span>
+          </span>
+          <ChevronDown className="h-4 w-4 shrink-0 -rotate-90 text-muted-foreground" />
+        </button>
 
-        <div className="mb-3">
-          <label className="mb-1 block text-xs text-muted-foreground" htmlFor="acct-email">
-            {t('settings.account.emailEdit')}
-          </label>
-          <input
-            id="acct-email"
-            type="email"
-            value={emailForm.email}
-            onChange={(e) => setEmailForm((prev) => ({ ...prev, email: e.target.value }))}
-            placeholder={t('settings.account.emailPlaceholder')}
-            className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
-          />
-        </div>
-
-        <div className="mb-3">
-          <p className="mb-2 text-xs text-muted-foreground">{t('settings.account.digestFrequency')}</p>
-          <div className="flex flex-wrap gap-2">
-            {(['NONE', 'DAILY', 'WEEKLY', 'MONTHLY'] as const).map((freq) => {
-              const labelKey = `settings.account.digest${freq.charAt(0)}${freq.slice(1).toLowerCase()}`;
-              return (
+        {/* ── Rapport à la demande (visible si SMTP configuré) ─── */}
+        {smtpReady && (
+          <div className="mt-3 rounded-lg border border-border bg-card-shield/20 p-4 space-y-3">
+            <div>
+              <p className="text-sm font-semibold text-foreground">{t('settings.account.sendNowTitle')}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{t('settings.account.sendNowHint')}</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {(['DAILY', 'WEEKLY', 'MONTHLY'] as const).map((freq) => (
                 <button
                   key={freq}
                   type="button"
-                  onClick={() => setEmailForm((prev) => ({ ...prev, emailDigest: freq }))}
+                  onClick={() => setSendFreq(freq)}
                   className={cn(
                     'rounded-lg border px-3 py-1.5 text-xs font-bold uppercase tracking-wide transition-all focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none',
-                    emailForm.emailDigest === freq
+                    sendFreq === freq
                       ? 'border-primary text-primary'
                       : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground',
                   )}
                 >
-                  {t(labelKey)}
+                  {t(`settings.account.digest${freq.charAt(0)}${freq.slice(1).toLowerCase()}`)}
                 </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="mb-4 space-y-3 rounded-lg border border-border p-4">
-          <div className="flex items-center gap-2">
-            <Server className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              {t('settings.account.smtpTitle')}
-            </span>
-          </div>
-          <div className="flex gap-3">
-            <div className="min-w-0 flex-1">
-              <label className="mb-1 block text-xs text-muted-foreground" htmlFor="smtp-host">
-                {t('settings.account.smtpHost')}
-              </label>
-              <input
-                id="smtp-host"
-                type="text"
-                value={emailForm.smtpHost}
-                onChange={(e) => setEmailForm((prev) => ({ ...prev, smtpHost: e.target.value }))}
-                placeholder={t('settings.account.smtpHostPlaceholder')}
-                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
-              />
+              ))}
             </div>
-            <div className="w-20 shrink-0">
-              <label className="mb-1 block text-xs text-muted-foreground" htmlFor="smtp-port">
-                {t('settings.account.smtpPort')}
-              </label>
-              <input
-                id="smtp-port"
-                type="number"
-                min={1}
-                max={65535}
-                value={emailForm.smtpPort}
-                onChange={(e) => setEmailForm((prev) => ({ ...prev, smtpPort: parseInt(e.target.value) || 587 }))}
-                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/60"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="mb-1 block text-xs text-muted-foreground" htmlFor="smtp-user">
-              {t('settings.account.smtpUser')}
-            </label>
-            <input
-              id="smtp-user"
-              type="text"
-              value={emailForm.smtpUser}
-              onChange={(e) => setEmailForm((prev) => ({ ...prev, smtpUser: e.target.value }))}
-              placeholder={t('settings.account.smtpUserPlaceholder')}
-              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs text-muted-foreground" htmlFor="smtp-pass">
-              {t('settings.account.smtpPass')}
-            </label>
-            <input
-              id="smtp-pass"
-              type="password"
-              value={emailForm.smtpPass}
-              onChange={(e) => setEmailForm((prev) => ({ ...prev, smtpPass: e.target.value }))}
-              placeholder={user?.smtpPassSet ? t('settings.account.smtpPassPlaceholder') : undefined}
-              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">{t('settings.account.smtpSecure')}</span>
-            <Toggle on={emailForm.smtpSecure} onChange={(v) => setEmailForm((prev) => ({ ...prev, smtpSecure: v }))} />
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={() => void handleSaveEmailSettings()}
-            disabled={emailSaveState === 'saving'}
-            className="flex items-center gap-2 rounded-lg border border-primary bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none disabled:opacity-60"
-          >
-            {emailSaveState === 'saving' && <Loader2 className="h-4 w-4 animate-spin" />}
-            {emailSaveState === 'saved' && <Check className="h-4 w-4" />}
-            {emailSaveState === 'saving'
-              ? t('settings.account.savingEmailSettings')
-              : emailSaveState === 'saved'
-                ? t('settings.account.savedEmailSettings')
-                : t('settings.account.saveEmailSettings')}
-          </button>
-          <button
-            type="button"
-            onClick={() => void handleTestEmail()}
-            disabled={testState === 'sending'}
-            className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none disabled:opacity-60"
-          >
-            {testState === 'sending'
-              ? <Loader2 className="h-4 w-4 animate-spin" />
-              : testState === 'sent'
-                ? <Check className="h-4 w-4 text-green-400" />
-                : <Send className="h-4 w-4" />}
-            {testState === 'sending'
-              ? t('settings.account.testEmailSending')
-              : testState === 'sent'
-                ? t('settings.account.testEmailSent')
-                : t('settings.account.testEmail')}
-          </button>
-        </div>
-        {testState === 'error' && testError && (
-          <div className="mt-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs text-red-400">
-            {testError}
-          </div>
-        )}
-        {emailSaveState === 'error' && (
-          <div className="mt-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs text-red-400">
-            {t('settings.account.saveEmailError')}
+            <button
+              type="button"
+              onClick={() => void handleSendNow()}
+              disabled={sendState === 'sending'}
+              className="flex items-center gap-2 rounded-lg border border-primary bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none disabled:opacity-60"
+            >
+              {sendState === 'sending'
+                ? <Loader2 className="h-4 w-4 animate-spin" />
+                : sendState === 'sent'
+                  ? <Check className="h-4 w-4" />
+                  : <Send className="h-4 w-4" />}
+              {sendState === 'sending'
+                ? t('settings.account.sendNowSending')
+                : sendState === 'sent'
+                  ? t('settings.account.sendNowSent')
+                  : t('settings.account.sendNowBtn')}
+            </button>
+            {sendState === 'error' && sendError && (
+              <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs text-red-400">
+                {sendError}
+              </div>
+            )}
           </div>
         )}
 

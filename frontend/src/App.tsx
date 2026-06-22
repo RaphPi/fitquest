@@ -11,6 +11,7 @@ import Library from '@/pages/Library';
 import Profile from '@/pages/Profile';
 import Trophees from '@/pages/Trophees';
 import Settings from '@/pages/Settings';
+import EmailSettings from '@/pages/EmailSettings';
 import ImportLFY from '@/pages/ImportLFY';
 import ExportPrograms from '@/pages/ExportPrograms';
 import AdminPanel from '@/pages/AdminPanel';
@@ -35,6 +36,7 @@ export default function App() {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/trophees" element={<ProtectedRoute><Trophees /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/settings/email" element={<ProtectedRoute><EmailSettings /></ProtectedRoute>} />
         <Route path="/import" element={<ProtectedRoute><ImportLFY /></ProtectedRoute>} />
         <Route path="/export" element={<ProtectedRoute><ExportPrograms /></ProtectedRoute>} />
         <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />

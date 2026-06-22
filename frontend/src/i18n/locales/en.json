@@ -576,7 +576,15 @@
       "testEmail": "Test send",
       "testEmailSoon": "coming soon",
       "testEmailSending": "Sending…",
-      "testEmailSent": "Email sent ✓"
+      "testEmailSent": "Email sent ✓",
+      "emailSettingsBtn": "Configure email notifications",
+      "emailSettingsBtnHint": "Address, automatic frequency and SMTP server",
+      "sendNowTitle": "On-demand report",
+      "sendNowHint": "Sent immediately — independent of your scheduled automatic reports.",
+      "sendNowBtn": "Send report now",
+      "sendNowSending": "Sending…",
+      "sendNowSent": "Report sent ✓",
+      "sendNowError": "Send error"
     },
     "data": {
       "importJson": "Import JSON",
@@ -587,6 +595,12 @@
       "exportZipHint": "Download all your data as a ZIP file (GDPR compliance).",
       "exportZipError": "Export failed. Please try again."
     }
+  },
+  "emailPage": {
+    "title": "Email notifications",
+    "subtitle": "Set up your address, the automatic report frequency and your SMTP server.",
+    "backLink": "Back to settings",
+    "frequencyHint": "Frequency for automatic sends. Select \"Never\" to disable."
   },
   "exportPrograms": {
     "title": "Export programs",

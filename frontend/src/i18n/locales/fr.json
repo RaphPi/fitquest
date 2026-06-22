@@ -576,7 +576,15 @@
       "testEmail": "Tester l'envoi",
       "testEmailSoon": "bientôt disponible",
       "testEmailSending": "Envoi en cours…",
-      "testEmailSent": "Email envoyé ✓"
+      "testEmailSent": "Email envoyé ✓",
+      "emailSettingsBtn": "Configurer les notifications email",
+      "emailSettingsBtnHint": "Adresse, fréquence automatique et serveur SMTP",
+      "sendNowTitle": "Rapport à la demande",
+      "sendNowHint": "Envoi immédiat — indépendant des rapports automatiques programmés selon votre fréquence.",
+      "sendNowBtn": "Envoyer le rapport maintenant",
+      "sendNowSending": "Envoi en cours…",
+      "sendNowSent": "Rapport envoyé ✓",
+      "sendNowError": "Erreur lors de l'envoi"
     },
     "data": {
       "importJson": "Import JSON",
@@ -587,6 +595,12 @@
       "exportZipHint": "Télécharge toutes vos données au format ZIP (conformité RGPD).",
       "exportZipError": "Erreur lors de l'export. Veuillez réessayer."
     }
+  },
+  "emailPage": {
+    "title": "Notifications email",
+    "subtitle": "Configurez votre adresse, la fréquence des rapports automatiques et votre serveur SMTP.",
+    "backLink": "Retour aux paramètres",
+    "frequencyHint": "Fréquence des envois automatiques. Sélectionnez « Jamais » pour désactiver."
   },
   "exportPrograms": {
     "title": "Exporter des programmes",
