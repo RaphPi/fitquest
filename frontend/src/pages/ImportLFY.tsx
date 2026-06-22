@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@/stores/userStore';
 import {
   Upload, FileJson, CheckCircle2, XCircle, Loader2, AlertCircle,
-  ArrowLeft, Trash2, TriangleAlert, History, PackageOpen,
+  ArrowLeft, Trash2, TriangleAlert, History, PackageOpen, ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PACKS, type PackMeta } from '@/lib/packs';
@@ -54,6 +54,7 @@ export default function ImportLFY() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   // ── Pack catalogue state ───────────────────────────────────────────────────
+  const [packsOpen, setPacksOpen] = useState(false);
   const [fetchingPackId, setFetchingPackId] = useState<string | null>(null);
   const [packFetchError, setPackFetchError] = useState<string | null>(null);
 
@@ -233,24 +234,31 @@ export default function ImportLFY() {
       {/* ── Catalogue de packs ────────────────────────────────────────────── */}
       {showCatalogue && (
         <div className="overflow-hidden rounded-xl border border-border bg-card">
-          <div className="flex items-center gap-3 border-b border-border px-5 py-4">
-            <PackageOpen className="h-4 w-4 text-muted-foreground" />
+          <button
+            type="button"
+            onClick={() => setPacksOpen((o) => !o)}
+            className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-card-shield/20"
+          >
+            <PackageOpen className="h-4 w-4 shrink-0 text-muted-foreground" />
             <div className="min-w-0 flex-1">
               <h2 className="font-display text-sm font-bold uppercase tracking-widest">
                 {t('import.packs.title')}
               </h2>
               <p className="mt-0.5 text-[11px] text-muted-foreground">{t('import.packs.subtitle')}</p>
             </div>
-          </div>
+            <ChevronDown
+              className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform', packsOpen && 'rotate-180')}
+            />
+          </button>
 
-          {packFetchError && (
+          {packsOpen && packFetchError && (
             <div className="flex items-start gap-3 border-b border-red-500/20 bg-red-500/10 px-5 py-3">
               <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
               <p className="text-xs text-red-400">{packFetchError}</p>
             </div>
           )}
 
-          <div className="divide-y divide-border">
+          {packsOpen && <div className="divide-y divide-border border-t border-border">
             {sortedPacks.map((pack) => {
               const isRec = !!user?.primaryGoal && pack.goals.includes(user.primaryGoal);
               const isFetching = fetchingPackId === pack.id;
@@ -295,7 +303,7 @@ export default function ImportLFY() {
                 </div>
               );
             })}
-          </div>
+          </div>}
         </div>
       )}
 
