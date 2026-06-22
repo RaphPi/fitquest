@@ -9,6 +9,7 @@ import ProgramDetail from '@/components/workout/ProgramDetail';
 import ProgramBuilder from '@/components/workout/ProgramBuilder';
 import GlowButton from '@/components/ui/GlowButton';
 import { estimateProgramMinutes } from '@/lib/duration';
+import { GOALS } from '@/lib/goals';
 
 type View = 'list' | 'detail' | 'builder';
 type DurationFilter = 'any' | 'short' | 'medium' | 'long';
@@ -39,6 +40,7 @@ export default function Workout() {
   const [showFilters, setShowFilters] = useState(false);
   const [levelFilter, setLevelFilter] = useState<Level[]>([]);
   const [durationFilter, setDurationFilter] = useState<DurationFilter>('any');
+  const [goalFilter, setGoalFilter] = useState<string[]>([]);
 
   useEffect(() => {
     fetchPrograms();
@@ -64,6 +66,9 @@ export default function Workout() {
         return min > 60;
       });
     }
+    if (goalFilter.length > 0) {
+      list = list.filter((p) => goalFilter.some((g) => p.goals.includes(g)));
+    }
     if (user?.primaryGoal) {
       const goal = user.primaryGoal;
       list = [...list].sort((a, b) => {
@@ -73,13 +78,14 @@ export default function Workout() {
       });
     }
     return list;
-  }, [programs, search, levelFilter, durationFilter, user?.primaryGoal]);
+  }, [programs, search, levelFilter, durationFilter, goalFilter, user?.primaryGoal]);
 
-  const hasFilters = levelFilter.length > 0 || durationFilter !== 'any';
+  const hasFilters = levelFilter.length > 0 || durationFilter !== 'any' || goalFilter.length > 0;
 
   const clearFilters = () => {
     setLevelFilter([]);
     setDurationFilter('any');
+    setGoalFilter([]);
   };
 
   const toggleLevel = (l: Level) =>
@@ -191,7 +197,7 @@ export default function Workout() {
           <span className="hidden sm:inline">{t('common.filters')}</span>
           {hasFilters && (
             <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-black text-white">
-              {(levelFilter.length > 0 ? 1 : 0) + (durationFilter !== 'any' ? 1 : 0)}
+              {(levelFilter.length > 0 ? 1 : 0) + (durationFilter !== 'any' ? 1 : 0) + (goalFilter.length > 0 ? 1 : 0)}
             </span>
           )}
         </button>
@@ -232,6 +238,24 @@ export default function Workout() {
                   }`}
                 >
                   {o.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('workout.filters.goals')}</p>
+            <div className="flex flex-wrap gap-2">
+              {GOALS.map((g) => (
+                <button
+                  key={g}
+                  onClick={() => setGoalFilter((prev) => prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g])}
+                  className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                    goalFilter.includes(g)
+                      ? 'border-emerald-500/60 bg-emerald-500/15 text-emerald-400'
+                      : 'border-border text-muted-foreground hover:border-emerald-500/30 hover:text-foreground'
+                  }`}
+                >
+                  {t(`goals.${g}`)}
                 </button>
               ))}
             </div>

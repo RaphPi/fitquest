@@ -145,7 +145,8 @@
     "saving": "Enregistrement…",
     "filters": {
       "level": "Niveau",
-      "duration": "Durée de séance"
+      "duration": "Durée de séance",
+      "goals": "Objectif"
     },
     "level": {
       "beginner": "Débutant",
@@ -576,7 +577,7 @@
     "remise_en_forme": "Remise en forme"
   },
   "programs": {
-    "recommended": "Recommandé pour toi"
+    "recommended": "Recommandé"
   },
   "settings": {
     "title": "Paramètres",

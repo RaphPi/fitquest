@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import type { Program, Level } from '@/types';
 import { getLevelTier } from '@/lib/levelTier';
-import { Calendar, Dumbbell, Clock, ChevronRight, Layers } from 'lucide-react';
+import { Calendar, Dumbbell, Clock, ChevronRight, Layers, Target } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
   estimateProgramMinutes,
@@ -37,26 +37,19 @@ export default function ProgramCard({ program, onClick, className, recommended }
   return (
     <div
       className={cn(
-        'group flex flex-col gap-0 rounded-xl border border-border bg-card transition-all duration-200 hover:border-primary/40 hover:shadow-glow overflow-hidden',
+        'group relative flex flex-col gap-0 rounded-xl border border-border bg-card transition-all duration-200 hover:border-primary/40 hover:shadow-glow overflow-hidden',
         className,
       )}
     >
       {/* Main clickable area */}
       <button className="flex flex-col gap-3 p-4 text-left w-full" onClick={onClick}>
         <div className="flex items-start justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span
-              className="rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider"
-              style={tierBadgeStyle(level)}
-            >
-              {t(`workout.level.${level}`)}
-            </span>
-            {recommended && (
-              <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400">
-                {t('programs.recommended')}
-              </span>
-            )}
-          </div>
+          <span
+            className="rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider"
+            style={tierBadgeStyle(level)}
+          >
+            {t(`workout.level.${level}`)}
+          </span>
           <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
         </div>
 
@@ -91,6 +84,12 @@ export default function ProgramCard({ program, onClick, className, recommended }
         </div>
       </button>
 
+      {recommended && (
+        <span className="pointer-events-none absolute bottom-2 right-2 flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-400">
+          <Target className="h-3 w-3" />
+          {t('programs.recommended')}
+        </span>
+      )}
     </div>
   );
 }

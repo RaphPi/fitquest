@@ -145,7 +145,8 @@
     "saving": "Saving…",
     "filters": {
       "level": "Level",
-      "duration": "Session duration"
+      "duration": "Session duration",
+      "goals": "Goal"
     },
     "level": {
       "beginner": "Beginner",
@@ -576,7 +577,7 @@
     "remise_en_forme": "Getting back in shape"
   },
   "programs": {
-    "recommended": "Recommended for you"
+    "recommended": "Recommended"
   },
   "settings": {
     "title": "Settings",
