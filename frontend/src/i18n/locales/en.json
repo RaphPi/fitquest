@@ -377,7 +377,29 @@
       "needWeight": "Record an entry with your weight to get started.",
       "cta": "Add your height and body fat % to unlock the Fitness Index.",
       "ctaHeightLink": "Set my height",
-      "hintBodyFat": "Add your body fat % in an entry to unlock FFMI and body composition."
+      "hintBodyFat": "Add your body fat % in an entry to unlock FFMI and body composition.",
+      "scaleToggle": "Understand the values",
+      "scaleDisclaimer": "Common reference points, not a medical diagnosis.",
+      "scaleFfmiTitle": "FFMI — lean mass relative to height",
+      "scaleFfmiRows": [
+        "< 18 · Low muscle mass",
+        "19–21 · Average",
+        "22–23 · Muscular",
+        "24–25 · Very muscular",
+        "> 25 · Exceptional"
+      ],
+      "scaleImcTitle": "BMI — weight relative to height (doesn't separate muscle from fat)",
+      "scaleImcRows": [
+        "< 18.5 · Underweight",
+        "18.5–25 · Normal",
+        "25–30 · Overweight",
+        "> 30 · Obesity"
+      ],
+      "scaleWhtrTitle": "Waist-to-height ratio",
+      "scaleWhtrRows": [
+        "< 0.5 · Generally favorable",
+        "≥ 0.5 · High waist for height"
+      ]
     },
     "photos": {
       "newPhoto": "New photo",

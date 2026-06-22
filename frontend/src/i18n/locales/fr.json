@@ -377,7 +377,29 @@
       "needWeight": "Enregistre un relevé avec ton poids pour commencer.",
       "cta": "Ajoute ta taille et ton % de masse grasse pour débloquer l'Indice de Forme.",
       "ctaHeightLink": "Renseigner ma taille",
-      "hintBodyFat": "Ajoute ton % de masse grasse dans un relevé pour débloquer le FFMI et la composition corporelle."
+      "hintBodyFat": "Ajoute ton % de masse grasse dans un relevé pour débloquer le FFMI et la composition corporelle.",
+      "scaleToggle": "Comprendre les valeurs",
+      "scaleDisclaimer": "Repères indicatifs courants, pas un diagnostic médical.",
+      "scaleFfmiTitle": "FFMI — masse maigre rapportée à la taille",
+      "scaleFfmiRows": [
+        "< 18 · Peu de masse musculaire",
+        "19–21 · Dans la moyenne",
+        "22–23 · Musclé",
+        "24–25 · Très musclé",
+        "> 25 · Exceptionnel"
+      ],
+      "scaleImcTitle": "IMC — poids rapporté à la taille (ne distingue pas muscle et gras)",
+      "scaleImcRows": [
+        "< 18,5 · Corpulence faible",
+        "18,5–25 · Corpulence normale",
+        "25–30 · Surpoids",
+        "> 30 · Obésité"
+      ],
+      "scaleWhtrTitle": "Tour de taille / taille",
+      "scaleWhtrRows": [
+        "< 0,5 · Généralement favorable",
+        "≥ 0,5 · Tour de taille élevé pour la taille"
+      ]
     },
     "photos": {
       "newPhoto": "Nouvelle photo",

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Scale, Camera, Plus, Trash2, Pencil, X, Check, Upload, ArrowLeftRight, Eye, EyeOff, ChevronDown } from 'lucide-react';
+import { Scale, Camera, Plus, Trash2, Pencil, X, Check, Upload, ArrowLeftRight, Eye, EyeOff, ChevronDown, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
@@ -593,21 +593,6 @@ function MeasureChart({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <span style={{ color, fontSize: 10 }}>●</span>
-        <select
-          value={selectedKey}
-          onChange={(e) => setSelectedOverride(e.target.value)}
-          className="h-8 rounded-lg border border-border bg-card px-3 text-sm text-foreground focus:border-primary focus:outline-none"
-        >
-          {availableKeys.map((k) => (
-            <option key={k} value={k}>
-              {STD.some((s) => s.key === k) || k === 'bodyFatPct' ? t(`body.metrics.${k}`) : getMeasureLabel(k)}
-            </option>
-          ))}
-        </select>
-      </div>
-
       {data.length === 0 ? (
         <p className="flex h-20 items-center justify-center text-sm text-muted-foreground">
           {t('body.metrics.noMeasureDataSingle')}
@@ -635,6 +620,21 @@ function MeasureChart({
           </LineChart>
         </ResponsiveContainer>
       )}
+
+      <div className="flex items-center gap-2">
+        <span style={{ color, fontSize: 10 }}>●</span>
+        <select
+          value={selectedKey}
+          onChange={(e) => setSelectedOverride(e.target.value)}
+          className="h-8 rounded-lg border border-border bg-card px-3 text-sm text-foreground focus:border-primary focus:outline-none"
+        >
+          {availableKeys.map((k) => (
+            <option key={k} value={k}>
+              {STD.some((s) => s.key === k) || k === 'bodyFatPct' ? t(`body.metrics.${k}`) : getMeasureLabel(k)}
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 }
@@ -740,6 +740,18 @@ function StatBox({ label, value, color }: { label: string; value: string; color:
   );
 }
 
+/** Bloc d'échelle de référence (titre + lignes « plage · libellé »). */
+function ScaleBlock({ title, rows, color }: { title: string; rows: string[]; color: string }) {
+  return (
+    <div>
+      <p className="font-semibold" style={{ color }}>{title}</p>
+      <ul className="mt-1 space-y-0.5 text-muted-foreground">
+        {rows.map((r, i) => <li key={i}>{r}</li>)}
+      </ul>
+    </div>
+  );
+}
+
 /**
  * Carte "Indice de Forme" — calculée à la volée pour le dernier relevé pesé.
  * Affichage à dégradation gracieuse selon les données disponibles (cf. fitnessIndex.ts).
@@ -755,6 +767,7 @@ function FitnessIndexCard({
 }) {
   const { t } = useTranslation();
   const color = getColor('fitnessIndex');
+  const [showScale, setShowScale] = useState(false);
 
   // Dernier relevé avec un poids (metrics est trié du plus récent au plus ancien).
   const latest = useMemo(() => metrics.find((m) => m.weightKg != null) ?? null, [metrics]);
@@ -798,7 +811,20 @@ function FitnessIndexCard({
 
   return (
     <div className="rounded-xl border bg-card p-4" style={{ borderColor: hexToRgba(color, 0.3) }}>
-      {header}
+      <div className="flex items-start justify-between gap-2">
+        {header}
+        <button
+          type="button"
+          onClick={() => setShowScale((s) => !s)}
+          aria-label={t('body.fitnessIndex.scaleToggle')}
+          aria-expanded={showScale}
+          className={`shrink-0 rounded-lg p-1 transition focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none ${
+            showScale ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Info className="h-4 w-4" />
+        </button>
+      </div>
       {latest && (
         <p className="mt-0.5 text-[11px] text-muted-foreground">
           {t('body.fitnessIndex.basedOn', { date: fmtLong(latest.date) })}
@@ -822,6 +848,32 @@ function FitnessIndexCard({
       </div>
       {result.mode === 'imc' && (
         <p className="mt-3 text-[11px] text-muted-foreground">{t('body.fitnessIndex.hintBodyFat')}</p>
+      )}
+      {showScale && (
+        <div className="mt-3 space-y-3 rounded-lg border border-border/50 bg-card/30 p-3 text-[11px]">
+          {result.mode === 'full' && (
+            <ScaleBlock
+              title={t('body.fitnessIndex.scaleFfmiTitle')}
+              rows={t('body.fitnessIndex.scaleFfmiRows', { returnObjects: true }) as string[]}
+              color={color}
+            />
+          )}
+          {result.imc != null && (
+            <ScaleBlock
+              title={t('body.fitnessIndex.scaleImcTitle')}
+              rows={t('body.fitnessIndex.scaleImcRows', { returnObjects: true }) as string[]}
+              color={color}
+            />
+          )}
+          {result.whtr != null && (
+            <ScaleBlock
+              title={t('body.fitnessIndex.scaleWhtrTitle')}
+              rows={t('body.fitnessIndex.scaleWhtrRows', { returnObjects: true }) as string[]}
+              color={color}
+            />
+          )}
+          <p className="italic text-muted-foreground">{t('body.fitnessIndex.scaleDisclaimer')}</p>
+        </div>
       )}
     </div>
   );
