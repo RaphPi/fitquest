@@ -779,6 +779,19 @@
       "purgeCancel": "Annuler",
       "purging": "Suppression en cours…",
       "purgeRetry": "Réessayer"
+    },
+    "packs": {
+      "title": "Packs disponibles",
+      "subtitle": "Programmes prêts à l'emploi — cliquez pour charger",
+      "loadBtn": "Charger",
+      "fetching": "Récupération…",
+      "fetchError": "Impossible de récupérer le pack. Vérifie ta connexion.",
+      "days": "{{count}}j/sem",
+      "weeks": "{{count}} sem.",
+      "equipNone": "Poids du corps",
+      "equipBar": "Barre de traction",
+      "equipDumbbells": "Haltères",
+      "equipBarDumbbells": "Barre + haltères"
     }
   },
   "sidebar": {

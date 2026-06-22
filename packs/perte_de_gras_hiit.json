@@ -1,0 +1,67 @@
+{
+  "version": "1.0",
+  "sourcePrefix": "pack_pdg_hiit",
+  "programs": [
+    {
+      "nameFr": "Métabolisme Max — HIIT 4j",
+      "nameEn": "Max Metabolism — HIIT 4d",
+      "descFr": "Programme combinant séances HIIT explosives et renforcement musculaire. Quatre séances par semaine pour maximiser la dépense énergétique tout en conservant le muscle. Poids du corps uniquement.",
+      "descEn": "Program combining explosive HIIT sessions with strength training. Four sessions per week to maximize energy expenditure while preserving muscle. Bodyweight only.",
+      "level": "intermediate",
+      "daysPerWeek": 4,
+      "durationWeeks": 8,
+      "equipment": ["none"],
+      "goals": ["perte_de_gras", "endurance"],
+      "sessions": [
+        {
+          "nameFr": "HIIT A — Explosif pur",
+          "nameEn": "HIIT A — Pure explosive",
+          "order": 1,
+          "exercises": [
+            { "exerciseId": "ex_019", "order": 1, "sets": 4, "reps": 10, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 30 },
+            { "exerciseId": "ex_006", "order": 2, "sets": 4, "reps": 15, "restBetweenSetsSeconds": 45, "restAfterExerciseSeconds": 30 },
+            { "exerciseId": "ex_018", "order": 3, "sets": 4, "durationSeconds": 30, "restBetweenSetsSeconds": 30, "restAfterExerciseSeconds": 30 },
+            { "exerciseId": "ex_020", "order": 4, "sets": 4, "durationSeconds": 40, "restBetweenSetsSeconds": 20, "restAfterExerciseSeconds": 0 }
+          ]
+        },
+        {
+          "nameFr": "Force B — Haut du corps",
+          "nameEn": "Strength B — Upper body",
+          "order": 2,
+          "exercises": [
+            { "exerciseId": "ex_001", "order": 1, "sets": 4, "reps": 15, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 45 },
+            { "exerciseId": "ex_003", "order": 2, "sets": 3, "reps": 12, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 45 },
+            { "exerciseId": "ex_024", "order": 3, "sets": 3, "reps": 10, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 45 },
+            { "exerciseId": "ex_013", "order": 4, "sets": 3, "durationSeconds": 40, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 45 },
+            { "exerciseId": "ex_017", "order": 5, "sets": 3, "reps": 15, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 0 }
+          ]
+        },
+        {
+          "nameFr": "Force C — Bas du corps",
+          "nameEn": "Strength C — Lower body",
+          "order": 3,
+          "exercises": [
+            { "exerciseId": "ex_007", "order": 1, "sets": 4, "reps": 10, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 45 },
+            { "exerciseId": "ex_008", "order": 2, "sets": 3, "reps": 12, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 45 },
+            { "exerciseId": "ex_012", "order": 3, "sets": 3, "reps": 12, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 45 },
+            { "exerciseId": "ex_011", "order": 4, "sets": 3, "reps": 20, "restBetweenSetsSeconds": 45, "restAfterExerciseSeconds": 45 },
+            { "exerciseId": "ex_010", "order": 5, "sets": 3, "reps": 25, "restBetweenSetsSeconds": 30, "restAfterExerciseSeconds": 0 }
+          ]
+        },
+        {
+          "nameFr": "HIIT D — Cardio intégré",
+          "nameEn": "HIIT D — Integrated cardio",
+          "order": 4,
+          "exercises": [
+            { "exerciseId": "ex_001", "order": 1, "sets": 3, "reps": 20, "restBetweenSetsSeconds": 30, "restAfterExerciseSeconds": 30 },
+            { "exerciseId": "ex_005", "order": 2, "sets": 3, "reps": 25, "restBetweenSetsSeconds": 30, "restAfterExerciseSeconds": 30 },
+            { "exerciseId": "ex_018", "order": 3, "sets": 3, "durationSeconds": 30, "restBetweenSetsSeconds": 30, "restAfterExerciseSeconds": 30 },
+            { "exerciseId": "ex_019", "order": 4, "sets": 3, "reps": 12, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 30 },
+            { "exerciseId": "ex_016", "order": 5, "sets": 3, "reps": 20, "restBetweenSetsSeconds": 30, "restAfterExerciseSeconds": 0 }
+          ]
+        }
+      ]
+    }
+  ],
+  "exercises": []
+}

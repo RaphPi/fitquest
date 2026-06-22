@@ -1,0 +1,72 @@
+{
+  "version": "1.0",
+  "sourcePrefix": "pack_masse_fb4",
+  "programs": [
+    {
+      "nameFr": "Volume & Fréquence — Full Body 4j",
+      "nameEn": "Volume & Frequency — Full Body 4d",
+      "descFr": "Programme full body haute fréquence pour la prise de masse, stimulant chaque groupe musculaire deux fois par semaine. Quatre séances de 45 minutes avec variantes A/B. Poids du corps uniquement.",
+      "descEn": "High frequency full body program for muscle gain, stimulating each muscle group twice per week. Four 45-minute sessions with A/B variations. Bodyweight only.",
+      "level": "intermediate",
+      "daysPerWeek": 4,
+      "durationWeeks": 12,
+      "equipment": ["none"],
+      "goals": ["prise_de_masse", "force"],
+      "sessions": [
+        {
+          "nameFr": "Full Body A",
+          "nameEn": "Full Body A",
+          "order": 1,
+          "exercises": [
+            { "exerciseId": "ex_001", "order": 1, "sets": 4, "reps": 12, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_005", "order": 2, "sets": 4, "reps": 15, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_004", "order": 3, "sets": 3, "reps": 12, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_011", "order": 4, "sets": 3, "reps": 20, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_013", "order": 5, "sets": 3, "durationSeconds": 40, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_023", "order": 6, "sets": 3, "reps": 15, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 0 }
+          ]
+        },
+        {
+          "nameFr": "Full Body B",
+          "nameEn": "Full Body B",
+          "order": 2,
+          "exercises": [
+            { "exerciseId": "ex_003", "order": 1, "sets": 4, "reps": 10, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_007", "order": 2, "sets": 4, "reps": 10, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_024", "order": 3, "sets": 3, "reps": 10, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_012", "order": 4, "sets": 3, "reps": 12, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_017", "order": 5, "sets": 3, "reps": 15, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_014", "order": 6, "sets": 3, "durationSeconds": 30, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 0 }
+          ]
+        },
+        {
+          "nameFr": "Full Body A'",
+          "nameEn": "Full Body A'",
+          "order": 3,
+          "exercises": [
+            { "exerciseId": "ex_001", "order": 1, "sets": 4, "reps": 15, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_005", "order": 2, "sets": 4, "reps": 20, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_004", "order": 3, "sets": 3, "reps": 15, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_011", "order": 4, "sets": 3, "reps": 25, "restBetweenSetsSeconds": 45, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_015", "order": 5, "sets": 3, "reps": 12, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_023", "order": 6, "sets": 3, "reps": 18, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 0 }
+          ]
+        },
+        {
+          "nameFr": "Full Body B'",
+          "nameEn": "Full Body B'",
+          "order": 4,
+          "exercises": [
+            { "exerciseId": "ex_003", "order": 1, "sets": 4, "reps": 12, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_007", "order": 2, "sets": 4, "reps": 12, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_024", "order": 3, "sets": 3, "reps": 12, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_012", "order": 4, "sets": 3, "reps": 15, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_029", "order": 5, "sets": 3, "reps": 10, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_016", "order": 6, "sets": 3, "reps": 25, "restBetweenSetsSeconds": 45, "restAfterExerciseSeconds": 0 }
+          ]
+        }
+      ]
+    }
+  ],
+  "exercises": []
+}

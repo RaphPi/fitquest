@@ -1,0 +1,53 @@
+{
+  "version": "1.0",
+  "sourcePrefix": "pack_force_5x5",
+  "programs": [
+    {
+      "nameFr": "Force 5×5 — Poids du Corps",
+      "nameEn": "Strength 5×5 — Bodyweight",
+      "descFr": "Programme de force pure au poids du corps inspiré du schème 5×5. Cinq séries de cinq répétitions sur des exercices difficiles avec longues plages de récupération. Progression sur 12 semaines. Poids du corps uniquement.",
+      "descEn": "Pure bodyweight strength program inspired by the 5×5 scheme. Five sets of five reps on challenging exercises with long recovery periods. 12-week progression. Bodyweight only.",
+      "level": "intermediate",
+      "daysPerWeek": 3,
+      "durationWeeks": 12,
+      "equipment": ["none"],
+      "goals": ["force"],
+      "sessions": [
+        {
+          "nameFr": "5×5 A — Push & Gainage",
+          "nameEn": "5×5 A — Push & Core",
+          "order": 1,
+          "exercises": [
+            { "exerciseId": "ex_003", "order": 1, "sets": 5, "reps": 5, "restBetweenSetsSeconds": 150, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_024", "order": 2, "sets": 5, "reps": 5, "restBetweenSetsSeconds": 150, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_004", "order": 3, "sets": 5, "reps": 8, "restBetweenSetsSeconds": 120, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_013", "order": 4, "sets": 5, "durationSeconds": 45, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 0 }
+          ]
+        },
+        {
+          "nameFr": "5×5 B — Jambes & Dos",
+          "nameEn": "5×5 B — Legs & Back",
+          "order": 2,
+          "exercises": [
+            { "exerciseId": "ex_030", "order": 1, "sets": 5, "reps": 5, "restBetweenSetsSeconds": 150, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_007", "order": 2, "sets": 5, "reps": 6, "restBetweenSetsSeconds": 120, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_012", "order": 3, "sets": 5, "reps": 6, "restBetweenSetsSeconds": 120, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_023", "order": 4, "sets": 5, "reps": 8, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 0 }
+          ]
+        },
+        {
+          "nameFr": "5×5 C — Full body force",
+          "nameEn": "5×5 C — Full body strength",
+          "order": 3,
+          "exercises": [
+            { "exerciseId": "ex_001", "order": 1, "sets": 5, "reps": 5, "restBetweenSetsSeconds": 150, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_005", "order": 2, "sets": 5, "reps": 5, "restBetweenSetsSeconds": 150, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_029", "order": 3, "sets": 5, "reps": 8, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_014", "order": 4, "sets": 5, "durationSeconds": 40, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 0 }
+          ]
+        }
+      ]
+    }
+  ],
+  "exercises": []
+}

@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "sourcePrefix": "pack_force_eq",
+  "programs": [
+    {
+      "nameFr": "Force + Équipement — Push/Pull/Legs",
+      "nameEn": "Strength + Equipment — Push/Pull/Legs",
+      "descFr": "Programme Push/Pull/Legs avec barre de traction et haltères. Force maximale sur les mouvements composés, 3 séances par semaine. Conçu pour ceux qui disposent d'un équipement minimal à domicile.",
+      "descEn": "Push/Pull/Legs program with pull-up bar and dumbbells. Maximum strength on compound movements, 3 sessions per week. Designed for those with minimal home equipment.",
+      "level": "intermediate",
+      "daysPerWeek": 3,
+      "durationWeeks": 12,
+      "equipment": ["pull_bar", "dumbbells"],
+      "goals": ["force", "prise_de_masse"],
+      "sessions": [
+        {
+          "nameFr": "Push — Poussée force",
+          "nameEn": "Push — Strength push",
+          "order": 1,
+          "exercises": [
+            { "exerciseId": "ex_001", "order": 1, "sets": 5, "reps": 10, "restBetweenSetsSeconds": 120, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_026", "order": 2, "sets": 4, "reps": 8, "restBetweenSetsSeconds": 120, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_003", "order": 3, "sets": 4, "reps": 8, "restBetweenSetsSeconds": 120, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_028", "order": 4, "sets": 3, "reps": 10, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_013", "order": 5, "sets": 3, "durationSeconds": 45, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 0 }
+          ]
+        },
+        {
+          "nameFr": "Pull — Tirage force",
+          "nameEn": "Pull — Strength pull",
+          "order": 2,
+          "exercises": [
+            { "exerciseId": "ex_021", "order": 1, "sets": 5, "reps": 5, "restBetweenSetsSeconds": 150, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_022", "order": 2, "sets": 4, "reps": 6, "restBetweenSetsSeconds": 120, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_025", "order": 3, "sets": 4, "reps": 10, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_023", "order": 4, "sets": 3, "reps": 15, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_017", "order": 5, "sets": 3, "reps": 15, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 0 }
+          ]
+        },
+        {
+          "nameFr": "Legs — Jambes force",
+          "nameEn": "Legs — Strength legs",
+          "order": 3,
+          "exercises": [
+            { "exerciseId": "ex_027", "order": 1, "sets": 5, "reps": 8, "restBetweenSetsSeconds": 120, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_007", "order": 2, "sets": 4, "reps": 8, "restBetweenSetsSeconds": 120, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_012", "order": 3, "sets": 4, "reps": 10, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_008", "order": 4, "sets": 3, "reps": 12, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 90 },
+            { "exerciseId": "ex_010", "order": 5, "sets": 4, "reps": 20, "restBetweenSetsSeconds": 45, "restAfterExerciseSeconds": 0 }
+          ]
+        }
+      ]
+    }
+  ],
+  "exercises": []
+}

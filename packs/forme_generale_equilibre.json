@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "sourcePrefix": "pack_fg_equi",
+  "programs": [
+    {
+      "nameFr": "Équilibre Total — Full Body 3j",
+      "nameEn": "Total Balance — Full Body 3d",
+      "descFr": "Programme d'équilibre complet pour développer force, endurance et mobilité. Trois séances de 40 minutes par semaine, poids du corps. Idéal pour maintenir une bonne condition physique générale sur la durée.",
+      "descEn": "Complete balance program to develop strength, endurance and mobility. Three 40-minute sessions per week, bodyweight. Ideal for maintaining overall physical fitness over time.",
+      "level": "intermediate",
+      "daysPerWeek": 3,
+      "durationWeeks": 12,
+      "equipment": ["none"],
+      "goals": ["forme_generale"],
+      "sessions": [
+        {
+          "nameFr": "Séance A — Push & Core",
+          "nameEn": "Session A — Push & Core",
+          "order": 1,
+          "exercises": [
+            { "exerciseId": "ex_001", "order": 1, "sets": 4, "reps": 12, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_003", "order": 2, "sets": 3, "reps": 10, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_004", "order": 3, "sets": 3, "reps": 12, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_013", "order": 4, "sets": 3, "durationSeconds": 40, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_017", "order": 5, "sets": 3, "reps": 12, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 0 }
+          ]
+        },
+        {
+          "nameFr": "Séance B — Jambes & Dos",
+          "nameEn": "Session B — Legs & Back",
+          "order": 2,
+          "exercises": [
+            { "exerciseId": "ex_007", "order": 1, "sets": 4, "reps": 10, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_008", "order": 2, "sets": 3, "reps": 12, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_012", "order": 3, "sets": 3, "reps": 10, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_023", "order": 4, "sets": 3, "reps": 15, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_014", "order": 5, "sets": 3, "durationSeconds": 30, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 0 }
+          ]
+        },
+        {
+          "nameFr": "Séance C — Full body explosif",
+          "nameEn": "Session C — Explosive full body",
+          "order": 3,
+          "exercises": [
+            { "exerciseId": "ex_019", "order": 1, "sets": 3, "reps": 10, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_006", "order": 2, "sets": 3, "reps": 12, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_018", "order": 3, "sets": 3, "durationSeconds": 30, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_015", "order": 4, "sets": 3, "reps": 12, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_029", "order": 5, "sets": 3, "reps": 10, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 0 }
+          ]
+        }
+      ]
+    }
+  ],
+  "exercises": []
+}

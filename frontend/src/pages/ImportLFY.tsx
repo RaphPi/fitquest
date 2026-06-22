@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@/stores/userStore';
 import {
   Upload, FileJson, CheckCircle2, XCircle, Loader2, AlertCircle,
-  ArrowLeft, Trash2, TriangleAlert, History,
+  ArrowLeft, Trash2, TriangleAlert, History, PackageOpen,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PACKS, type PackMeta } from '@/lib/packs';
 
 interface ImportLog {
   id: string;
@@ -52,6 +53,10 @@ export default function ImportLFY() {
   const [jsonContent, setJsonContent] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // ── Pack catalogue state ───────────────────────────────────────────────────
+  const [fetchingPackId, setFetchingPackId] = useState<string | null>(null);
+  const [packFetchError, setPackFetchError] = useState<string | null>(null);
+
   // ── Logs state ────────────────────────────────────────────────────────────
   const [logs, setLogs] = useState<ImportLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
@@ -77,6 +82,25 @@ export default function ImportLFY() {
 
   // ── Import handlers ───────────────────────────────────────────────────────
 
+  function applyJsonText(raw: string) {
+    const parsed = JSON.parse(raw) as { exercises?: unknown[]; programs?: unknown[] };
+    setJsonContent(raw);
+    const progs = Array.isArray(parsed.programs) ? parsed.programs : [];
+    setPreview({
+      exercises: Array.isArray(parsed.exercises) ? parsed.exercises.length : 0,
+      programs: progs.length,
+      programsData: progs.map((p) => {
+        const prog = p as Record<string, unknown>;
+        return {
+          nameFr: typeof prog.nameFr === 'string' ? prog.nameFr : '',
+          nameEn: typeof prog.nameEn === 'string' ? prog.nameEn : undefined,
+          goals: Array.isArray(prog.goals) ? (prog.goals as unknown[]).filter((g): g is string => typeof g === 'string') : [],
+        };
+      }),
+    });
+    setStatus('preview');
+  }
+
   function readFile(file: File) {
     if (!file.name.endsWith('.json')) {
       setErrorMsg(t('import.error.notJson'));
@@ -87,28 +111,28 @@ export default function ImportLFY() {
     reader.onload = (e) => {
       const raw = e.target?.result as string;
       try {
-        const parsed = JSON.parse(raw) as { exercises?: unknown[]; programs?: unknown[] };
-        setJsonContent(raw);
-        const progs = Array.isArray(parsed.programs) ? parsed.programs : [];
-        setPreview({
-          exercises: Array.isArray(parsed.exercises) ? parsed.exercises.length : 0,
-          programs: progs.length,
-          programsData: progs.map((p) => {
-            const prog = p as Record<string, unknown>;
-            return {
-              nameFr: typeof prog.nameFr === 'string' ? prog.nameFr : '',
-              nameEn: typeof prog.nameEn === 'string' ? prog.nameEn : undefined,
-              goals: Array.isArray(prog.goals) ? (prog.goals as unknown[]).filter((g): g is string => typeof g === 'string') : [],
-            };
-          }),
-        });
-        setStatus('preview');
+        applyJsonText(raw);
       } catch {
         setErrorMsg(t('import.error.invalidJson'));
         setStatus('error');
       }
     };
     reader.readAsText(file, 'utf-8');
+  }
+
+  async function loadPackFromUrl(pack: PackMeta) {
+    setPackFetchError(null);
+    setFetchingPackId(pack.id);
+    try {
+      const res = await fetch(pack.url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      applyJsonText(text);
+    } catch {
+      setPackFetchError(t('import.packs.fetchError'));
+    } finally {
+      setFetchingPackId(null);
+    }
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -170,6 +194,23 @@ export default function ImportLFY() {
   }
 
   const showDropZone = status === 'idle' || status === 'error';
+  const showCatalogue = showDropZone;
+
+  function equipLabel(eq: string[]): string {
+    const hasBar = eq.includes('pull_bar');
+    const hasDumbbells = eq.includes('dumbbells');
+    if (hasBar && hasDumbbells) return t('import.packs.equipBarDumbbells');
+    if (hasBar) return t('import.packs.equipBar');
+    if (hasDumbbells) return t('import.packs.equipDumbbells');
+    return t('import.packs.equipNone');
+  }
+
+  const sortedPacks = [...PACKS].sort((a, b) => {
+    const aRec = !!user?.primaryGoal && a.goals.includes(user.primaryGoal);
+    const bRec = !!user?.primaryGoal && b.goals.includes(user.primaryGoal);
+    if (aRec === bRec) return 0;
+    return aRec ? -1 : 1;
+  });
 
   return (
     <section className="max-w-lg space-y-4">
@@ -188,6 +229,75 @@ export default function ImportLFY() {
           <span className="font-mono text-foreground">lfy_import.json</span>.
         </p>
       </div>
+
+      {/* ── Catalogue de packs ────────────────────────────────────────────── */}
+      {showCatalogue && (
+        <div className="overflow-hidden rounded-xl border border-border bg-card">
+          <div className="flex items-center gap-3 border-b border-border px-5 py-4">
+            <PackageOpen className="h-4 w-4 text-muted-foreground" />
+            <div className="min-w-0 flex-1">
+              <h2 className="font-display text-sm font-bold uppercase tracking-widest">
+                {t('import.packs.title')}
+              </h2>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">{t('import.packs.subtitle')}</p>
+            </div>
+          </div>
+
+          {packFetchError && (
+            <div className="flex items-start gap-3 border-b border-red-500/20 bg-red-500/10 px-5 py-3">
+              <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
+              <p className="text-xs text-red-400">{packFetchError}</p>
+            </div>
+          )}
+
+          <div className="divide-y divide-border">
+            {sortedPacks.map((pack) => {
+              const isRec = !!user?.primaryGoal && pack.goals.includes(user.primaryGoal);
+              const isFetching = fetchingPackId === pack.id;
+              const name = i18n.language === 'en' ? pack.nameEn : pack.nameFr;
+              const desc = i18n.language === 'en' ? pack.descEn : pack.descFr;
+              return (
+                <div key={pack.id} className="flex items-start gap-4 px-5 py-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm font-semibold text-foreground">{name}</span>
+                      {isRec && (
+                        <span className="shrink-0 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-400">
+                          {t('programs.recommended')}
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{desc}</p>
+                    <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                      <span>{equipLabel(pack.equipment)}</span>
+                      <span>·</span>
+                      <span>{t('import.packs.days', { count: pack.daysPerWeek })}</span>
+                      {pack.durationWeeks && (
+                        <>
+                          <span>·</span>
+                          <span>{t('import.packs.weeks', { count: pack.durationWeeks })}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={isFetching || fetchingPackId !== null}
+                    onClick={() => void loadPackFromUrl(pack)}
+                    className="mt-0.5 shrink-0 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground disabled:opacity-50"
+                  >
+                    {isFetching ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      t('import.packs.loadBtn')
+                    )}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ── Zone drag & drop ──────────────────────────────────────────────── */}
       {showDropZone && (

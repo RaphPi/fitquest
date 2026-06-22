@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "sourcePrefix": "pack_rfe_deb",
+  "programs": [
+    {
+      "nameFr": "Départ Zéro — Full Body 3j",
+      "nameEn": "Zero Start — Full Body 3d",
+      "descFr": "Programme pour (re)démarrer l'activité physique. Trois séances courtes de 30 minutes alternées chaque semaine. Poids du corps uniquement. Progression douce sur 8 semaines.",
+      "descEn": "Program to (re)start physical activity. Three short 30-minute alternating sessions per week. Bodyweight only. Gentle progression over 8 weeks.",
+      "level": "beginner",
+      "daysPerWeek": 3,
+      "durationWeeks": 8,
+      "equipment": ["none"],
+      "goals": ["remise_en_forme"],
+      "sessions": [
+        {
+          "nameFr": "Séance A — Haut du corps",
+          "nameEn": "Session A — Upper body",
+          "order": 1,
+          "exercises": [
+            { "exerciseId": "ex_002", "order": 1, "sets": 3, "reps": 8, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_004", "order": 2, "sets": 3, "reps": 8, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_024", "order": 3, "sets": 2, "reps": 8, "restBetweenSetsSeconds": 90, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_013", "order": 4, "sets": 3, "durationSeconds": 20, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_016", "order": 5, "sets": 2, "reps": 12, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 0 }
+          ]
+        },
+        {
+          "nameFr": "Séance B — Bas du corps",
+          "nameEn": "Session B — Lower body",
+          "order": 2,
+          "exercises": [
+            { "exerciseId": "ex_005", "order": 1, "sets": 3, "reps": 12, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_008", "order": 2, "sets": 3, "reps": 8, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_011", "order": 3, "sets": 3, "reps": 12, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_010", "order": 4, "sets": 3, "reps": 15, "restBetweenSetsSeconds": 45, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_013", "order": 5, "sets": 2, "durationSeconds": 25, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 0 }
+          ]
+        },
+        {
+          "nameFr": "Séance C — Full body léger",
+          "nameEn": "Session C — Light full body",
+          "order": 3,
+          "exercises": [
+            { "exerciseId": "ex_020", "order": 1, "sets": 2, "durationSeconds": 30, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_002", "order": 2, "sets": 2, "reps": 10, "restBetweenSetsSeconds": 75, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_005", "order": 3, "sets": 2, "reps": 15, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_023", "order": 4, "sets": 2, "reps": 12, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 60 },
+            { "exerciseId": "ex_016", "order": 5, "sets": 2, "reps": 15, "restBetweenSetsSeconds": 60, "restAfterExerciseSeconds": 0 }
+          ]
+        }
+      ]
+    }
+  ],
+  "exercises": []
+}

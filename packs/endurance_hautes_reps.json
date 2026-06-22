@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "sourcePrefix": "pack_end_hrep",
+  "programs": [
+    {
+      "nameFr": "Endurance Musculaire — Hautes Reps",
+      "nameEn": "Muscular Endurance — High Reps",
+      "descFr": "Programme d'endurance musculaire basé sur de hauts volumes de répétitions avec peu de repos. Développe la résistance à la fatigue et la capacité aérobie. Trois séances de 40 minutes par semaine. Poids du corps uniquement.",
+      "descEn": "Muscular endurance program based on high rep volumes with minimal rest. Develops fatigue resistance and aerobic capacity. Three 40-minute sessions per week. Bodyweight only.",
+      "level": "intermediate",
+      "daysPerWeek": 3,
+      "durationWeeks": 8,
+      "equipment": ["none"],
+      "goals": ["endurance"],
+      "sessions": [
+        {
+          "nameFr": "Endurance A — Haut du corps",
+          "nameEn": "Endurance A — Upper body",
+          "order": 1,
+          "exercises": [
+            { "exerciseId": "ex_001", "order": 1, "sets": 4, "reps": 25, "restBetweenSetsSeconds": 40, "restAfterExerciseSeconds": 40 },
+            { "exerciseId": "ex_024", "order": 2, "sets": 3, "reps": 15, "restBetweenSetsSeconds": 45, "restAfterExerciseSeconds": 40 },
+            { "exerciseId": "ex_004", "order": 3, "sets": 4, "reps": 20, "restBetweenSetsSeconds": 40, "restAfterExerciseSeconds": 40 },
+            { "exerciseId": "ex_015", "order": 4, "sets": 3, "reps": 15, "restBetweenSetsSeconds": 45, "restAfterExerciseSeconds": 40 },
+            { "exerciseId": "ex_016", "order": 5, "sets": 3, "reps": 25, "restBetweenSetsSeconds": 30, "restAfterExerciseSeconds": 0 }
+          ]
+        },
+        {
+          "nameFr": "Endurance B — Bas du corps",
+          "nameEn": "Endurance B — Lower body",
+          "order": 2,
+          "exercises": [
+            { "exerciseId": "ex_005", "order": 1, "sets": 4, "reps": 30, "restBetweenSetsSeconds": 40, "restAfterExerciseSeconds": 40 },
+            { "exerciseId": "ex_008", "order": 2, "sets": 4, "reps": 20, "restBetweenSetsSeconds": 40, "restAfterExerciseSeconds": 40 },
+            { "exerciseId": "ex_011", "order": 3, "sets": 4, "reps": 25, "restBetweenSetsSeconds": 30, "restAfterExerciseSeconds": 40 },
+            { "exerciseId": "ex_009", "order": 4, "sets": 3, "reps": 20, "restBetweenSetsSeconds": 40, "restAfterExerciseSeconds": 40 },
+            { "exerciseId": "ex_010", "order": 5, "sets": 4, "reps": 40, "restBetweenSetsSeconds": 30, "restAfterExerciseSeconds": 0 }
+          ]
+        },
+        {
+          "nameFr": "Endurance C — Stamina full body",
+          "nameEn": "Endurance C — Full body stamina",
+          "order": 3,
+          "exercises": [
+            { "exerciseId": "ex_020", "order": 1, "sets": 4, "durationSeconds": 45, "restBetweenSetsSeconds": 30, "restAfterExerciseSeconds": 40 },
+            { "exerciseId": "ex_001", "order": 2, "sets": 3, "reps": 20, "restBetweenSetsSeconds": 40, "restAfterExerciseSeconds": 40 },
+            { "exerciseId": "ex_005", "order": 3, "sets": 3, "reps": 25, "restBetweenSetsSeconds": 40, "restAfterExerciseSeconds": 40 },
+            { "exerciseId": "ex_018", "order": 4, "sets": 3, "durationSeconds": 30, "restBetweenSetsSeconds": 45, "restAfterExerciseSeconds": 40 },
+            { "exerciseId": "ex_013", "order": 5, "sets": 3, "durationSeconds": 45, "restBetweenSetsSeconds": 45, "restAfterExerciseSeconds": 0 }
+          ]
+        }
+      ]
+    }
+  ],
+  "exercises": []
+}

@@ -779,6 +779,19 @@
       "purgeCancel": "Cancel",
       "purging": "Deleting…",
       "purgeRetry": "Retry"
+    },
+    "packs": {
+      "title": "Available Packs",
+      "subtitle": "Ready-to-use programs — click to load",
+      "loadBtn": "Load",
+      "fetching": "Fetching…",
+      "fetchError": "Unable to fetch the pack. Check your connection.",
+      "days": "{{count}}d/wk",
+      "weeks": "{{count}} wks",
+      "equipNone": "Bodyweight",
+      "equipBar": "Pull-up bar",
+      "equipDumbbells": "Dumbbells",
+      "equipBarDumbbells": "Bar + dumbbells"
     }
   },
   "sidebar": {
