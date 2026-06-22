@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Volume2, VolumeX, Plus, Lock, LogOut, Mail, ChevronDown, FileJson, Flame, Zap, Clock, Activity, Trophy, Check, ShieldCheck, Archive, Loader2 } from 'lucide-react';
+import { Volume2, VolumeX, Plus, Lock, LogOut, Mail, ChevronDown, FileJson, Flame, Zap, Clock, Activity, Trophy, Check, ShieldCheck, Archive, Loader2, Server, Send } from 'lucide-react';
 import { useSettingsStore, type WidgetId } from '@/stores/settingsStore';
 import { useUserStore } from '@/stores/userStore';
 import { cn } from '@/lib/utils';
-import type { ThemeId } from '@/types';
+import type { ThemeId, DigestFrequency } from '@/types';
 import PixelCanvas from '@/components/workout/active/PixelCanvas';
 import {
   BOSSES,
@@ -190,8 +190,56 @@ export default function Settings() {
   }
   const user = useUserStore((s) => s.user);
   const logout = useUserStore((s) => s.logout);
+  const updateProfile = useUserStore((s) => s.updateProfile);
 
   const toggle = (id: SectionId) => setOpen((prev) => (prev === id ? null : id));
+
+  const [emailForm, setEmailForm] = useState({
+    email: '',
+    emailDigest: 'NONE' as DigestFrequency,
+    smtpHost: '',
+    smtpPort: 587,
+    smtpUser: '',
+    smtpPass: '',
+    smtpSecure: false,
+  });
+  const [emailSaveState, setEmailSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const emailFormInit = useRef(false);
+
+  useEffect(() => {
+    if (user && !emailFormInit.current) {
+      emailFormInit.current = true;
+      setEmailForm({
+        email: user.email ?? '',
+        emailDigest: (user.emailDigest as DigestFrequency | null) ?? 'NONE',
+        smtpHost: user.smtpHost ?? '',
+        smtpPort: user.smtpPort ?? 587,
+        smtpUser: user.smtpUser ?? '',
+        smtpPass: '',
+        smtpSecure: user.smtpSecure ?? false,
+      });
+    }
+  }, [user]);
+
+  const handleSaveEmailSettings = async () => {
+    setEmailSaveState('saving');
+    try {
+      const payload: Parameters<typeof updateProfile>[0] = {
+        email: emailForm.email || null,
+        emailDigest: emailForm.emailDigest,
+        smtpHost: emailForm.smtpHost || null,
+        smtpPort: emailForm.smtpPort || null,
+        smtpUser: emailForm.smtpUser || null,
+        smtpSecure: emailForm.smtpSecure,
+      };
+      if (emailForm.smtpPass !== '') payload.smtpPass = emailForm.smtpPass;
+      await updateProfile(payload);
+      setEmailSaveState('saved');
+      setTimeout(() => setEmailSaveState('idle'), 3000);
+    } catch {
+      setEmailSaveState('error');
+    }
+  };
 
   const [zipExporting, setZipExporting] = useState(false);
   const [zipError, setZipError] = useState<string | null>(null);
@@ -429,16 +477,148 @@ export default function Settings() {
         open={open === 'compte'}
         onToggle={() => toggle('compte')}
       >
-        <div className="flex items-center justify-between gap-4 py-1">
-          <div className="flex items-center gap-3">
-            <Mail className="h-5 w-5 shrink-0 text-muted-foreground" />
-            <div>
-              <div className="text-sm font-semibold text-foreground">{t('settings.account.email')}</div>
-              <div className="text-xs text-muted-foreground">{user?.email ?? '—'}</div>
+        {/* ── Notifications email ─── */}
+        <SubLabel className="flex items-center gap-2">
+          <Mail className="h-3.5 w-3.5" />
+          {t('settings.account.emailNotifications')}
+        </SubLabel>
+
+        <div className="mb-3">
+          <label className="mb-1 block text-xs text-muted-foreground" htmlFor="acct-email">
+            {t('settings.account.emailEdit')}
+          </label>
+          <input
+            id="acct-email"
+            type="email"
+            value={emailForm.email}
+            onChange={(e) => setEmailForm((prev) => ({ ...prev, email: e.target.value }))}
+            placeholder={t('settings.account.emailPlaceholder')}
+            className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
+          />
+        </div>
+
+        <div className="mb-3">
+          <p className="mb-2 text-xs text-muted-foreground">{t('settings.account.digestFrequency')}</p>
+          <div className="flex flex-wrap gap-2">
+            {(['NONE', 'DAILY', 'WEEKLY', 'MONTHLY'] as const).map((freq) => {
+              const labelKey = `settings.account.digest${freq.charAt(0)}${freq.slice(1).toLowerCase()}`;
+              return (
+                <button
+                  key={freq}
+                  type="button"
+                  onClick={() => setEmailForm((prev) => ({ ...prev, emailDigest: freq }))}
+                  className={cn(
+                    'rounded-lg border px-3 py-1.5 text-xs font-bold uppercase tracking-wide transition-all focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none',
+                    emailForm.emailDigest === freq
+                      ? 'border-primary text-primary'
+                      : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground',
+                  )}
+                >
+                  {t(labelKey)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mb-4 space-y-3 rounded-lg border border-border p-4">
+          <div className="flex items-center gap-2">
+            <Server className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              {t('settings.account.smtpTitle')}
+            </span>
+          </div>
+          <div className="flex gap-3">
+            <div className="min-w-0 flex-1">
+              <label className="mb-1 block text-xs text-muted-foreground" htmlFor="smtp-host">
+                {t('settings.account.smtpHost')}
+              </label>
+              <input
+                id="smtp-host"
+                type="text"
+                value={emailForm.smtpHost}
+                onChange={(e) => setEmailForm((prev) => ({ ...prev, smtpHost: e.target.value }))}
+                placeholder={t('settings.account.smtpHostPlaceholder')}
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
+              />
+            </div>
+            <div className="w-20 shrink-0">
+              <label className="mb-1 block text-xs text-muted-foreground" htmlFor="smtp-port">
+                {t('settings.account.smtpPort')}
+              </label>
+              <input
+                id="smtp-port"
+                type="number"
+                min={1}
+                max={65535}
+                value={emailForm.smtpPort}
+                onChange={(e) => setEmailForm((prev) => ({ ...prev, smtpPort: parseInt(e.target.value) || 587 }))}
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/60"
+              />
             </div>
           </div>
-          <Lock className="h-4 w-4 shrink-0 text-muted-foreground" aria-label={t('settings.account.emailReadOnly')} />
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground" htmlFor="smtp-user">
+              {t('settings.account.smtpUser')}
+            </label>
+            <input
+              id="smtp-user"
+              type="text"
+              value={emailForm.smtpUser}
+              onChange={(e) => setEmailForm((prev) => ({ ...prev, smtpUser: e.target.value }))}
+              placeholder={t('settings.account.smtpUserPlaceholder')}
+              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground" htmlFor="smtp-pass">
+              {t('settings.account.smtpPass')}
+            </label>
+            <input
+              id="smtp-pass"
+              type="password"
+              value={emailForm.smtpPass}
+              onChange={(e) => setEmailForm((prev) => ({ ...prev, smtpPass: e.target.value }))}
+              placeholder={user?.smtpPassSet ? t('settings.account.smtpPassPlaceholder') : undefined}
+              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">{t('settings.account.smtpSecure')}</span>
+            <Toggle on={emailForm.smtpSecure} onChange={(v) => setEmailForm((prev) => ({ ...prev, smtpSecure: v }))} />
+          </div>
         </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => void handleSaveEmailSettings()}
+            disabled={emailSaveState === 'saving'}
+            className="flex items-center gap-2 rounded-lg border border-primary bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none disabled:opacity-60"
+          >
+            {emailSaveState === 'saving' && <Loader2 className="h-4 w-4 animate-spin" />}
+            {emailSaveState === 'saved' && <Check className="h-4 w-4" />}
+            {emailSaveState === 'saving'
+              ? t('settings.account.savingEmailSettings')
+              : emailSaveState === 'saved'
+                ? t('settings.account.savedEmailSettings')
+                : t('settings.account.saveEmailSettings')}
+          </button>
+          <button
+            type="button"
+            disabled
+            title={t('settings.account.testEmailSoon')}
+            className="flex cursor-not-allowed items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold text-muted-foreground opacity-50 focus-visible:outline-none"
+          >
+            <Send className="h-4 w-4" />
+            {t('settings.account.testEmail')}
+          </button>
+        </div>
+        {emailSaveState === 'error' && (
+          <div className="mt-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs text-red-400">
+            {t('settings.account.saveEmailError')}
+          </div>
+        )}
 
         {user?.role === 'ADMIN' && (
           <div className="mt-4 border-t border-border pt-4">

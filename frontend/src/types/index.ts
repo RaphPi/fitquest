@@ -216,4 +216,10 @@ export interface UserProfile {
   xpBalance: number;
   streak: number;
   lastWorkout?: string | null;
+  emailDigest?: DigestFrequency | null;
+  smtpHost?: string | null;
+  smtpPort?: number | null;
+  smtpUser?: string | null;
+  smtpSecure?: boolean | null;
+  smtpPassSet?: boolean;
 }

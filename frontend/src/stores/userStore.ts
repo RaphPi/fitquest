@@ -12,7 +12,16 @@ interface UserState {
   register: (payload: RegisterPayload) => Promise<void>;
   login: (payload: LoginPayload) => Promise<void>;
   logout: () => Promise<void>;
-  updateProfile: (data: { avatarStage?: number }) => Promise<void>;
+  updateProfile: (data: {
+    avatarStage?: number;
+    email?: string | null;
+    emailDigest?: string | null;
+    smtpHost?: string | null;
+    smtpPort?: number | null;
+    smtpUser?: string | null;
+    smtpPass?: string | null;
+    smtpSecure?: boolean;
+  }) => Promise<void>;
   setUser: (user: UserProfile) => void;
   clearError: () => void;
 }
