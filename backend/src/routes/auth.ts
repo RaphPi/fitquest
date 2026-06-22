@@ -5,6 +5,7 @@ import { prisma } from '../lib/prisma';
 import { requireAuth, type AuthRequest } from '../middleware/requireAuth';
 import { encrypt } from '../lib/crypto';
 import { detectBadges } from '../lib/badges';
+import { isGoal } from '../lib/goals';
 
 const router = Router();
 
@@ -12,7 +13,7 @@ const router = Router();
 // puis retiré par toSafeUser — jamais exposé en clair.
 const USER_SELECT = {
   id: true, username: true, email: true, emailDigest: true, avatarStage: true,
-  heightCm: true,
+  heightCm: true, primaryGoal: true, goalNote: true,
   themeId: true, level: true, totalXP: true, currentXP: true,
   xpBalance: true, streak: true, lastWorkout: true, role: true,
   smtpHost: true, smtpPort: true, smtpUser: true, smtpSecure: true, smtpPass: true,
@@ -130,11 +131,13 @@ router.post('/logout', (_req, res) => {
 router.patch('/me', requireAuth, async (req: AuthRequest, res) => {
   try {
     const {
-      avatarStage, heightCm, email, emailDigest,
+      avatarStage, heightCm, primaryGoal, goalNote, email, emailDigest,
       smtpHost, smtpPort, smtpUser, smtpPass, smtpSecure,
     } = req.body as {
       avatarStage?: unknown;
       heightCm?: unknown;
+      primaryGoal?: unknown;
+      goalNote?: unknown;
       email?: unknown;
       emailDigest?: unknown;
       smtpHost?: unknown;
@@ -164,6 +167,29 @@ router.patch('/me', requireAuth, async (req: AuthRequest, res) => {
           return;
         }
         data.heightCm = h;
+      }
+    }
+
+    if (primaryGoal !== undefined) {
+      // null/'' = effacer l'objectif. Sinon doit appartenir à l'enum applicatif.
+      if (primaryGoal === null || primaryGoal === '') {
+        data.primaryGoal = null;
+      } else if (isGoal(primaryGoal)) {
+        data.primaryGoal = primaryGoal;
+      } else {
+        res.status(400).json({ error: 'primaryGoal invalide' });
+        return;
+      }
+    }
+
+    if (goalNote !== undefined) {
+      if (goalNote === null || goalNote === '') {
+        data.goalNote = null;
+      } else if (typeof goalNote === 'string' && goalNote.length <= 280) {
+        data.goalNote = goalNote;
+      } else {
+        res.status(400).json({ error: 'goalNote invalide (max 280 caractères)' });
+        return;
       }
     }
 

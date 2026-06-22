@@ -36,6 +36,8 @@ model User {
   smtpPass     String?          // chiffré AES-256-GCM (jamais en clair)
   smtpSecure   Boolean?
   heightCm     Float?
+  primaryGoal  String?          // objectif principal (enum applicatif, cf. lib/goals.ts)
+  goalNote     String?          // note libre sur l'objectif (max 280 car.)
   avatarStage  Int              @default(0)
   themeId      String           @default("void_rpg")
   level        Int              @default(1)
@@ -80,6 +82,7 @@ model Program {
   daysPerWeek   Int
   durationWeeks Int?
   equipment     String[]
+  goals         String[]  @default([]) // objectifs ciblés (enum applicatif, cf. lib/goals.ts)
   isCustom      Boolean   @default(false)
   isAiGen       Boolean   @default(false)
   createdBy     String? // userId si custom

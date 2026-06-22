@@ -4,6 +4,7 @@ import { prisma } from '../lib/prisma';
 import { requireAuth } from '../middleware/requireAuth';
 import type { AuthRequest } from '../middleware/requireAuth';
 import { detectBadges } from '../lib/badges';
+import { GOALS } from '../lib/goals';
 
 const router = Router();
 
@@ -328,6 +329,7 @@ const ProgramImportItemSchema = z.object({
   daysPerWeek: z.number().int().min(1).max(7),
   durationWeeks: z.number().int().min(1).nullable().optional(),
   equipment: z.array(z.string()).default([]),
+  goals: z.array(z.enum(GOALS)).default([]),
   sessions: z.array(SessionImportSchema).default([]),
 });
 
@@ -460,6 +462,7 @@ router.post('/import', requireAuth, async (req: AuthRequest, res) => {
             daysPerWeek: prog.daysPerWeek,
             durationWeeks: prog.durationWeeks ?? null,
             equipment: prog.equipment,
+            goals: prog.goals,
             isCustom: false,
             isAiGen: false,
             sessions: {
