@@ -14,6 +14,7 @@ interface UserState {
   logout: () => Promise<void>;
   updateProfile: (data: {
     avatarStage?: number;
+    heightCm?: number | null;
     email?: string | null;
     emailDigest?: string | null;
     smtpHost?: string | null;

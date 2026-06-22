@@ -43,6 +43,7 @@ interface CustomMetricInput {
 
 interface MetricBody {
   weightKg?: number | null;
+  bodyFatPct?: number | null;
   waistCm?: number | null;
   chestCm?: number | null;
   bicepCm?: number | null;
@@ -51,8 +52,8 @@ interface MetricBody {
 }
 
 function hasAnyMeasurement(body: MetricBody): boolean {
-  const { weightKg, waistCm, chestCm, bicepCm, thighCm, customMetrics } = body;
-  return [weightKg, waistCm, chestCm, bicepCm, thighCm].some((v) => v != null)
+  const { weightKg, bodyFatPct, waistCm, chestCm, bicepCm, thighCm, customMetrics } = body;
+  return [weightKg, bodyFatPct, waistCm, chestCm, bicepCm, thighCm].some((v) => v != null)
     || (Array.isArray(customMetrics) && customMetrics.length > 0);
 }
 
@@ -94,6 +95,7 @@ router.post('/metrics', requireAuth, async (req: AuthRequest, res) => {
       data: {
         userId: req.userId!,
         weightKg: body.weightKg ?? null,
+        bodyFatPct: body.bodyFatPct ?? null,
         waistCm: body.waistCm ?? null,
         chestCm: body.chestCm ?? null,
         bicepCm: body.bicepCm ?? null,
@@ -133,6 +135,7 @@ router.patch('/metrics/:id', requireAuth, async (req: AuthRequest, res) => {
       where: { id },
       data: {
         ...('weightKg' in body ? { weightKg: body.weightKg } : {}),
+        ...('bodyFatPct' in body ? { bodyFatPct: body.bodyFatPct } : {}),
         ...('waistCm' in body ? { waistCm: body.waistCm } : {}),
         ...('chestCm' in body ? { chestCm: body.chestCm } : {}),
         ...('bicepCm' in body ? { bicepCm: body.bicepCm } : {}),

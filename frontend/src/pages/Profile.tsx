@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, Check, FileDown, Loader2 } from 'lucide-react';
+import { ChevronDown, Check, FileDown, Loader2, Ruler } from 'lucide-react';
+import NumberStepper from '@/components/ui/NumberStepper';
 import { useUserStore } from '@/stores/userStore';
 import { getLevelTier, nextTierLevel } from '@/lib/levelTier';
 import { getAvatarStageMeta, getAvatarStage, avatarClassFromStage, AVATAR_CLASSES, AVATAR_STAGE_COUNT } from '@/lib/avatar';
@@ -14,6 +15,95 @@ import LevelBadge from '@/components/ui/LevelBadge';
 import XPBar from '@/components/ui/XPBar';
 import Avatar from '@/components/avatar/Avatar';
 import BadgeSummaryTile from '@/components/badge/BadgeSummaryTile';
+
+function HeightSection() {
+  const { t } = useTranslation();
+  const user = useUserStore((s) => s.user);
+  const updateProfile = useUserStore((s) => s.updateProfile);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState<number>(user?.heightCm ?? 175);
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  if (!user) return null;
+
+  const unchanged = value === user.heightCm;
+
+  async function handleSave() {
+    if (saving) return;
+    setSaving(true);
+    try {
+      await updateProfile({ heightCm: value });
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2000);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-card-shield/30"
+      >
+        <div className="flex items-center gap-3">
+          <Ruler className="h-4 w-4 text-primary" />
+          <div>
+            <h2 className="font-display text-sm font-bold uppercase tracking-widest">
+              {t('profile.height.title')}
+            </h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {user.heightCm != null
+                ? t('profile.height.current', { value: user.heightCm })
+                : t('profile.height.notSet')}
+            </p>
+          </div>
+        </div>
+        <ChevronDown
+          className={cn(
+            'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
+            open && 'rotate-180',
+          )}
+        />
+      </button>
+
+      {open && (
+        <div className="border-t border-border px-5 pb-5 pt-4">
+          <div className="flex items-center gap-4">
+            <NumberStepper
+              value={value}
+              onChange={setValue}
+              step={1}
+              min={50}
+              max={300}
+              suffix="cm"
+              variant="primary"
+              directEdit
+            />
+            <div className="flex items-center gap-3">
+              {success && (
+                <span className="flex items-center gap-1 text-xs text-green-400">
+                  <Check className="h-3.5 w-3.5" /> {t('profile.height.saved')}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => void handleSave()}
+                disabled={saving || unchanged}
+                className="rounded-lg bg-primary px-5 py-2 font-display text-sm font-bold uppercase tracking-widest text-white transition hover:bg-primary/90 disabled:opacity-40"
+              >
+                {saving ? t('profile.height.saving') : t('profile.height.save')}
+              </button>
+            </div>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">{t('profile.height.hint')}</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function AvatarPicker() {
   const { t } = useTranslation();
@@ -325,6 +415,8 @@ export default function Profile() {
       )}
 
       <ExportSheetButton />
+
+      <HeightSection />
 
       <AvatarPicker />
 

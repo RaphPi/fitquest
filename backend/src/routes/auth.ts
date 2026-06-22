@@ -11,6 +11,7 @@ const router = Router();
 // puis retiré par toSafeUser — jamais exposé en clair.
 const USER_SELECT = {
   id: true, username: true, email: true, emailDigest: true, avatarStage: true,
+  heightCm: true,
   themeId: true, level: true, totalXP: true, currentXP: true,
   xpBalance: true, streak: true, lastWorkout: true, role: true,
   smtpHost: true, smtpPort: true, smtpUser: true, smtpSecure: true, smtpPass: true,
@@ -128,10 +129,11 @@ router.post('/logout', (_req, res) => {
 router.patch('/me', requireAuth, async (req: AuthRequest, res) => {
   try {
     const {
-      avatarStage, email, emailDigest,
+      avatarStage, heightCm, email, emailDigest,
       smtpHost, smtpPort, smtpUser, smtpPass, smtpSecure,
     } = req.body as {
       avatarStage?: unknown;
+      heightCm?: unknown;
       email?: unknown;
       emailDigest?: unknown;
       smtpHost?: unknown;
@@ -149,6 +151,19 @@ router.patch('/me', requireAuth, async (req: AuthRequest, res) => {
         return;
       }
       data.avatarStage = avatarStage as number;
+    }
+
+    if (heightCm !== undefined) {
+      if (heightCm === null) {
+        data.heightCm = null;
+      } else {
+        const h = Number(heightCm);
+        if (!Number.isFinite(h) || h < 50 || h > 300) {
+          res.status(400).json({ error: 'heightCm doit être entre 50 et 300' });
+          return;
+        }
+        data.heightCm = h;
+      }
     }
 
     if (email !== undefined) {

@@ -337,6 +337,7 @@
     },
     "metrics": {
       "weight": "Poids",
+      "bodyFatPct": "% Masse grasse",
       "waistCm": "Tour de taille",
       "chestCm": "Poitrine",
       "bicepCm": "Biceps",
@@ -491,6 +492,15 @@
     "stage": "Stade {{stage}} / {{total}} — {{tier}}",
     "nextStage": "Prochain stade au niveau {{level}}.",
     "ultimateStage": "Stade ultime atteint — tu es une Légende.",
+    "height": {
+      "title": "Taille",
+      "current": "{{value}} cm",
+      "notSet": "Non renseignée",
+      "saved": "Sauvegardée",
+      "saving": "Sauvegarde…",
+      "save": "Enregistrer",
+      "hint": "Utilisée pour calculer l'Indice de Forme (FFMI, IMC)."
+    },
     "avatarPicker": {
       "title": "Changer de personnage",
       "currentClass": "Classe actuelle : {{class}}",

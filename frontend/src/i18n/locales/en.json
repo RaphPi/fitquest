@@ -337,6 +337,7 @@
     },
     "metrics": {
       "weight": "Weight",
+      "bodyFatPct": "Body fat %",
       "waistCm": "Waist",
       "chestCm": "Chest",
       "bicepCm": "Biceps",
@@ -491,6 +492,15 @@
     "stage": "Stage {{stage}} / {{total}} — {{tier}}",
     "nextStage": "Next stage at level {{level}}.",
     "ultimateStage": "Ultimate stage reached — you are a Legend.",
+    "height": {
+      "title": "Height",
+      "current": "{{value}} cm",
+      "notSet": "Not set",
+      "saved": "Saved",
+      "saving": "Saving…",
+      "save": "Save",
+      "hint": "Used to calculate your Fitness Index (FFMI, BMI)."
+    },
     "avatarPicker": {
       "title": "Change character",
       "currentClass": "Current class: {{class}}",

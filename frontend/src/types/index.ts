@@ -166,6 +166,7 @@ export interface BodyMetric {
   userId: string;
   date: string;
   weightKg: number | null;
+  bodyFatPct: number | null;
   waistCm: number | null;
   chestCm: number | null;
   bicepCm: number | null;
@@ -175,6 +176,7 @@ export interface BodyMetric {
 
 export interface MetricPayload {
   weightKg?: number | null;
+  bodyFatPct?: number | null;
   waistCm?: number | null;
   chestCm?: number | null;
   bicepCm?: number | null;
@@ -208,6 +210,7 @@ export interface UserProfile {
   username: string;
   email?: string | null;
   role: UserRole;
+  heightCm?: number | null;
   avatarStage: number;
   themeId: ThemeId;
   level: number;

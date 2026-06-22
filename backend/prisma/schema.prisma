@@ -35,6 +35,7 @@ model User {
   smtpUser     String?
   smtpPass     String?          // chiffré AES-256-GCM (jamais en clair)
   smtpSecure   Boolean?
+  heightCm     Float?
   avatarStage  Int              @default(0)
   themeId      String           @default("void_rpg")
   level        Int              @default(1)
@@ -138,6 +139,7 @@ model BodyMetric {
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   date          DateTime @default(now())
   weightKg      Float?
+  bodyFatPct    Float?
   waistCm       Float?
   chestCm       Float?
   bicepCm       Float?

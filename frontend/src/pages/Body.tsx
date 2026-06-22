@@ -89,6 +89,8 @@ interface MeasureState { enabled: boolean; value: number; }
 interface FormState {
   weightEnabled: boolean;
   weightKg: number;
+  bodyFatEnabled: boolean;
+  bodyFatPct: number;
   measures: Record<StdKey, MeasureState>;
   customFields: CustomMetric[];
 }
@@ -96,6 +98,8 @@ interface FormState {
 const EMPTY_FORM: FormState = {
   weightEnabled: true,
   weightKg: 75,
+  bodyFatEnabled: false,
+  bodyFatPct: 15,
   measures: {
     waistCm: { enabled: false, value: 80 },
     chestCm: { enabled: false, value: 95 },
@@ -108,6 +112,7 @@ const EMPTY_FORM: FormState = {
 function formToPayload(form: FormState): MetricPayload {
   const out: MetricPayload = {};
   if (form.weightEnabled) out.weightKg = form.weightKg;
+  if (form.bodyFatEnabled) out.bodyFatPct = form.bodyFatPct;
   STD.forEach(({ key }) => {
     if (form.measures[key].enabled) Object.assign(out, { [key]: form.measures[key].value });
   });
@@ -119,6 +124,8 @@ function metricToForm(m: BodyMetric): FormState {
   return {
     weightEnabled: m.weightKg != null,
     weightKg: m.weightKg ?? 75,
+    bodyFatEnabled: m.bodyFatPct != null,
+    bodyFatPct: m.bodyFatPct ?? 15,
     measures: {
       waistCm: { enabled: m.waistCm != null, value: m.waistCm ?? 80 },
       chestCm: { enabled: m.chestCm != null, value: m.chestCm ?? 95 },
@@ -247,11 +254,13 @@ function MetricForm({
 
   const hasAny =
     form.weightEnabled ||
+    form.bodyFatEnabled ||
     STD.some(({ key }) => form.measures[key].enabled) ||
     form.customFields.length > 0;
 
   const hasColorRows =
     form.weightEnabled ||
+    form.bodyFatEnabled ||
     STD.some(({ key }) => form.measures[key].enabled) ||
     form.customFields.some((cf) => cf.name !== '');
 
@@ -269,6 +278,7 @@ function MetricForm({
   };
 
   const toggleWeight = () => setForm((f) => ({ ...f, weightEnabled: !f.weightEnabled }));
+  const toggleBodyFat = () => setForm((f) => ({ ...f, bodyFatEnabled: !f.bodyFatEnabled }));
   const toggleMeasure = (key: StdKey) =>
     setForm((f) => ({
       ...f,
@@ -319,6 +329,33 @@ function MetricForm({
           variant={form.weightEnabled ? 'gold' : 'default'}
           directEdit={form.weightEnabled}
           className={form.weightEnabled ? '' : 'pointer-events-none opacity-40'}
+        />
+      </div>
+
+      {/* % Masse grasse */}
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={toggleBodyFat}
+          className={`h-5 w-5 shrink-0 rounded border-2 flex items-center justify-center transition focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none ${
+            form.bodyFatEnabled ? 'border-primary bg-primary/20' : 'border-border'
+          }`}
+        >
+          {form.bodyFatEnabled && <Check className="h-3 w-3 text-primary" />}
+        </button>
+        <span className={`w-28 shrink-0 text-sm font-medium ${form.bodyFatEnabled ? 'text-foreground' : 'text-muted-foreground'}`}>
+          {t('body.metrics.bodyFatPct')}
+        </span>
+        <NumberStepper
+          value={form.bodyFatPct}
+          onChange={(v) => setForm((f) => ({ ...f, bodyFatPct: v }))}
+          step={0.5}
+          min={3}
+          max={60}
+          suffix="%"
+          variant={form.bodyFatEnabled ? 'primary' : 'default'}
+          directEdit={form.bodyFatEnabled}
+          className={form.bodyFatEnabled ? '' : 'pointer-events-none opacity-40'}
         />
       </div>
 
@@ -410,6 +447,9 @@ function MetricForm({
           <p className="text-xs font-medium text-muted-foreground">{t('body.metrics.graphColors')}</p>
           {form.weightEnabled && (
             <ColorRow colorKey="weight" label={t('body.metrics.weight')} getColor={getColor} setColor={setColor} />
+          )}
+          {form.bodyFatEnabled && (
+            <ColorRow colorKey="bodyFatPct" label={t('body.metrics.bodyFatPct')} getColor={getColor} setColor={setColor} />
           )}
           {STD.map(({ key }) =>
             form.measures[key].enabled ? (
@@ -603,6 +643,7 @@ function MetricCard({ metric, onEdit, onDelete, getColor }: MetricCardProps) {
 
   const fields: { key: string; label: string; value: string }[] = [];
   if (metric.weightKg != null) fields.push({ key: 'weight', label: t('body.metrics.weight'), value: `${metric.weightKg} kg` });
+  if (metric.bodyFatPct != null) fields.push({ key: 'bodyFatPct', label: t('body.metrics.bodyFatPct'), value: `${metric.bodyFatPct} %` });
   STD.forEach(({ key, unit }) => {
     const v = (metric as unknown as Record<string, number | null>)[key];
     if (v != null) fields.push({ key, label: t(`body.metrics.${key}`), value: `${v} ${unit}` });
