@@ -60,6 +60,8 @@ interface WorkoutState {
   abandon: () => void;
   quit: () => void;
   submit: () => Promise<WorkoutResult | null>;
+  /** Enregistre le ressenti post-séance (fire-and-forget, non-bloquant). */
+  submitFeeling: (logId: string, feeling: number | null, note: string | null) => Promise<void>;
   elapsedSecs: () => number;
   fetchHistory: () => Promise<void>;
 }
@@ -210,6 +212,27 @@ export const useWorkoutStore = create<WorkoutState>((set, get) => ({
     } catch (e) {
       set({ isSubmitting: false, error: (e as Error).message });
       return null;
+    }
+  },
+
+  submitFeeling: async (logId, feeling, note) => {
+    try {
+      const body: Record<string, unknown> = {};
+      if (feeling !== null) body.feeling = feeling;
+      if (note !== null && note.trim().length > 0) body.feelingNote = note.trim();
+      if (Object.keys(body).length === 0) return;
+
+      const { log } = await apiFetch<{ log: WorkoutLog }>(`${API}/${logId}/feeling`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      set((s) => ({
+        history: s.history.map((h) => (h.id === logId ? log : h)),
+        result: s.result ? { ...s.result, log } : s.result,
+      }));
+    } catch {
+      // non-bloquant : l'échec du ressenti ne doit pas perturber la navigation
     }
   },
 

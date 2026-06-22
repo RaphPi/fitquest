@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Pause, Minus, Plus, Info } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useWorkoutStore } from '@/stores/workoutStore';
 import { useUserStore } from '@/stores/userStore';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -8,7 +9,7 @@ import { useExerciseStore } from '@/stores/exerciseStore';
 import { effortPoints, typeCopy } from '@/lib/bossFight';
 import { levelProgressPct } from '@/lib/xp';
 import { playSound } from '@/lib/sound';
-import { renderBoss, drawSprite, WEAPONS, SHIELD, ANVIL, HAMMER } from '@/lib/pixelSprites';
+import { renderBoss, drawSprite, WEAPONS, SHIELD, ANVIL, HAMMER, FEEL_FACES } from '@/lib/pixelSprites';
 import { getAvatarStage, avatarClassFromStage } from '@/lib/avatar';
 import PixelCanvas from '@/components/workout/active/PixelCanvas';
 import ExerciseInfoModal from '@/components/workout/ExerciseInfoModal';
@@ -49,10 +50,11 @@ interface Particle { id: number; mx: string; my: string; color: string; }
 
 export default function ActiveWorkout() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const {
     session, phase, restKind, exerciseIndex, setIndex, bossMaxHp, bossHp,
     completed, result, isSubmitting, recordSet, skipExercise, resumeFromRest,
-    pause, resume, abandon, quit, submit, elapsedSecs,
+    pause, resume, abandon, quit, submit, submitFeeling, elapsedSecs,
   } = useWorkoutStore();
   const user = useUserStore((s) => s.user);
   const bossKey = useSettingsStore((s) => s.boss);
@@ -75,6 +77,7 @@ export default function ActiveWorkout() {
   const [restRemaining, setRestRemaining] = useState(0);
   const [showBadges, setShowBadges] = useState(false);
   const [showEvolve, setShowEvolve] = useState(false);
+  const [showFeel, setShowFeel] = useState(false);
   const restTotalRef = useRef(1);
 
   // Évolution d'avatar : le stade a-t-il franchi un palier sur cette séance ?
@@ -500,7 +503,7 @@ export default function ActiveWorkout() {
                 </div>
               </>
             )}
-            <button onClick={() => { quit(); navigate('/'); }} disabled={isSubmitting}
+            <button onClick={() => { if (result) setShowFeel(true); }} disabled={isSubmitting || !result}
               className="mt-2 rounded-2xl border-none bg-gradient-to-br from-primary to-indigo-800 px-6 py-3 font-display text-sm font-bold text-white disabled:opacity-50">
               {result ? 'Récupérer le butin ▸' : '…'}
             </button>
@@ -523,6 +526,19 @@ export default function ActiveWorkout() {
       {/* DÉBLOCAGE DE BADGES (après le level-up / l'évolution le cas échéant) */}
       {showBadges && result && result.newBadges.length > 0 && (
         <BadgeUnlockOverlay badges={result.newBadges} onClose={() => setShowBadges(false)} />
+      )}
+
+      {/* RESSENTI POST-SÉANCE (non-bloquant, après badges) */}
+      {showFeel && result && (
+        <FeelingOverlay
+          t={t}
+          onSave={async (feeling, note) => {
+            await submitFeeling(result.log.id, feeling, note);
+            quit();
+            navigate('/');
+          }}
+          onSkip={() => { quit(); navigate('/'); }}
+        />
       )}
     </div>
   );
@@ -609,6 +625,109 @@ function RestRing({ remaining, total, color }: { remaining: number; total: numbe
           strokeDasharray={circ} strokeDashoffset={circ * (1 - frac)} style={{ filter: `drop-shadow(0 0 10px ${color})`, transition: 'stroke-dashoffset 1s linear' }} />
       </svg>
       <div className="absolute font-display font-bold" style={{ fontSize: 56 }}>{fmt(remaining)}</div>
+    </div>
+  );
+}
+
+const FEEL_COLORS: Record<number, { color: string; bg: string }> = {
+  1: { color: 'rgba(239,68,68,1)',   bg: 'rgba(239,68,68,.15)' },
+  2: { color: 'rgba(249,115,22,1)',  bg: 'rgba(249,115,22,.15)' },
+  3: { color: 'rgba(234,179,8,1)',   bg: 'rgba(234,179,8,.15)' },
+  4: { color: 'rgba(74,222,128,1)',  bg: 'rgba(74,222,128,.15)' },
+  5: { color: 'rgba(34,197,94,1)',   bg: 'rgba(34,197,94,.15)' },
+};
+
+function FeelingOverlay({
+  t,
+  onSave,
+  onSkip,
+}: {
+  t: ReturnType<typeof useTranslation>['t'];
+  onSave: (feeling: number | null, note: string | null) => Promise<void>;
+  onSkip: () => void;
+}) {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [note, setNote] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  async function handleSave() {
+    setSaving(true);
+    await onSave(selected, note || null);
+  }
+
+  return (
+    <div
+      className="absolute inset-0 flex items-center justify-center px-5"
+      style={{ zIndex: 70, background: 'rgba(6,6,10,.97)', backdropFilter: 'blur(12px)' }}
+    >
+      <div className="w-full max-w-sm rounded-2xl border border-border p-6" style={{ background: 'linear-gradient(180deg,#12141d,#0c0d14)' }}>
+        <h3 className="text-center text-sm font-display font-bold">{t('workout.feel.title')}</h3>
+        <p className="mt-1 text-center text-[11px] text-muted-foreground">{t('workout.feel.subtitle')}</p>
+
+        {/* Sélecteur 1-5 */}
+        <div className="mt-5 flex justify-center gap-2">
+          {([1, 2, 3, 4, 5] as const).map((v) => {
+            const f = FEEL_COLORS[v];
+            const active = selected === v;
+            return (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setSelected(active ? null : v)}
+                title={t(`workout.feel.labels.${v}`)}
+                className="flex h-14 w-14 flex-col items-center justify-center rounded-xl border transition-all"
+                style={{
+                  borderColor: active ? f.color : 'rgba(255,255,255,.12)',
+                  background: active ? f.bg : 'transparent',
+                  boxShadow: active ? `0 0 14px -2px ${f.color}` : 'none',
+                }}
+              >
+                <PixelCanvas
+                  render={(c) => drawSprite(c, FEEL_FACES[v - 1], 4)}
+                  deps={[v]}
+                />
+              </button>
+            );
+          })}
+        </div>
+        {selected && (
+          <p className="mt-2 text-center text-[11px] font-semibold" style={{ color: FEEL_COLORS[selected].color }}>
+            {t(`workout.feel.labels.${selected}`)}
+          </p>
+        )}
+
+        {/* Note libre */}
+        <div className="relative mt-4">
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value.slice(0, 200))}
+            placeholder={t('workout.feel.notePlaceholder')}
+            rows={2}
+            className="w-full resize-none rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+          />
+          <span className="absolute bottom-2 right-3 text-[10px] text-muted-foreground">{note.length}/200</span>
+        </div>
+
+        {/* Boutons */}
+        <div className="mt-4 flex gap-2.5">
+          <button
+            type="button"
+            onClick={onSkip}
+            disabled={saving}
+            className="flex-1 rounded-xl border border-border bg-card py-2.5 text-sm font-semibold text-muted-foreground disabled:opacity-50"
+          >
+            {t('workout.feel.skip')}
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={selected === null || saving}
+            className="flex-1 rounded-xl border-none bg-gradient-to-br from-primary to-indigo-800 py-2.5 text-sm font-bold text-white disabled:opacity-40"
+          >
+            {saving ? '…' : t('workout.feel.save')}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

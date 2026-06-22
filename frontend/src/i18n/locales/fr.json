@@ -248,6 +248,20 @@
       "more": "+ {{count}} autre séance",
       "more_plural": "+ {{count}} autres séances",
       "abandonedSession": "Aucune série enregistrée (séance abandonnée)."
+    },
+    "feel": {
+      "title": "Comment tu te sens ?",
+      "subtitle": "Ressenti post-séance — optionnel",
+      "notePlaceholder": "Note libre (facultative)…",
+      "save": "Enregistrer",
+      "skip": "Passer",
+      "labels": {
+        "1": "Épuisé",
+        "2": "Difficile",
+        "3": "Correct",
+        "4": "Bien",
+        "5": "Excellent"
+      }
     }
   },
   "activeWorkout": {

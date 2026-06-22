@@ -248,6 +248,20 @@
       "more": "+ {{count}} more session",
       "more_plural": "+ {{count}} more sessions",
       "abandonedSession": "No sets recorded (session abandoned)."
+    },
+    "feel": {
+      "title": "How are you feeling?",
+      "subtitle": "Post-workout rating — optional",
+      "notePlaceholder": "Optional note…",
+      "save": "Save",
+      "skip": "Skip",
+      "labels": {
+        "1": "Exhausted",
+        "2": "Hard",
+        "3": "OK",
+        "4": "Good",
+        "5": "Excellent"
+      }
     }
   },
   "activeWorkout": {

@@ -133,4 +133,41 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
+// PATCH /api/v1/workouts/:id/feeling — enregistre le ressenti post-séance
+router.patch('/:id/feeling', requireAuth, async (req: AuthRequest, res) => {
+  const { id } = req.params;
+  const { feeling, feelingNote } = req.body as { feeling?: number; feelingNote?: string };
+
+  if (feeling === undefined && feelingNote === undefined) {
+    res.status(400).json({ error: 'feeling ou feelingNote requis' });
+    return;
+  }
+  if (feeling !== undefined && (!Number.isInteger(feeling) || feeling < 1 || feeling > 5)) {
+    res.status(400).json({ error: 'feeling doit être un entier entre 1 et 5' });
+    return;
+  }
+  if (feelingNote !== undefined && feelingNote.length > 200) {
+    res.status(400).json({ error: 'feelingNote ne peut pas dépasser 200 caractères' });
+    return;
+  }
+
+  try {
+    const existing = await prisma.workoutLog.findFirst({ where: { id, userId: req.userId! } });
+    if (!existing) { res.status(404).json({ error: 'Séance introuvable' }); return; }
+
+    const log = await prisma.workoutLog.update({
+      where: { id },
+      data: {
+        feeling: feeling !== undefined ? feeling : existing.feeling,
+        feelingNote: feelingNote !== undefined ? feelingNote.trim() : existing.feelingNote,
+      },
+      include: { completedSets: { orderBy: { setNumber: 'asc' } } },
+    });
+    res.json({ log });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 export default router;

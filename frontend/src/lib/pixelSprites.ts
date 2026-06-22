@@ -176,6 +176,109 @@ export const HAMMER: Sprite = {
   pal: { '#': '#08070c', H: '#6b7280', W: '#8b5a2b' },
 };
 
+// ─── Visages ressenti post-séance (5 niveaux, 13×13) ───────────────────────
+// Palette : '#' = outline/détails, 'F' = peau, 'L' = reflet (face 5 seulement)
+// Maquette des yeux : blocs 2×2 aux cols 3-4 et 8-9.
+// X-eyes  (face 1) : croix diagonale sur les blocs yeux.
+// Bouche  : ∩ = frown | ligne = neutre | ∪ = smile.
+export const FEEL_FACES: Sprite[] = [
+  // 1 — Épuisé : X-eyes + frown
+  {
+    grid: [
+      '...#######...',
+      '..#FFFFFFF#..',
+      '.#FFFFFFFFF#.',
+      '#FFFFFFFFFFF#',
+      '#FF#FFFF#FFF#', // X-eye top  : # aux cols 3,8
+      '#FFF#FFFF#FF#', // X-eye bot  : # aux cols 4,9
+      '#FFFFFFFFFFF#',
+      '#FFFFFFFFFFF#',
+      '#FFF#####FFF#', // frown peak : # aux cols 4-8
+      '#FF#FFFFF#FF#', // frown corners : # aux cols 3,9
+      '.#FFFFFFFFF#.',
+      '..#FFFFFFF#..',
+      '...#######...',
+    ],
+    pal: { '#': '#1a1010', F: '#e8c4a0' },
+  },
+  // 2 — Difficile : yeux fins (1 ligne) + frown
+  {
+    grid: [
+      '...#######...',
+      '..#FFFFFFF#..',
+      '.#FFFFFFFFF#.',
+      '#FFFFFFFFFFF#',
+      '#FFFFFFFFFFF#',
+      '#FF##FFF##FF#', // yeux fins : # aux cols 3,4,8,9
+      '#FFFFFFFFFFF#',
+      '#FFFFFFFFFFF#',
+      '#FFF#####FFF#', // frown peak
+      '#FF#FFFFF#FF#', // frown corners
+      '.#FFFFFFFFF#.',
+      '..#FFFFFFF#..',
+      '...#######...',
+    ],
+    pal: { '#': '#1a1010', F: '#e8c4a0' },
+  },
+  // 3 — Correct : yeux 2 lignes + bouche neutre
+  {
+    grid: [
+      '...#######...',
+      '..#FFFFFFF#..',
+      '.#FFFFFFFFF#.',
+      '#FFFFFFFFFFF#',
+      '#FFFFFFFFFFF#',
+      '#FF##FFF##FF#', // yeux ligne 1
+      '#FF##FFF##FF#', // yeux ligne 2
+      '#FFFFFFFFFFF#',
+      '#FF#######FF#', // bouche neutre : # aux cols 3-9
+      '#FFFFFFFFFFF#',
+      '.#FFFFFFFFF#.',
+      '..#FFFFFFF#..',
+      '...#######...',
+    ],
+    pal: { '#': '#1a1010', F: '#e8c4a0' },
+  },
+  // 4 — Bien : yeux 2 lignes + smile (∪)
+  {
+    grid: [
+      '...#######...',
+      '..#FFFFFFF#..',
+      '.#FFFFFFFFF#.',
+      '#FFFFFFFFFFF#',
+      '#FFFFFFFFFFF#',
+      '#FF##FFF##FF#', // yeux ligne 1
+      '#FF##FFF##FF#', // yeux ligne 2
+      '#FF#FFFFF#FF#', // smile corners : # aux cols 3,9 (haut du ∪)
+      '#FFF#####FFF#', // smile center  : # aux cols 4-8 (bas du ∪)
+      '#FFFFFFFFFFF#',
+      '.#FFFFFFFFF#.',
+      '..#FFFFFFF#..',
+      '...#######...',
+    ],
+    pal: { '#': '#1a1010', F: '#e8c4a0' },
+  },
+  // 5 — Excellent : yeux brillants (reflet L) + grand smile
+  {
+    grid: [
+      '...#######...',
+      '..#FFFFFFF#..',
+      '.#FFFFFFFFF#.',
+      '#FFFFFFFFFFF#',
+      '#FFFFFFFFFFF#',
+      '#FF#LFFF#LFF#', // yeux avec reflet L aux cols 4,9
+      '#FF##FFF##FF#', // yeux ligne 2 (solide)
+      '#FF#FFFFF#FF#', // grand smile corners
+      '#FFF#####FFF#', // grand smile center
+      '#FFFFFFFFFFF#',
+      '.#FFFFFFFFF#.',
+      '..#FFFFFFF#..',
+      '...#######...',
+    ],
+    pal: { '#': '#1a1010', F: '#e8c4a0', L: '#fdf6e0' },
+  },
+];
+
 /** Dessine un sprite (grille + palette) sur un canvas, à l'échelle indiquée. */
 export function drawSprite(canvas: HTMLCanvasElement, sprite: Sprite, scale: number): void {
   const ctx = canvas.getContext('2d');

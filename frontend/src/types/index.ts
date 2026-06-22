@@ -99,6 +99,8 @@ export interface WorkoutLog {
   date: string;
   durationSecs: number;
   xpEarned: number;
+  feeling?: number | null;
+  feelingNote?: string | null;
   completedSets: WorkoutLogSet[];
 }
 

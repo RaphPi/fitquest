@@ -121,6 +121,8 @@ model WorkoutLog {
   date          DateTime       @default(now())
   durationSecs  Int
   xpEarned      Int
+  feeling       Int?           // ressenti post-séance 1-5 (😫→😄)
+  feelingNote   String?        // note libre ≤200 chars
   completedSets CompletedSet[]
 }
 

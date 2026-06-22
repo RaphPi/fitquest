@@ -6,6 +6,8 @@ import { useWorkoutStore } from '@/stores/workoutStore';
 import { useProgramStore } from '@/stores/programStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
 import { buildActiveSession } from '@/lib/launchSession';
+import { drawSprite, FEEL_FACES } from '@/lib/pixelSprites';
+import PixelCanvas from '@/components/workout/active/PixelCanvas';
 import type { Exercise, Program, WorkoutLog, WorkoutSession } from '@/types';
 
 interface Props {
@@ -123,6 +125,14 @@ export default function WorkoutHistory({ limit, overrideLogs }: Props) {
   );
 }
 
+const FEEL_COLORS: Record<number, { color: string; bg: string }> = {
+  1: { color: 'rgba(239,68,68,1)',   bg: 'rgba(239,68,68,.15)' },
+  2: { color: 'rgba(249,115,22,1)',  bg: 'rgba(249,115,22,.15)' },
+  3: { color: 'rgba(234,179,8,1)',   bg: 'rgba(234,179,8,.15)' },
+  4: { color: 'rgba(74,222,128,1)',  bg: 'rgba(74,222,128,.15)' },
+  5: { color: 'rgba(34,197,94,1)',   bg: 'rgba(34,197,94,.15)' },
+};
+
 function HistoryItem({
   log,
   programName,
@@ -137,6 +147,7 @@ function HistoryItem({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const setCount = log.completedSets.length;
+  const feel = log.feeling != null ? FEEL_COLORS[log.feeling] : null;
 
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-card">
@@ -161,14 +172,27 @@ function HistoryItem({
           />
         </button>
 
-        {/* Ligne 2 : date/durée/séries · XP · Relancer */}
+        {/* Ligne 2 : date/durée/séries · XP · chip feeling · Relancer */}
         <div className="mt-2 flex items-center justify-between gap-x-2 pl-[52px] text-xs text-muted-foreground">
-          <div className="flex min-w-0 flex-wrap gap-x-3 gap-y-0.5">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5">
             <span className="whitespace-nowrap">{formatDate(log.date)} · {formatTime(log.date)}</span>
             <span className="inline-flex items-center gap-1 whitespace-nowrap" style={{ color: 'rgba(34,211,238,1)' }}>
               <Clock className="h-3 w-3" /> {formatDuration(log.durationSecs)}
             </span>
             <span className="whitespace-nowrap">{setCount} série{setCount > 1 ? 's' : ''}</span>
+            {feel && (
+              <span
+                className="inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                style={{ color: feel.color, background: feel.bg }}
+              >
+                <PixelCanvas
+                  render={(c) => drawSprite(c, FEEL_FACES[log.feeling! - 1], 1)}
+                  deps={[log.feeling]}
+                  className="shrink-0"
+                />
+                {t(`workout.feel.labels.${log.feeling}`)}
+              </span>
+            )}
           </div>
           <div className="flex shrink-0 items-center gap-1.5">
             <div className="inline-flex items-center gap-0.5 font-display text-sm font-black text-xp">
@@ -210,6 +234,11 @@ function HistoryItem({
                 </li>
               ))}
             </ul>
+          )}
+          {log.feelingNote && (
+            <p className="mt-2.5 border-t border-border/40 pt-2.5 text-xs italic text-muted-foreground">
+              💬 {log.feelingNote}
+            </p>
           )}
         </div>
       )}
