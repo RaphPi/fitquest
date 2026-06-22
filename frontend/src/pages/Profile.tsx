@@ -5,6 +5,9 @@ import { useUserStore } from '@/stores/userStore';
 import { getLevelTier, nextTierLevel } from '@/lib/levelTier';
 import { getAvatarStageMeta, getAvatarStage, avatarClassFromStage, AVATAR_CLASSES, AVATAR_STAGE_COUNT } from '@/lib/avatar';
 import { renderAvatarSprite } from '@/lib/avatarSprites';
+import { renderBadgeIcon } from '@/lib/badgeIcons';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { useBadgeStore } from '@/stores/badgeStore';
 import { xpRequiredForLevel } from '@/lib/xp';
 import { cn } from '@/lib/utils';
 import LevelBadge from '@/components/ui/LevelBadge';
@@ -129,6 +132,9 @@ function AvatarPicker() {
 function ExportSheetButton() {
   const { t } = useTranslation();
   const user = useUserStore((s) => s.user);
+  const theme = useSettingsStore((s) => s.theme);
+  const badges = useBadgeStore((s) => s.badges);
+  const fetchBadges = useBadgeStore((s) => s.fetchBadges);
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState(false);
 
@@ -150,11 +156,28 @@ function ExportSheetButton() {
       });
       const avatarPng = canvas.toDataURL('image/png');
 
+      // Icônes de trophées obtenus → PNG pixel art, indexées par "iconType__rarity"
+      // (clé reconstruite côté backend pour chaque UserBadge).
+      let badgeList = badges;
+      if (badgeList.length === 0) {
+        await fetchBadges();
+        badgeList = useBadgeStore.getState().badges;
+      }
+      const iconMap: Record<string, string> = {};
+      for (const b of badgeList) {
+        if (!b.obtained) continue;
+        const key = `${b.iconType}__${b.rarity}`;
+        if (iconMap[key]) continue;
+        const c = document.createElement('canvas');
+        renderBadgeIcon(c, b.iconType, b.rarity, 6, false);
+        iconMap[key] = c.toDataURL('image/png');
+      }
+
       const res = await fetch('/api/v1/profile/pdf', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ avatarPng }),
+        body: JSON.stringify({ avatarPng, themeId: theme, iconMap }),
       });
       if (!res.ok) throw new Error('export failed');
 
