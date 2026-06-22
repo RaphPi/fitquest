@@ -7,6 +7,7 @@ import bodyRouter from './body';
 import digestRouter from './digest';
 import exerciseRouter from './exercises';
 import exportRouter from './export';
+import profileRouter from './profile';
 import programRouter from './programs';
 import workoutRouter from './workouts';
 
@@ -37,6 +38,7 @@ router.use('/badges', badgeRouter);
 router.use('/body', bodyRouter);
 router.use('/exercises', exerciseRouter);
 router.use('/export', exportRouter);
+router.use('/profile', profileRouter);
 router.use('/programs', programRouter);
 router.use('/workouts', workoutRouter);
 

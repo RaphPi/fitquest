@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, Check } from 'lucide-react';
+import { ChevronDown, Check, FileDown, Loader2 } from 'lucide-react';
 import { useUserStore } from '@/stores/userStore';
 import { getLevelTier, nextTierLevel } from '@/lib/levelTier';
-import { getAvatarStageMeta, avatarClassFromStage, AVATAR_CLASSES, AVATAR_STAGE_COUNT } from '@/lib/avatar';
+import { getAvatarStageMeta, getAvatarStage, avatarClassFromStage, AVATAR_CLASSES, AVATAR_STAGE_COUNT } from '@/lib/avatar';
+import { renderAvatarSprite } from '@/lib/avatarSprites';
 import { xpRequiredForLevel } from '@/lib/xp';
 import { cn } from '@/lib/utils';
 import LevelBadge from '@/components/ui/LevelBadge';
@@ -122,6 +123,80 @@ function AvatarPicker() {
   );
 }
 
+/** Bouton d'export de la fiche de personnage en PDF.
+ *  L'avatar pixel art est rendu hors-écran en PNG puis envoyé au backend
+ *  (qui génère le PDF via Puppeteer) pour un rendu fidèle au jeu. */
+function ExportSheetButton() {
+  const { t } = useTranslation();
+  const user = useUserStore((s) => s.user);
+  const [exporting, setExporting] = useState(false);
+  const [error, setError] = useState(false);
+
+  if (!user) return null;
+
+  async function handleExport() {
+    if (!user || exporting) return;
+    setExporting(true);
+    setError(false);
+    try {
+      // Rendu hors-écran de l'avatar (scale élevé = net à l'impression).
+      const canvas = document.createElement('canvas');
+      renderAvatarSprite(canvas, {
+        classKey: avatarClassFromStage(user.avatarStage),
+        stage: getAvatarStage(user.level),
+        tier: getLevelTier(user.level),
+        scale: 14,
+        bare: false,
+      });
+      const avatarPng = canvas.toDataURL('image/png');
+
+      const res = await fetch('/api/v1/profile/pdf', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatarPng }),
+      });
+      if (!res.ok) throw new Error('export failed');
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `fitquest-fiche-${user.username}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setError(true);
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card px-5 py-4">
+      <div className="min-w-0">
+        <h2 className="font-display text-sm font-bold uppercase tracking-widest">
+          {t('profile.exportSheet.title')}
+        </h2>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {error ? t('profile.exportSheet.error') : t('profile.exportSheet.hint')}
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={() => void handleExport()}
+        disabled={exporting}
+        className="flex shrink-0 items-center gap-2 rounded-lg bg-primary px-4 py-2 font-display text-sm font-bold uppercase tracking-widest text-white transition hover:bg-primary/90 disabled:opacity-40"
+      >
+        {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
+        {exporting ? t('profile.exportSheet.generating') : t('profile.exportSheet.button')}
+      </button>
+    </div>
+  );
+}
+
 export default function Profile() {
   const { t } = useTranslation();
   const user = useUserStore((s) => s.user);
@@ -178,6 +253,8 @@ export default function Profile() {
           </div>
         </div>
       )}
+
+      <ExportSheetButton />
 
       <AvatarPicker />
 

@@ -497,6 +497,13 @@
       "saving": "Sauvegarde…",
       "save": "Enregistrer",
       "saved": "Sauvegardé"
+    },
+    "exportSheet": {
+      "title": "Fiche de personnage",
+      "hint": "Exporte ta fiche RPG en PDF.",
+      "button": "Exporter",
+      "generating": "Génération…",
+      "error": "Échec de la génération, réessaie."
     }
   },
   "settings": {

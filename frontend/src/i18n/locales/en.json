@@ -497,6 +497,13 @@
       "saving": "Saving…",
       "save": "Save",
       "saved": "Saved"
+    },
+    "exportSheet": {
+      "title": "Character sheet",
+      "hint": "Export your RPG sheet as PDF.",
+      "button": "Export",
+      "generating": "Generating…",
+      "error": "Generation failed, try again."
     }
   },
   "settings": {
