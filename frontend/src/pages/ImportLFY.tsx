@@ -13,6 +13,7 @@ interface ImportLog {
   importedAt: string;
   programIds: string[];
   exerciseIds: string[];
+  programNames: string[];
 }
 
 interface ImportPayloadPreview {
@@ -371,22 +372,29 @@ export default function ImportLFY() {
               <div key={log.id} className="px-5 py-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                      {log.label && (
-                        <span className="rounded bg-primary/15 px-1.5 py-0.5 font-mono text-xs font-semibold text-primary">
-                          {log.label}
-                        </span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(log.importedAt).toLocaleString(i18n.language)}
+                    </span>
+                    <ul className="mt-1.5 space-y-0.5">
+                      {(log.programNames.length > 0 ? log.programNames : Array(log.programIds.length).fill(null))
+                        .slice(0, 3)
+                        .map((name, i) => (
+                          <li key={i} className="flex items-center gap-1.5 text-xs text-foreground">
+                            <span className="h-1 w-1 shrink-0 rounded-full bg-primary/60" />
+                            {name ?? `Programme ${i + 1}`}
+                          </li>
+                        ))}
+                      {log.programIds.length > 3 && (
+                        <li className="text-xs text-muted-foreground">
+                          + {log.programIds.length - 3} {t('import.preview.programs').toLowerCase()}…
+                        </li>
                       )}
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(log.importedAt).toLocaleString(i18n.language)}
-                      </span>
-                    </div>
-                    <div className="mt-1 flex gap-4 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                      <span>{log.programIds.length} {t('import.preview.programs').toLowerCase()}</span>
-                      {log.exerciseIds.length > 0 && (
-                        <span>{log.exerciseIds.length} {t('import.preview.exercises').toLowerCase()}</span>
-                      )}
-                    </div>
+                    </ul>
+                    {log.exerciseIds.length > 0 && (
+                      <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                        + {log.exerciseIds.length} {t('import.preview.exercises').toLowerCase()}
+                      </p>
+                    )}
                   </div>
                   {purgingLogId === log.id ? (
                     <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-muted-foreground" />

@@ -413,6 +413,7 @@ router.post('/import', requireAuth, async (req: AuthRequest, res) => {
   let skipped = 0;
   const newExerciseIds: string[] = [];
   const createdProgramIds: string[] = [];
+  const createdProgramNames: string[] = [];
 
   try {
     // Pré-vérifie quels exercices existent déjà (1 requête batch) pour tracker uniquement les nouveaux
@@ -483,6 +484,7 @@ router.post('/import', requireAuth, async (req: AuthRequest, res) => {
           select: { id: true },
         });
         createdProgramIds.push(created.id);
+        createdProgramNames.push(prog.nameFr);
         importedPrograms++;
       }
     }, { timeout: 30000 });
@@ -493,6 +495,7 @@ router.post('/import', requireAuth, async (req: AuthRequest, res) => {
           label: parsed.data.sourcePrefix?.trim() || null,
           programIds: createdProgramIds,
           exerciseIds: newExerciseIds,
+          programNames: createdProgramNames,
         },
       }).catch((logErr) => console.error('[programs/import] ImportLog non-bloquant:', logErr));
     }
