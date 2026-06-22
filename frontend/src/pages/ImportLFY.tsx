@@ -9,10 +9,10 @@ import { cn } from '@/lib/utils';
 
 interface ImportLog {
   id: string;
-  sourcePrefix: string;
+  label: string | null;
   importedAt: string;
-  programCount: number;
-  exerciseCount: number;
+  programIds: string[];
+  exerciseIds: string[];
 }
 
 interface ImportPayloadPreview {
@@ -52,7 +52,7 @@ export default function ImportLFY() {
   const [logs, setLogs] = useState<ImportLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
   const [confirmLogId, setConfirmLogId] = useState<string | null>(null);
-  const [purgingPrefix, setPurgingPrefix] = useState<string | null>(null);
+  const [purgingLogId, setPurgingLogId] = useState<string | null>(null);
   const [purgeError, setPurgeError] = useState<string | null>(null);
 
   // ── Fetch logs ────────────────────────────────────────────────────────────
@@ -139,20 +139,20 @@ export default function ImportLFY() {
 
   // ── Purge handlers ────────────────────────────────────────────────────────
 
-  async function handlePurge(prefix: string) {
+  async function handlePurge(logId: string) {
     setConfirmLogId(null);
-    setPurgingPrefix(prefix);
+    setPurgingLogId(logId);
     setPurgeError(null);
     try {
       await apiFetch<{ deleted: { programs: number; exercises: number } }>(
-        `/api/v1/programs/import/${encodeURIComponent(prefix)}`,
+        `/api/v1/programs/import/${encodeURIComponent(logId)}`,
         { method: 'DELETE' },
       );
       await fetchLogs();
     } catch (e) {
       setPurgeError(e instanceof Error ? e.message : t('common.unknownError'));
     } finally {
-      setPurgingPrefix(null);
+      setPurgingLogId(null);
     }
   }
 
@@ -372,19 +372,23 @@ export default function ImportLFY() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                      <span className="rounded bg-primary/15 px-1.5 py-0.5 font-mono text-xs font-semibold text-primary">
-                        {log.sourcePrefix}
-                      </span>
+                      {log.label && (
+                        <span className="rounded bg-primary/15 px-1.5 py-0.5 font-mono text-xs font-semibold text-primary">
+                          {log.label}
+                        </span>
+                      )}
                       <span className="text-xs text-muted-foreground">
                         {new Date(log.importedAt).toLocaleString(i18n.language)}
                       </span>
                     </div>
                     <div className="mt-1 flex gap-4 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                      <span>{log.exerciseCount} {t('import.preview.exercises').toLowerCase()}</span>
-                      <span>{log.programCount} {t('import.preview.programs').toLowerCase()}</span>
+                      <span>{log.programIds.length} {t('import.preview.programs').toLowerCase()}</span>
+                      {log.exerciseIds.length > 0 && (
+                        <span>{log.exerciseIds.length} {t('import.preview.exercises').toLowerCase()}</span>
+                      )}
                     </div>
                   </div>
-                  {purgingPrefix === log.sourcePrefix ? (
+                  {purgingLogId === log.id ? (
                     <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
                   ) : confirmLogId !== log.id && (
                     <button
@@ -403,13 +407,16 @@ export default function ImportLFY() {
                     <div className="flex items-start gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-2.5">
                       <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-yellow-400" />
                       <p className="text-xs text-yellow-400">
-                        {t('import.logs.purgeConfirm', { prefix: log.sourcePrefix })}
+                        {t('import.logs.purgeConfirm', {
+                          programs: log.programIds.length,
+                          exercises: log.exerciseIds.length,
+                        })}
                       </p>
                     </div>
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        onClick={() => void handlePurge(log.sourcePrefix)}
+                        onClick={() => void handlePurge(log.id)}
                         className="flex-1 rounded-lg bg-red-500/80 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-red-500"
                       >
                         {t('import.logs.purgeConfirmBtn')}

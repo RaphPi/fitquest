@@ -1,4 +1,4 @@
-{
+﻿{
   "app": {
     "name": "FitQuest",
     "tagline": "LEVEL UP !"
@@ -692,7 +692,7 @@
       "title": "Historique des imports",
       "empty": "Aucun import enregistré.",
       "purgeBtn": "Purger",
-      "purgeConfirm": "Supprimer tous les exercices et programmes « {{prefix}} » ? Cette action est irréversible.",
+      "purgeConfirm": "Supprimer {{programs}} programme(s) et {{exercises}} exercice(s) importés ? Cette action est irréversible.",
       "purgeConfirmBtn": "Confirmer la suppression",
       "purgeCancel": "Annuler",
       "purging": "Suppression en cours…",

@@ -185,9 +185,9 @@ model UserBadge {
 }
 
 model ImportLog {
-  id            String   @id @default(cuid())
-  sourcePrefix  String
-  importedAt    DateTime @default(now())
-  programCount  Int
-  exerciseCount Int
+  id          String   @id @default(cuid())
+  label       String?  // sourcePrefix du payload (ex: "lfy") ou null si import anonyme
+  importedAt  DateTime @default(now())
+  programIds  String[] // IDs des programmes créés par cet import
+  exerciseIds String[] // IDs des exercices nouveaux (non existants avant l'import)
 }

@@ -300,7 +300,7 @@ router.delete('/:id/sessions/:sessionId', requireAuth, async (req: AuthRequest, 
   }
 });
 
-// ── Import LFY ──────────────────────────────────────────────────────────────
+// ── Import JSON générique ────────────────────────────────────────────────────
 
 const SessionExerciseImportSchema = z.object({
   exerciseId: z.string().min(1),
@@ -350,7 +350,7 @@ const ExerciseImportItemSchema = z.object({
 
 const ImportPayloadSchema = z.object({
   version: z.string().optional(),
-  sourcePrefix: z.string().optional(),
+  sourcePrefix: z.string().optional(), // label optionnel (ex: "lfy")
   programs: z.array(ProgramImportItemSchema),
   exercises: z.array(ExerciseImportItemSchema),
 });
@@ -367,29 +367,31 @@ router.get('/import/logs', requireAuth, async (_req: AuthRequest, res) => {
   }
 });
 
-// DELETE /api/v1/programs/import/:prefix
-// Purge générique par sourcePrefix : supprime exercices (id prefix_*),
-// programmes (nameFr PREFIX*) et entrées ImportLog associées.
-router.delete('/import/:prefix', requireAuth, async (req: AuthRequest, res) => {
-  const { prefix } = req.params;
-  if (!prefix || prefix.trim() === '') {
-    res.status(400).json({ error: 'Préfixe invalide' });
+// DELETE /api/v1/programs/import/:logId
+// Purge par ID de log : supprime exactement les programmes et exercices trackés.
+router.delete('/import/:logId', requireAuth, async (req: AuthRequest, res) => {
+  const { logId } = req.params;
+  const log = await prisma.importLog.findUnique({ where: { id: logId } });
+  if (!log) {
+    res.status(404).json({ error: 'Import introuvable' });
     return;
   }
   try {
     const result = await prisma.$transaction(async (tx) => {
+      // Programmes trackés → cascade vers Sessions et SessionExercises
       const { count: programs } = await tx.program.deleteMany({
-        where: { nameFr: { startsWith: prefix.toUpperCase() } },
+        where: { id: { in: log.programIds } },
       });
+      // Exercices nouveaux trackés (pas les exercices catalogue déjà existants)
       const { count: exercises } = await tx.exercise.deleteMany({
-        where: { id: { startsWith: `${prefix}_` } },
+        where: { id: { in: log.exerciseIds } },
       });
-      await tx.importLog.deleteMany({ where: { sourcePrefix: prefix } });
+      await tx.importLog.delete({ where: { id: logId } });
       return { programs, exercises };
     }, { timeout: 30000 });
     res.json({ deleted: result });
   } catch (e) {
-    console.error('[programs/import/:prefix DELETE]', e);
+    console.error('[programs/import/:logId DELETE]', e);
     res.status(500).json({ error: 'Erreur lors de la suppression' });
   }
 });
@@ -397,6 +399,7 @@ router.delete('/import/:prefix', requireAuth, async (req: AuthRequest, res) => {
 // POST /api/v1/programs/import
 // Ingère un payload JSON (exercises + programs) et peuple la BDD.
 // Exercices : upsert par id. Programmes : créé seulement si le nameFr n'existe pas déjà.
+// Crée un ImportLog avec les IDs exacts importés pour permettre une purge propre.
 router.post('/import', requireAuth, async (req: AuthRequest, res) => {
   const parsed = ImportPayloadSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -408,8 +411,18 @@ router.post('/import', requireAuth, async (req: AuthRequest, res) => {
   let importedExercises = 0;
   let importedPrograms = 0;
   let skipped = 0;
+  const newExerciseIds: string[] = [];
+  const createdProgramIds: string[] = [];
 
   try {
+    // Pré-vérifie quels exercices existent déjà (1 requête batch) pour tracker uniquement les nouveaux
+    const existingExIds = new Set(
+      (await prisma.exercise.findMany({
+        where: { id: { in: exercises.map((e) => e.id) } },
+        select: { id: true },
+      })).map((e) => e.id),
+    );
+
     await prisma.$transaction(async (tx) => {
       for (const ex of exercises) {
         const data = {
@@ -429,13 +442,14 @@ router.post('/import', requireAuth, async (req: AuthRequest, res) => {
         };
         await tx.exercise.upsert({ where: { id: ex.id }, update: data, create: { id: ex.id, ...data } });
         importedExercises++;
+        if (!existingExIds.has(ex.id)) newExerciseIds.push(ex.id);
       }
 
       for (const prog of programs) {
         const existing = await tx.program.findFirst({ where: { nameFr: prog.nameFr } });
         if (existing) { skipped++; continue; }
 
-        await tx.program.create({
+        const created = await tx.program.create({
           data: {
             nameFr: prog.nameFr,
             nameEn: prog.nameEn,
@@ -466,15 +480,20 @@ router.post('/import', requireAuth, async (req: AuthRequest, res) => {
               })),
             },
           },
+          select: { id: true },
         });
+        createdProgramIds.push(created.id);
         importedPrograms++;
       }
     }, { timeout: 30000 });
 
-    const sp = parsed.data.sourcePrefix?.trim();
-    if (sp && (importedExercises + importedPrograms) > 0) {
+    if (createdProgramIds.length + newExerciseIds.length > 0) {
       prisma.importLog.create({
-        data: { sourcePrefix: sp, programCount: importedPrograms, exerciseCount: importedExercises },
+        data: {
+          label: parsed.data.sourcePrefix?.trim() || null,
+          programIds: createdProgramIds,
+          exerciseIds: newExerciseIds,
+        },
       }).catch((logErr) => console.error('[programs/import] ImportLog non-bloquant:', logErr));
     }
 
