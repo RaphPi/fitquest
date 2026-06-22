@@ -21,6 +21,7 @@ export type ProgramFormData = {
   daysPerWeek: number;
   durationWeeks?: number | null;
   equipment: string[];
+  goals?: string[];
 };
 
 export type SessionExerciseInput = {

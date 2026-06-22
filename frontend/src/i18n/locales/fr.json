@@ -200,6 +200,7 @@
       "durationWeeksOptional": "— optionnel",
       "equipment": "Équipement",
       "equipmentAuto": "(mis à jour automatiquement)",
+      "goals": "Objectifs ciblés",
       "clearDuration": "Effacer",
       "sessions": "Séances ({{count}})",
       "addSession": "Ajouter",

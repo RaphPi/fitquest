@@ -133,12 +133,15 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
 
 // POST /api/v1/programs
 router.post('/', requireAuth, async (req: AuthRequest, res) => {
-  const { nameFr, nameEn, descFr, descEn, level, daysPerWeek, durationWeeks, equipment } =
+  const { nameFr, nameEn, descFr, descEn, level, daysPerWeek, durationWeeks, equipment, goals } =
     req.body as Record<string, unknown>;
   if (!nameFr || !nameEn || !level || !daysPerWeek) {
     res.status(400).json({ error: 'Champs obligatoires manquants' });
     return;
   }
+  const validGoals = Array.isArray(goals)
+    ? (goals as unknown[]).filter((g): g is string => typeof g === 'string' && GOALS.includes(g as never))
+    : [];
   try {
     const program = await prisma.program.create({
       data: {
@@ -150,6 +153,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
         daysPerWeek: Number(daysPerWeek),
         durationWeeks: durationWeeks ? Number(durationWeeks) : null,
         equipment: (equipment as string[] | undefined) ?? [],
+        goals: validGoals,
         isCustom: true,
         createdBy: req.userId!,
       },
@@ -175,13 +179,18 @@ router.patch('/:id', requireAuth, async (req: AuthRequest, res) => {
   const existing = await prisma.program.findUnique({ where: { id } });
   if (!existing) { res.status(404).json({ error: 'Programme introuvable' }); return; }
 
-  const allowed = ['nameFr', 'nameEn', 'descFr', 'descEn', 'level', 'daysPerWeek', 'durationWeeks', 'equipment'];
+  const allowed = ['nameFr', 'nameEn', 'descFr', 'descEn', 'level', 'daysPerWeek', 'durationWeeks', 'equipment', 'goals'];
   const data: Record<string, unknown> = {};
   for (const key of allowed) {
     if (key in req.body) data[key] = (req.body as Record<string, unknown>)[key];
   }
   if (data.daysPerWeek !== undefined) data.daysPerWeek = Number(data.daysPerWeek);
   if (data.durationWeeks !== undefined) data.durationWeeks = data.durationWeeks ? Number(data.durationWeeks) : null;
+  if (data.goals !== undefined) {
+    data.goals = Array.isArray(data.goals)
+      ? (data.goals as unknown[]).filter((g): g is string => typeof g === 'string' && GOALS.includes(g as never))
+      : [];
+  }
   try {
     const program = await prisma.program.update({ where: { id }, data, include });
     res.json({ program });

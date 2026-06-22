@@ -10,6 +10,7 @@ import SetsFlow from '@/components/workout/SetsFlow';
 import ExerciseInfoModal from '@/components/workout/ExerciseInfoModal';
 import type { Program, Level, Equipment, Exercise, Category } from '@/types';
 import { estimateExerciseSeconds } from '@/lib/duration';
+import { GOALS } from '@/lib/goals';
 
 interface ProgramBuilderProps {
   initial?: Program;
@@ -128,6 +129,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
     initial?.durationWeeks ? String(initial.durationWeeks) : '',
   );
   const [equipment, setEquipment] = useState<Equipment[]>((initial?.equipment as Equipment[]) ?? []);
+  const [goals, setGoals] = useState<string[]>(initial?.goals ?? []);
   const [sessions, setSessions] = useState<DraftSession[]>(() =>
     initial ? initFromProgram(initial, exMap) : [makeDefaultSession(0)],
   );
@@ -274,6 +276,7 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
         level, daysPerWeek,
         durationWeeks: durationWeeks ? Number(durationWeeks) : null,
         equipment,
+        goals,
       };
 
       const toSessionData = (s: DraftSession) => ({
@@ -419,6 +422,27 @@ export default function ProgramBuilder({ initial, onBack, onSaved }: ProgramBuil
                 }`}
               >
                 {o.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Objectifs */}
+        <div className="flex flex-col gap-2">
+          <label className="text-[11px] text-muted-foreground font-semibold">{t('workout.builder.goals')}</label>
+          <div className="flex flex-wrap gap-2">
+            {GOALS.map((g) => (
+              <button
+                key={g}
+                type="button"
+                onClick={() => setGoals((prev) => prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g])}
+                className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                  goals.includes(g)
+                    ? 'border-emerald-500/60 bg-emerald-500/15 text-emerald-400'
+                    : 'border-border text-muted-foreground hover:border-emerald-500/30 hover:text-foreground'
+                }`}
+              >
+                {t(`goals.${g}`)}
               </button>
             ))}
           </div>
