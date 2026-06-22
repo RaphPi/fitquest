@@ -3,6 +3,7 @@ import express, { type Request, type Response, type NextFunction } from 'express
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import apiRouter from './routes';
+import { startScheduler } from './lib/scheduler';
 
 const app = express();
 const PORT = Number(process.env.PORT ?? 3001);
@@ -41,4 +42,5 @@ process.on('unhandledRejection', (reason) => {
 
 app.listen(PORT, () => {
   console.log(`🗡️  FitQuest API en écoute sur http://localhost:${PORT}/api/v1`);
+  startScheduler();
 });

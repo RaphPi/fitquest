@@ -20,11 +20,15 @@ msg_info "Récupération des dernières modifications…"
 git pull origin "$BRANCH" || die "git pull a échoué."
 msg_ok "Dépôt à jour"
 
-# 1b. Garde-fou : ajoute SMTP_ENC_KEY au .env existant s'il manque (chiffrement SMTP par user).
+# 1b. Garde-fous : ajoute les clés manquantes au .env existant.
+gen_secret() { openssl rand -hex 32 2>/dev/null || head -c32 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | head -c48; }
 if [[ -f .env ]] && ! grep -q '^SMTP_ENC_KEY=' .env; then
-  gen_secret() { openssl rand -hex 32 2>/dev/null || head -c32 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | head -c48; }
   echo "SMTP_ENC_KEY=$(gen_secret)" >> .env
   msg_ok "SMTP_ENC_KEY ajouté au .env"
+fi
+if [[ -f .env ]] && ! grep -q '^DIGEST_CRON_HOUR=' .env; then
+  echo "DIGEST_CRON_HOUR=7" >> .env
+  msg_ok "DIGEST_CRON_HOUR ajouté au .env"
 fi
 
 # shellcheck disable=SC1091
