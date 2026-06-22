@@ -116,6 +116,24 @@ function fmtNum(n: number): string {
   return Number.isInteger(n) ? String(n) : n.toFixed(1);
 }
 
+/** Courbe lissée (Catmull-Rom → Bézier cubique) passant par tous les points. */
+function smoothPath(pts: { x: number; y: number }[]): string {
+  if (pts.length < 2) return '';
+  let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] ?? pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] ?? p2;
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+  }
+  return d;
+}
+
 /** Graphe multi-lignes pour un groupe d'unité (axe X = temps, axe Y = valeurs de l'unité). */
 function buildGroupChartSvg(group: MetricGroup, gridColor: string): string {
   const all = group.series.flatMap((s) => s.points);
@@ -127,7 +145,7 @@ function buildGroupChartSvg(group: MetricGroup, gridColor: string): string {
   let vMin = Math.min(...vals), vMax = Math.max(...vals);
   if (vMin === vMax) { vMin -= 1; vMax += 1; }
 
-  const W = 340, H = 120, padL = 6, padR = 6, padT = 14, padB = 10;
+  const W = 340, H = 104, padL = 6, padR = 6, padT = 13, padB = 9;
   const innerW = W - padL - padR, innerH = H - padT - padB;
   const x = (t: number) => padL + (innerW * (t - tMin)) / (tMax - tMin);
   const y = (v: number) => padT + innerH * (1 - (v - vMin) / (vMax - vMin));
@@ -136,14 +154,14 @@ function buildGroupChartSvg(group: MetricGroup, gridColor: string): string {
     const pts = s.points
       .slice()
       .sort((a, b) => a.date.getTime() - b.date.getTime())
-      .map((p) => `${x(p.date.getTime()).toFixed(1)},${y(p.value).toFixed(1)}`);
-    const dots = s.points
-      .map((p) => `<circle cx="${x(p.date.getTime()).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="2.2" fill="${s.color}"/>`)
+      .map((p) => ({ x: x(p.date.getTime()), y: y(p.value) }));
+    const dots = pts
+      .map((p) => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="2.2" fill="${s.color}"/>`)
       .join('');
-    const poly = pts.length > 1
-      ? `<polyline points="${pts.join(' ')}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`
+    const path = pts.length > 1
+      ? `<path d="${smoothPath(pts)}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`
       : '';
-    return poly + dots;
+    return path + dots;
   }).join('');
 
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="none" style="display:block">
@@ -241,61 +259,61 @@ export function buildCharacterSheetHtml(data: CharacterSheetData): string {
   @page { size: A4; margin: 0; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root { --display: 'VT323', 'Courier New', monospace; --body: 'Inter', system-ui, sans-serif; }
-  body { width: 210mm; min-height: 297mm; font-family: var(--body); color: ${th.textPrimary}; background: #fff; padding: 12mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { width: 210mm; min-height: 297mm; font-family: var(--body); color: ${th.textPrimary}; background: #fff; padding: 9mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .sheet { border: 2px solid ${th.border}; border-radius: 18px; background: ${th.bgCard};
     background-image: radial-gradient(circle at 18% 10%, ${tier.color}26, transparent 42%), radial-gradient(circle at 85% 92%, ${th.accent}26, transparent 45%);
     box-shadow: inset 0 0 60px ${tier.color}14; overflow: hidden; }
   .topbar { height: 6px; background: linear-gradient(90deg, ${tier.color}, ${tier.light}); }
-  .title { text-align: center; padding: 12px 0 4px; font-family: var(--display); letter-spacing: 6px; font-size: 22px; text-transform: uppercase; color: ${th.textSecondary}; }
+  .title { text-align: center; padding: 9px 0 3px; font-family: var(--display); letter-spacing: 6px; font-size: 19px; text-transform: uppercase; color: ${th.textSecondary}; }
   .title b { color: ${th.accentSoft}; }
-  .hero { display: flex; gap: 26px; align-items: center; padding: 6px 30px 18px; border-bottom: 1px solid ${th.border}; }
-  .avatar { width: 120px; height: 180px; image-rendering: pixelated; filter: drop-shadow(0 0 10px ${tier.color}88); }
+  .hero { display: flex; gap: 22px; align-items: center; padding: 4px 28px 12px; border-bottom: 1px solid ${th.border}; }
+  .avatar { width: 104px; height: 156px; image-rendering: pixelated; filter: drop-shadow(0 0 10px ${tier.color}88); }
   .avatar-fallback { display: flex; align-items: center; justify-content: center; }
-  .avatar-fallback svg { width: 96px; height: 96px; }
+  .avatar-fallback svg { width: 84px; height: 84px; }
   .hero-info { flex: 1; min-width: 0; }
-  .hero-name { font-family: var(--display); font-size: 46px; line-height: 1; }
-  .hero-class { margin-top: 4px; font-size: 13px; letter-spacing: 1px; color: ${tier.color}; font-weight: 700; }
+  .hero-name { font-family: var(--display); font-size: 38px; line-height: 1; }
+  .hero-class { margin-top: 3px; font-size: 13px; letter-spacing: 1px; color: ${tier.color}; font-weight: 700; }
   .hero-class .sep { color: ${th.textSecondary}; margin: 0 8px; }
-  .level-row { display: flex; align-items: center; gap: 14px; margin: 14px 0 8px; }
-  .level-badge { width: 56px; height: 56px; border-radius: 50%; flex-direction: column; display: flex; align-items: center; justify-content: center; background: ${th.bgShield}; border: 2px solid ${tier.color}; box-shadow: 0 0 14px ${tier.color}66; }
+  .level-row { display: flex; align-items: center; gap: 14px; margin: 10px 0 6px; }
+  .level-badge { width: 50px; height: 50px; border-radius: 50%; flex-direction: column; display: flex; align-items: center; justify-content: center; background: ${th.bgShield}; border: 2px solid ${tier.color}; box-shadow: 0 0 14px ${tier.color}66; }
   .level-badge .lvl-label { font-size: 8px; letter-spacing: 1px; color: ${th.textSecondary}; }
-  .level-badge .lvl-num { font-family: var(--display); font-size: 30px; color: ${tier.light}; line-height: 0.9; }
+  .level-badge .lvl-num { font-family: var(--display); font-size: 26px; color: ${tier.light}; line-height: 0.9; }
   .xp-wrap { flex: 1; }
   .xp-meta { display: flex; justify-content: space-between; font-size: 11px; color: ${th.textSecondary}; margin-bottom: 4px; }
-  .xp-bar { height: 14px; border-radius: 8px; background: ${th.bgShield}; border: 1px solid ${th.border}; overflow: hidden; }
+  .xp-bar { height: 13px; border-radius: 8px; background: ${th.bgShield}; border: 1px solid ${th.border}; overflow: hidden; }
   .xp-fill { height: 100%; width: ${xpPct}%; background: linear-gradient(90deg, ${tier.color}, ${tier.light}); }
-  .hero-meta { display: block; margin-top: 10px; font-size: 12px; color: ${th.textSecondary}; }
+  .hero-meta { display: block; margin-top: 7px; font-size: 12px; color: ${th.textSecondary}; }
   .hero-meta b { color: ${th.textPrimary}; }
 
-  .section-title { padding: 18px 30px 8px; font-family: var(--display); font-size: 17px; letter-spacing: 3px; text-transform: uppercase; color: ${th.textSecondary}; }
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 0 30px; }
-  .stat { background: ${th.bgShield}; border: 1px solid ${th.border}; border-radius: 12px; padding: 12px 8px; text-align: center; }
-  .stat-value { font-family: var(--display); font-size: 36px; line-height: 0.9; color: ${th.accentSoft}; }
-  .stat-label { margin-top: 6px; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: ${th.textSecondary}; }
+  .section-title { padding: 11px 28px 5px; font-family: var(--display); font-size: 15px; letter-spacing: 3px; text-transform: uppercase; color: ${th.textSecondary}; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 28px; }
+  .stat { background: ${th.bgShield}; border: 1px solid ${th.border}; border-radius: 12px; padding: 9px 6px; text-align: center; }
+  .stat-value { font-family: var(--display); font-size: 30px; line-height: 0.9; color: ${th.accentSoft}; }
+  .stat-label { margin-top: 5px; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: ${th.textSecondary}; }
 
-  .evolution { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; padding: 0 30px; }
-  .metric-card { background: ${th.bgShield}; border: 1px solid ${th.border}; border-radius: 12px; padding: 12px 14px; }
-  .mc-title { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: ${th.textSecondary}; margin-bottom: 4px; }
-  .legend { display: grid; grid-template-columns: 1fr auto auto; gap: 3px 12px; margin-top: 8px; font-size: 11px; align-items: baseline; }
+  .evolution { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; padding: 0 28px; }
+  .metric-card { background: ${th.bgShield}; border: 1px solid ${th.border}; border-radius: 12px; padding: 9px 12px; }
+  .mc-title { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: ${th.textSecondary}; margin-bottom: 3px; }
+  .legend { display: grid; grid-template-columns: 1fr auto auto; gap: 2px 12px; margin-top: 5px; font-size: 11px; align-items: baseline; }
   .lg-name { color: ${th.textPrimary}; display: flex; align-items: center; gap: 6px; }
   .lg-name i { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
-  .lg-val { font-family: var(--display); font-size: 16px; text-align: right; color: ${th.textPrimary}; }
+  .lg-val { font-family: var(--display); font-size: 14px; text-align: right; color: ${th.textPrimary}; }
   .lg-delta { font-weight: 700; text-align: right; min-width: 30px; }
 
-  .photos { display: flex; gap: 16px; padding: 0 30px; }
+  .photos { display: flex; gap: 16px; padding: 0 28px; }
   .photo { flex: 1; text-align: center; }
-  .photo img { width: 100%; max-height: 200px; object-fit: contain; border: 1px solid ${th.border}; border-radius: 10px; background: ${th.bgShield}; }
-  .photo .cap { margin-top: 6px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: ${th.textSecondary}; }
+  .photo img { width: 100%; max-height: 150px; object-fit: contain; border: 1px solid ${th.border}; border-radius: 10px; background: ${th.bgShield}; }
+  .photo .cap { margin-top: 5px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: ${th.textSecondary}; }
 
-  .badges { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 0 30px; }
-  .badge { background: ${th.bgShield}; border: 1.5px solid; border-radius: 12px; padding: 12px 8px; text-align: center; }
-  .badge-icon { width: 48px; height: 48px; margin: 0 auto 8px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-  .badge-img { width: 39px; height: 39px; image-rendering: pixelated; }
+  .badges { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 28px; }
+  .badge { background: ${th.bgShield}; border: 1.5px solid; border-radius: 12px; padding: 8px 6px; text-align: center; }
+  .badge-icon { width: 40px; height: 40px; margin: 0 auto 6px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .badge-img { width: 32px; height: 32px; image-rendering: pixelated; }
   .badge-name { font-size: 11px; font-weight: 700; line-height: 1.2; }
-  .badge-date { margin-top: 4px; font-size: 9px; color: ${th.textSecondary}; }
-  .empty { padding: 0 30px; font-size: 13px; font-style: italic; color: ${th.textSecondary}; }
+  .badge-date { margin-top: 3px; font-size: 9px; color: ${th.textSecondary}; }
+  .empty { padding: 0 28px; font-size: 13px; font-style: italic; color: ${th.textSecondary}; }
 
-  .footer { margin-top: 22px; border-top: 1px solid ${th.border}; padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; letter-spacing: 1px; color: ${th.textSecondary}; }
+  .footer { margin-top: 12px; border-top: 1px solid ${th.border}; padding: 9px 28px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; letter-spacing: 1px; color: ${th.textSecondary}; }
   .footer .brand { display: flex; align-items: center; gap: 7px; color: ${th.accentSoft}; font-weight: 700; }
   .footer .brand svg { width: 18px; height: 18px; }
 </style>
