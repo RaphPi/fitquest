@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, Check, FileDown, Loader2, Ruler } from 'lucide-react';
+import { ChevronDown, Check, FileDown, Loader2, Ruler, Target } from 'lucide-react';
+import { GOALS } from '@/lib/goals';
+import type { Goal } from '@/lib/goals';
 import NumberStepper from '@/components/ui/NumberStepper';
 import { useUserStore } from '@/stores/userStore';
 import { getLevelTier, nextTierLevel } from '@/lib/levelTier';
@@ -99,6 +101,121 @@ function HeightSection() {
             </div>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">{t('profile.height.hint')}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GoalSection() {
+  const { t } = useTranslation();
+  const user = useUserStore((s) => s.user);
+  const updateProfile = useUserStore((s) => s.updateProfile);
+  const [open, setOpen] = useState(false);
+  const [goal, setGoal] = useState<Goal | null>(user?.primaryGoal ?? null);
+  const [note, setNote] = useState<string>(user?.goalNote ?? '');
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  if (!user) return null;
+
+  const unchanged = goal === (user.primaryGoal ?? null) && note === (user.goalNote ?? '');
+
+  function handleChip(g: Goal) {
+    setGoal((prev) => (prev === g ? null : g));
+  }
+
+  async function handleSave() {
+    if (saving) return;
+    setSaving(true);
+    try {
+      await updateProfile({ primaryGoal: goal, goalNote: note || null });
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2000);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const currentLabel = user.primaryGoal
+    ? t(`goals.${user.primaryGoal}`)
+    : t('profile.goal.notSet');
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-card-shield/30"
+      >
+        <div className="flex items-center gap-3">
+          <Target className="h-4 w-4 text-primary" />
+          <div>
+            <h2 className="font-display text-sm font-bold uppercase tracking-widest">
+              {t('profile.goal.title')}
+            </h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">{currentLabel}</p>
+          </div>
+        </div>
+        <ChevronDown
+          className={cn(
+            'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
+            open && 'rotate-180',
+          )}
+        />
+      </button>
+
+      {open && (
+        <div className="border-t border-border px-5 pb-5 pt-4 space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {GOALS.map((g) => {
+              const selected = goal === g;
+              return (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => handleChip(g)}
+                  className={cn(
+                    'rounded-lg border px-3 py-1.5 text-sm font-semibold transition-colors',
+                    selected
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border bg-transparent text-muted-foreground hover:border-primary/50 hover:text-foreground',
+                  )}
+                >
+                  {t(`goals.${g}`)}
+                </button>
+              );
+            })}
+          </div>
+
+          <div>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value.slice(0, 280))}
+              placeholder={t('profile.goal.notePlaceholder')}
+              rows={3}
+              className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+            />
+            <p className="mt-1 text-right text-xs text-muted-foreground">
+              {t('profile.goal.noteCount', { count: note.length })}
+            </p>
+          </div>
+
+          <div className="flex items-center justify-end gap-3">
+            {success && (
+              <span className="flex items-center gap-1 text-xs text-green-400">
+                <Check className="h-3.5 w-3.5" /> {t('profile.goal.saved')}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => void handleSave()}
+              disabled={saving || unchanged}
+              className="rounded-lg bg-primary px-5 py-2 font-display text-sm font-bold uppercase tracking-widest text-white transition hover:bg-primary/90 disabled:opacity-40"
+            >
+              {saving ? t('profile.goal.saving') : t('profile.goal.save')}
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -417,6 +534,8 @@ export default function Profile() {
       <ExportSheetButton />
 
       <HeightSection />
+
+      <GoalSection />
 
       <AvatarPicker />
 

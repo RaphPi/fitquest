@@ -554,7 +554,25 @@
       "optEvolution": "Body evolution",
       "optPhotos": "Before/after photos",
       "optBadges": "Trophies"
+    },
+    "goal": {
+      "title": "My goal",
+      "notSet": "Not set",
+      "current": "Goal: {{label}}",
+      "notePlaceholder": "Free note (optional)…",
+      "noteCount": "{{count}} / 280",
+      "saved": "Saved",
+      "saving": "Saving…",
+      "save": "Save"
     }
+  },
+  "goals": {
+    "prise_de_masse": "Muscle gain",
+    "perte_de_gras": "Fat loss",
+    "force": "Strength",
+    "endurance": "Endurance",
+    "forme_generale": "General fitness",
+    "remise_en_forme": "Getting back in shape"
   },
   "settings": {
     "title": "Settings",

@@ -1,5 +1,8 @@
 // Types partagés FitQuest — alignés sur le modèle Prisma & exercises_seed.json.
 
+import type { Goal } from '@/lib/goals';
+export type { Goal };
+
 export type Category = 'push' | 'pull' | 'legs' | 'core' | 'cardio' | 'back';
 export type Equipment = 'none' | 'dumbbells' | 'barbell' | 'pull_bar' | 'other';
 export type Level = 'beginner' | 'intermediate' | 'advanced';
@@ -211,6 +214,8 @@ export interface UserProfile {
   email?: string | null;
   role: UserRole;
   heightCm?: number | null;
+  primaryGoal?: Goal | null;
+  goalNote?: string | null;
   avatarStage: number;
   themeId: ThemeId;
   level: number;

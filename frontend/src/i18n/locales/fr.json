@@ -554,7 +554,25 @@
       "optEvolution": "Évolution physique",
       "optPhotos": "Photos avant/après",
       "optBadges": "Trophées"
+    },
+    "goal": {
+      "title": "Mon objectif",
+      "notSet": "Non défini",
+      "current": "Objectif : {{label}}",
+      "notePlaceholder": "Note libre (facultatif)…",
+      "noteCount": "{{count}} / 280",
+      "saved": "Sauvegardé",
+      "saving": "Sauvegarde…",
+      "save": "Enregistrer"
     }
+  },
+  "goals": {
+    "prise_de_masse": "Prise de masse",
+    "perte_de_gras": "Perte de gras",
+    "force": "Force",
+    "endurance": "Endurance",
+    "forme_generale": "Forme générale",
+    "remise_en_forme": "Remise en forme"
   },
   "settings": {
     "title": "Paramètres",

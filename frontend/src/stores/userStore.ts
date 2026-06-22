@@ -15,6 +15,8 @@ interface UserState {
   updateProfile: (data: {
     avatarStage?: number;
     heightCm?: number | null;
+    primaryGoal?: string | null;
+    goalNote?: string | null;
     email?: string | null;
     emailDigest?: string | null;
     smtpHost?: string | null;
