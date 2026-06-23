@@ -61,6 +61,8 @@ export interface Program {
   isCustom: boolean;
   isAiGen: boolean;
   goals: string[];
+  /** userId du créateur ; null = programme catalogue partagé (seed). */
+  createdBy?: string | null;
   sessions: WorkoutSession[];
 }
 

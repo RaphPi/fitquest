@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useProgramStore } from '@/stores/programStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
 import { useWorkoutStore } from '@/stores/workoutStore';
+import { useUserStore } from '@/stores/userStore';
 import { buildActiveSession } from '@/lib/launchSession';
 import { getLevelTier } from '@/lib/levelTier';
 import type { Program, WorkoutSession, Exercise, Level } from '@/types';
@@ -45,6 +46,12 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
   const { exercises, fetchExercises } = useExerciseStore();
   const startSession = useWorkoutStore((s) => s.start);
   const { isSaving } = useProgramStore();
+  const currentUser = useUserStore((s) => s.user);
+  // Seuls le créateur d'un programme privé (ou un admin) peuvent l'éditer/supprimer.
+  // Les programmes du catalogue (createdBy null) sont en lecture seule hors admin.
+  const canManage =
+    !!currentUser &&
+    (currentUser.role === 'ADMIN' || (!!program.createdBy && program.createdBy === currentUser.id));
   const [openSession, setOpenSession] = useState<string | null>(program.sessions[0]?.id ?? null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [infoExercise, setInfoExercise] = useState<Exercise | null>(null);
@@ -97,22 +104,24 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
               <p className="text-sm text-muted-foreground leading-relaxed">{program.descFr}</p>
             )}
           </div>
-          <div className="flex shrink-0 gap-1">
-            <button
-              onClick={onEdit}
-              className="rounded-lg p-2 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
-              title={t('workout.detail.edit')}
-            >
-              <Pencil className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setDeleteConfirm(true)}
-              className="rounded-lg p-2 text-muted-foreground hover:bg-danger/10 hover:text-red-400 transition-colors"
-              title={t('workout.detail.delete')}
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </div>
+          {canManage && (
+            <div className="flex shrink-0 gap-1">
+              <button
+                onClick={onEdit}
+                className="rounded-lg p-2 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                title={t('workout.detail.edit')}
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setDeleteConfirm(true)}
+                className="rounded-lg p-2 text-muted-foreground hover:bg-danger/10 hover:text-red-400 transition-colors"
+                title={t('workout.detail.delete')}
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Program stats row */}

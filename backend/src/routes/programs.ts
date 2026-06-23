@@ -15,10 +15,25 @@ const include = {
   },
 } as const;
 
+// Appartenance des programmes :
+//   createdBy === null  → catalogue partagé (seed), visible par tous, modifiable
+//                          uniquement par un admin.
+//   createdBy === userId → programme privé, visible/modifiable par son créateur
+//                          (ou un admin).
+function canManage(program: { createdBy: string | null }, req: AuthRequest): boolean {
+  return req.userRole === 'ADMIN' || (program.createdBy != null && program.createdBy === req.userId);
+}
+
+// Filtre de visibilité : catalogue + mes propres programmes.
+function visibleWhere(req: AuthRequest) {
+  return { OR: [{ createdBy: null }, { createdBy: req.userId }] };
+}
+
 // GET /api/v1/programs
-router.get('/', requireAuth, async (_req: AuthRequest, res) => {
+router.get('/', requireAuth, async (req: AuthRequest, res) => {
   try {
     const programs = await prisma.program.findMany({
+      where: visibleWhere(req),
       include,
       orderBy: { nameFr: 'asc' },
     });
@@ -40,14 +55,17 @@ router.get('/export', requireAuth, async (req: AuthRequest, res) => {
   try {
     let programs;
     if (ids === 'all') {
-      programs = await prisma.program.findMany({ include, orderBy: { nameFr: 'asc' } });
+      programs = await prisma.program.findMany({ where: visibleWhere(req), include, orderBy: { nameFr: 'asc' } });
     } else {
       const idList = ids.split(',').map((s) => s.trim()).filter(Boolean);
       if (idList.length === 0) {
         res.status(400).json({ error: "Liste d'ids vide" });
         return;
       }
-      programs = await prisma.program.findMany({ where: { id: { in: idList } }, include });
+      programs = await prisma.program.findMany({
+        where: { AND: [{ id: { in: idList } }, visibleWhere(req)] },
+        include,
+      });
     }
 
     const exerciseIds = new Set<string>();
@@ -124,6 +142,10 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
   try {
     const program = await prisma.program.findUnique({ where: { id }, include });
     if (!program) { res.status(404).json({ error: 'Programme introuvable' }); return; }
+    // Ne pas divulguer un programme privé d'un autre utilisateur.
+    if (program.createdBy && program.createdBy !== req.userId && req.userRole !== 'ADMIN') {
+      res.status(404).json({ error: 'Programme introuvable' }); return;
+    }
     res.json({ program });
   } catch (e) {
     console.error(e);
@@ -178,6 +200,7 @@ router.patch('/:id', requireAuth, async (req: AuthRequest, res) => {
   const { id } = req.params;
   const existing = await prisma.program.findUnique({ where: { id } });
   if (!existing) { res.status(404).json({ error: 'Programme introuvable' }); return; }
+  if (!canManage(existing, req)) { res.status(403).json({ error: 'Action non autorisée' }); return; }
 
   const allowed = ['nameFr', 'nameEn', 'descFr', 'descEn', 'level', 'daysPerWeek', 'durationWeeks', 'equipment', 'goals'];
   const data: Record<string, unknown> = {};
@@ -203,6 +226,9 @@ router.patch('/:id', requireAuth, async (req: AuthRequest, res) => {
 // DELETE /api/v1/programs/:id
 router.delete('/:id', requireAuth, async (req: AuthRequest, res) => {
   const { id } = req.params;
+  const existing = await prisma.program.findUnique({ where: { id } });
+  if (!existing) { res.status(404).json({ error: 'Programme introuvable' }); return; }
+  if (!canManage(existing, req)) { res.status(403).json({ error: 'Action non autorisée' }); return; }
   try {
     await prisma.program.delete({ where: { id } });
     res.status(204).end();
@@ -240,6 +266,7 @@ router.post('/:id/sessions', requireAuth, async (req: AuthRequest, res) => {
   const { id } = req.params;
   const program = await prisma.program.findUnique({ where: { id } });
   if (!program) { res.status(404).json({ error: 'Programme introuvable' }); return; }
+  if (!canManage(program, req)) { res.status(403).json({ error: 'Action non autorisée' }); return; }
 
   const { nameFr, nameEn, order, exercises } = req.body as {
     nameFr: string; nameEn: string; order: number; exercises?: SessionExerciseInput[];
@@ -269,6 +296,7 @@ router.patch('/:id/sessions/:sessionId', requireAuth, async (req: AuthRequest, r
   const { id, sessionId } = req.params;
   const program = await prisma.program.findUnique({ where: { id } });
   if (!program) { res.status(404).json({ error: 'Programme introuvable' }); return; }
+  if (!canManage(program, req)) { res.status(403).json({ error: 'Action non autorisée' }); return; }
 
   const { nameFr, nameEn, order, exercises } = req.body as {
     nameFr?: string; nameEn?: string; order?: number; exercises?: SessionExerciseInput[];
@@ -300,6 +328,7 @@ router.delete('/:id/sessions/:sessionId', requireAuth, async (req: AuthRequest, 
   const { id, sessionId } = req.params;
   const program = await prisma.program.findUnique({ where: { id } });
   if (!program) { res.status(404).json({ error: 'Programme introuvable' }); return; }
+  if (!canManage(program, req)) { res.status(403).json({ error: 'Action non autorisée' }); return; }
   try {
     await prisma.session.delete({ where: { id: sessionId } });
     res.status(204).end();
@@ -458,7 +487,11 @@ router.post('/import', requireAuth, async (req: AuthRequest, res) => {
       }
 
       for (const prog of programs) {
-        const existing = await tx.program.findFirst({ where: { nameFr: prog.nameFr } });
+        // Dédup scopée : on n'écrase pas un programme du catalogue ni l'un des
+        // miens portant le même nom (les programmes privés d'autrui ne bloquent pas).
+        const existing = await tx.program.findFirst({
+          where: { nameFr: prog.nameFr, OR: [{ createdBy: null }, { createdBy: req.userId }] },
+        });
         if (existing) { skipped++; continue; }
 
         const created = await tx.program.create({
@@ -474,6 +507,7 @@ router.post('/import', requireAuth, async (req: AuthRequest, res) => {
             goals: prog.goals,
             isCustom: false,
             isAiGen: false,
+            createdBy: req.userId!,
             sessions: {
               create: prog.sessions.map((s) => ({
                 nameFr: s.nameFr,
