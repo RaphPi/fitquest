@@ -383,21 +383,21 @@ export default function ActiveWorkout() {
             </button>
           )}
         </div>
-        <div className="mt-1.5 flex items-center justify-center gap-3">
+        <div className="mt-1 flex items-center justify-center gap-3">
           <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-bold text-primary-soft">{cur.category.toUpperCase()}</span>
           <span className="text-[11px] font-bold text-muted-foreground">{t('activeWorkout.set', { current: setIndex + 1, total: cur.sets })}</span>
         </div>
         {/* Objectif bien visible */}
-        <div className="mt-2.5 inline-flex items-baseline gap-2 rounded-2xl border-2 px-4 py-1.5 sm:px-6 sm:py-2"
+        <div className="mt-2 inline-flex items-baseline gap-2 rounded-2xl border-2 px-4 py-1.5 sm:px-6"
           style={cur.type === 'duration'
             ? { borderColor: 'rgba(34,211,238,.5)', background: 'rgba(34,211,238,.08)' }
             : { borderColor: 'rgba(255,255,255,.2)', background: 'rgba(255,255,255,.04)' }}>
           <span className="text-xs uppercase tracking-widest text-muted-foreground">{t('activeWorkout.objective')}</span>
-          <span className="font-display text-4xl font-black leading-none sm:text-5xl"
+          <span className="font-display text-4xl font-black leading-none"
             style={{ color: cur.type === 'duration' ? 'rgba(34,211,238,1)' : '#ffffff' }}>{cur.target}</span>
           <span className="text-sm font-bold text-muted-foreground">{cur.type === 'duration' ? t('activeWorkout.seconds') : t('activeWorkout.reps')}</span>
         </div>
-        <div className="mt-2.5">{setsRow}</div>
+        <div className="mt-1.5">{setsRow}</div>
       </div>
 
       {/* FOOTER : XP + CTA */}
