@@ -20,6 +20,16 @@ msg_info "Récupération des dernières modifications…"
 git pull origin "$BRANCH" || die "git pull a échoué."
 msg_ok "Dépôt à jour"
 
+# 1a. Ré-exécution de la version fraîchement tirée.
+# Sans ça, lors d'un saut de version, c'est l'ANCIEN update.sh qui tourne
+# jusqu'au bout (il rate les garde-fous ajoutés depuis). On relance donc le
+# script à jour, une seule fois (garde anti-boucle FITQUEST_UPDATE_REEXEC).
+if [[ -z "${FITQUEST_UPDATE_REEXEC:-}" ]]; then
+  export FITQUEST_UPDATE_REEXEC=1
+  msg_info "Exécution de la version à jour du script…"
+  exec /bin/bash "$INSTALL_DIR/scripts/update.sh" "$@"
+fi
+
 # 1b. Garde-fous : ajoute les clés manquantes au .env existant.
 gen_secret() { openssl rand -hex 32 2>/dev/null || head -c32 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | head -c48; }
 if [[ -f .env ]] && ! grep -q '^SMTP_ENC_KEY=' .env; then

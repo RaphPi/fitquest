@@ -161,6 +161,20 @@ async function main(): Promise<void> {
     });
   }
   console.log(`  ✔ ${BADGES.length} badges`);
+
+  // ----- Bootstrap admin -------------------------------------
+  // Si aucun administrateur n'existe, on promeut le plus ancien utilisateur.
+  // Couvre les nouvelles installations (1er inscrit = admin) comme les upgrades
+  // depuis une version sans rôle ADMIN. Idempotent : ne fait rien si un admin existe.
+  const adminCount = await prisma.user.count({ where: { role: 'ADMIN' } });
+  if (adminCount === 0) {
+    const oldest = await prisma.user.findFirst({ orderBy: { createdAt: 'asc' }, select: { id: true, username: true } });
+    if (oldest) {
+      await prisma.user.update({ where: { id: oldest.id }, data: { role: 'ADMIN' } });
+      console.log(`  ✔ Bootstrap admin : « ${oldest.username} » promu ADMIN`);
+    }
+  }
+
   console.log('✅ Seed terminé.');
 }
 
