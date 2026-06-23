@@ -69,7 +69,19 @@ function getCtx(): AudioContext | null {
  */
 export function unlockAudio(): void {
   const audio = getCtx();
-  if (audio && audio.state === 'suspended') void audio.resume();
+  if (!audio) return;
+  if (audio.state === 'suspended') void audio.resume();
+  // resume() seul ne suffit pas sur Safari iOS : il faut émettre un vrai son
+  // (ici un buffer d'1 échantillon silencieux) dans le geste pour déverrouiller.
+  try {
+    const buffer = audio.createBuffer(1, 1, 22050);
+    const src = audio.createBufferSource();
+    src.buffer = buffer;
+    src.connect(audio.destination);
+    src.start(0);
+  } catch {
+    /* ignore */
+  }
 }
 
 /** Joue un son nommé si le son est activé dans les paramètres. */

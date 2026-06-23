@@ -301,8 +301,10 @@ export default function ActiveWorkout() {
         </div>
       </div>
 
-      {/* CORPS : grille responsive (desktop = panneaux latéraux) */}
-      <div className="z-20 grid flex-1 grid-cols-1 lg:grid-cols-[260px_1fr_280px]">
+      {/* CORPS : grille responsive (desktop = panneaux latéraux).
+          min-h-0 + overflow-y-auto : si la fenêtre est trop courte, c'est cette
+          zone centrale qui scrolle — le header et le footer (CTA) restent visibles. */}
+      <div className="z-20 grid min-h-0 flex-1 grid-cols-1 overflow-y-auto lg:grid-cols-[260px_1fr_280px]">
         {/* Panneau gauche (desktop) : stats de séance */}
         <aside className="hidden flex-col gap-3 border-r border-border/60 p-5 lg:flex">
           <div className="text-xs uppercase tracking-widest text-muted-foreground">{t('activeWorkout.sidebarCombat')}</div>
