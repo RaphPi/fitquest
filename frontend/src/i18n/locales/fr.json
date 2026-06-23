@@ -120,6 +120,7 @@
     },
     "weeklyFrequency": "Fréq. hebdo",
     "currentWeight": "Poids actuel",
+    "weightNeedMore": "Ajoute un 2ᵉ relevé pour voir la courbe.",
     "nextSession": "Prochaine séance",
     "recentActivity": "Activité récente",
     "noActiveProgram": "Aucun programme actif.",

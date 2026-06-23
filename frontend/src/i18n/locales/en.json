@@ -120,6 +120,7 @@
     },
     "weeklyFrequency": "Weekly freq.",
     "currentWeight": "Current weight",
+    "weightNeedMore": "Add a 2nd entry to see the trend.",
     "nextSession": "Next session",
     "recentActivity": "Recent activity",
     "noActiveProgram": "No active program.",

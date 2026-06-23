@@ -132,7 +132,7 @@ export default function Dashboard() {
   const isDashboardLoading = programsLoading || metricsLoading;
 
   return (
-    <section className="space-y-5">
+    <section className="space-y-3 lg:space-y-5">
       {/* ── En-tête ── */}
       <div className="flex items-center gap-3">
         {user && (
@@ -192,7 +192,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-3 lg:gap-5">
           {/* ── Fréquence + Poids : toujours 2 colonnes ── */}
           <div className="order-2 empty:hidden lg:order-1">
           {isDashboardLoading ? (
@@ -238,14 +238,32 @@ export default function Dashboard() {
                     {weightData.current.toFixed(1)}{' '}
                     <span className="text-xs font-normal text-muted-foreground">kg</span>
                   </p>
-                  {weightData.sparkline.length > 1 && (
+                  {weightData.sparkline.length > 1 ? (
                     <div className="mt-1.5">
-                      <ResponsiveContainer width="100%" height={36}>
-                        <LineChart data={weightData.sparkline} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
-                          <Line type="monotone" dataKey="v" stroke={weightColor} dot={false} strokeWidth={2} />
+                      <ResponsiveContainer width="100%" height={56}>
+                        <LineChart data={weightData.sparkline} margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
+                          <Tooltip
+                            contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, padding: '2px 8px' }}
+                            labelFormatter={() => ''}
+                            formatter={(v: number) => [`${v.toFixed(1)} kg`, '']}
+                            itemStyle={{ color: weightColor, fontSize: 12 }}
+                            separator=""
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="v"
+                            stroke={weightColor}
+                            strokeWidth={2}
+                            dot={{ r: 2.5, fill: weightColor, strokeWidth: 0 }}
+                            activeDot={{ r: 4, fill: weightColor, strokeWidth: 0 }}
+                          />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
+                  ) : (
+                    <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
+                      {t('dashboard.weightNeedMore')}
+                    </p>
                   )}
                 </div>
               ) : (
@@ -261,7 +279,7 @@ export default function Dashboard() {
           {isDashboardLoading ? (
             <div className="h-28 animate-pulse rounded-lg border border-border bg-card" />
           ) : (
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="rounded-lg border border-border bg-card p-3 lg:p-4">
             <h2 className="mb-2 font-display text-xs font-bold uppercase tracking-widest text-muted-foreground">
               {t('dashboard.nextSession')}
             </h2>
