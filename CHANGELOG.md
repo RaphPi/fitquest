@@ -2,6 +2,23 @@
 
 Toutes les évolutions notables de FitQuest. Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/).
 
+## [2.0.1] — 2026-06-23
+
+Correctifs ciblant l'expérience d'administration et la robustesse des mises à jour
+(notamment les sauts de version v1 → v2).
+
+### Corrigé / Amélioré
+
+- **Administration sans friction** — le rôle est désormais lu en base de données
+  (et non plus depuis le JWT) : une promotion ou rétrogradation prend effet
+  immédiatement, sans re-login. Un token dont le compte a été supprimé est rejeté.
+- **Bootstrap admin automatique** — si aucun administrateur n'existe, le seed promeut
+  le plus ancien compte. Couvre les nouvelles installations comme les montées de version
+  depuis une version sans rôle ADMIN (plus besoin de SQL manuel).
+- **Mise à jour auto-actualisée** — `update.sh` se ré-exécute après le `git pull` afin que
+  la version fraîchement tirée s'exécute dès le premier passage (corrige les pièges de saut
+  de version, ex. variable `SMTP_ENC_KEY` manquante).
+
 ## [2.0.0] — 2026-06-23 — Phase 2
 
 Deuxième cycle majeur : internationalisation, suivi corporel avancé, administration,
