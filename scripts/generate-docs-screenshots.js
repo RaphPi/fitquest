@@ -48,16 +48,17 @@ const OUTPUT_DIR =
   process.env.SCREENSHOTS_OUT_DIR ||
   path.resolve(__dirname, '..', 'frontend', 'public', 'docs', 'screenshots');
 
-// Ordre des sections tel qu'il apparaît dans les fichiers Markdown (les <h2>).
-// Doit rester aligné avec les placeholders ![](docs/screenshots/xxx.png).
-const SECTION_FILES = [
-  'dashboard.png',
-  'programs.png',
-  'workouts.png',
-  'body.png',
-  'profile.png',
-  'settings.png',
-  'gamification.png',
+// Chaque capture illustre l'écran RÉEL de l'app correspondant à une section de
+// l'aide. Les noms de fichiers doivent rester alignés avec les placeholders
+// ![](docs/screenshots/xxx.png) insérés dans help.fr.md / help.en.md.
+const PAGES = [
+  { file: 'dashboard.png', path: '/' },
+  { file: 'programs.png', path: '/library' },
+  { file: 'workouts.png', path: '/workout' },
+  { file: 'body.png', path: '/body' },
+  { file: 'profile.png', path: '/profile' },
+  { file: 'settings.png', path: '/settings' },
+  { file: 'gamification.png', path: '/trophees' },
 ];
 
 async function main() {
@@ -89,46 +90,17 @@ async function main() {
       page.click('button[type="submit"]'),
     ]);
 
-    // --- Page d'aide ---
-    await page.goto(`${BASE_URL}/help`, { waitUntil: 'networkidle2' });
-    await page.waitForSelector('h2');
+    // --- Capture de chaque écran réel ---
+    for (const { file, path: route } of PAGES) {
+      await page.goto(`${BASE_URL}${route}`, { waitUntil: 'networkidle2' });
+      // Laisse le temps aux rendus asynchrones (graphes Recharts, canvas pixel
+      // art, requêtes de données) de se stabiliser avant la capture.
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Calcule la zone (en coordonnées de page) de chaque section : d'un <h2>
-    // jusqu'au <h2> suivant. La capture utilise ensuite `clip` +
-    // `captureBeyondViewport` → pas de dépendance au scroll, et un cadrage sur
-    // la colonne de contenu (la sidebar, plus à gauche, est exclue via le x du h2).
-    const PAD = 20;
-    const rects = await page.evaluate((count, pad) => {
-      const hs = Array.from(document.querySelectorAll('h2')).slice(0, count);
-      const fullHeight = document.documentElement.scrollHeight;
-      return hs.map((h, i) => {
-        const r = h.getBoundingClientRect();
-        const x = Math.max(0, r.left + window.scrollX - pad);
-        const width = r.width + pad * 2;
-        const top = Math.max(0, r.top + window.scrollY - pad);
-        const bottom =
-          i + 1 < hs.length
-            ? hs[i + 1].getBoundingClientRect().top + window.scrollY - pad
-            : fullHeight;
-        return { x, y: top, width, height: Math.max(1, bottom - top) };
-      });
-    }, SECTION_FILES.length, PAD);
-
-    if (rects.length < SECTION_FILES.length) {
-      throw new Error(
-        `Attendu ${SECTION_FILES.length} sections <h2>, trouvé ${rects.length}. ` +
-          'La page /help a-t-elle bien chargé le Markdown ?',
-      );
-    }
-
-    for (let i = 0; i < SECTION_FILES.length; i += 1) {
-      const filePath = path.join(OUTPUT_DIR, SECTION_FILES[i]);
-      await page.screenshot({
-        path: filePath,
-        captureBeyondViewport: true,
-        clip: rects[i],
-      });
-      console.log(`✓ ${SECTION_FILES[i]}`);
+      // Capture du viewport (haut de page) : un cadrage propre et lisible de
+      // l'écran tel qu'il s'affiche au chargement.
+      await page.screenshot({ path: path.join(OUTPUT_DIR, file) });
+      console.log(`✓ ${file}  (${route})`);
     }
   } finally {
     await browser.close();
