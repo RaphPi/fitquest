@@ -8,7 +8,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
 import { effortPoints, typeCopyKeys } from '@/lib/bossFight';
 import { levelProgressPct } from '@/lib/xp';
-import { playSound } from '@/lib/sound';
+import { playSound, unlockAudio } from '@/lib/sound';
 import { renderBoss, drawSprite, WEAPONS, SHIELD, ANVIL, HAMMER, FEEL_FACES } from '@/lib/pixelSprites';
 import { getAvatarStage, avatarClassFromStage } from '@/lib/avatar';
 import PixelCanvas from '@/components/workout/active/PixelCanvas';
@@ -90,6 +90,17 @@ export default function ActiveWorkout() {
     () => exercises.find((e) => e.id === cur?.exerciseId) ?? null,
     [exercises, cur?.exerciseId],
   );
+
+  // Déverrouille l'audio au tout premier geste (Safari iOS exige une interaction).
+  useEffect(() => {
+    const unlock = () => unlockAudio();
+    window.addEventListener('touchstart', unlock, { once: true });
+    window.addEventListener('pointerdown', unlock, { once: true });
+    return () => {
+      window.removeEventListener('touchstart', unlock);
+      window.removeEventListener('pointerdown', unlock);
+    };
+  }, []);
 
   // Chrono : re-render chaque seconde.
   useEffect(() => {
@@ -375,12 +386,12 @@ export default function ActiveWorkout() {
           <span className="text-[11px] font-bold text-muted-foreground">{t('activeWorkout.set', { current: setIndex + 1, total: cur.sets })}</span>
         </div>
         {/* Objectif bien visible */}
-        <div className="mt-2.5 inline-flex items-baseline gap-2 rounded-2xl border-2 px-6 py-2"
+        <div className="mt-2.5 inline-flex items-baseline gap-2 rounded-2xl border-2 px-4 py-1.5 sm:px-6 sm:py-2"
           style={cur.type === 'duration'
             ? { borderColor: 'rgba(34,211,238,.5)', background: 'rgba(34,211,238,.08)' }
             : { borderColor: 'rgba(255,255,255,.2)', background: 'rgba(255,255,255,.04)' }}>
           <span className="text-xs uppercase tracking-widest text-muted-foreground">{t('activeWorkout.objective')}</span>
-          <span className="font-display text-5xl font-black leading-none"
+          <span className="font-display text-4xl font-black leading-none sm:text-5xl"
             style={{ color: cur.type === 'duration' ? 'rgba(34,211,238,1)' : '#ffffff' }}>{cur.target}</span>
           <span className="text-sm font-bold text-muted-foreground">{cur.type === 'duration' ? t('activeWorkout.seconds') : t('activeWorkout.reps')}</span>
         </div>
@@ -389,27 +400,27 @@ export default function ActiveWorkout() {
 
       {/* FOOTER : XP + CTA */}
       <footer
-        className="z-20 px-4 pt-3"
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.25rem)' }}
+        className="z-20 px-4 pt-2 sm:pt-3"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
       >
-        <div className="mb-1 flex justify-between text-xs uppercase tracking-wide text-muted-foreground">
+        <div className="mb-1 flex justify-between text-[11px] uppercase tracking-wide text-muted-foreground sm:text-xs">
           <span>{t('activeWorkout.level', { level: user?.level ?? 1 })}</span>
           <span className="font-display text-xp">{dealt} {t('activeWorkout.effortPoints')}</span>
         </div>
-        <div className="mb-3 h-2 overflow-hidden border border-[#2a2d40] bg-border">
+        <div className="mb-2 h-2 overflow-hidden border border-[#2a2d40] bg-border sm:mb-3">
           <div className="h-full transition-[width] duration-700" style={{ width: `${levelProgressPct(user?.currentXP ?? 0, user?.level ?? 1)}%`, backgroundImage: 'linear-gradient(90deg,#b45309,var(--xp))' }} />
         </div>
         <button onClick={openConfirm} disabled={striking || phase !== 'fight'}
-          className="flex h-14 w-full items-center justify-center gap-2 border-2 text-white disabled:opacity-50"
-          style={{ fontFamily: PX, fontSize: 12, borderColor: '#fca5a5', background: 'linear-gradient(180deg,#ef4444,#991b1b)', boxShadow: '0 6px 0 #5b1212' }}>
+          className="flex h-12 w-full items-center justify-center gap-2 border-2 text-[11px] text-white disabled:opacity-50 sm:h-14 sm:text-xs"
+          style={{ fontFamily: PX, borderColor: '#fca5a5', background: 'linear-gradient(180deg,#ef4444,#991b1b)', boxShadow: '0 6px 0 #5b1212' }}>
           ⚔ {t(copy.cta)}
         </button>
-        <div className="mt-3 flex gap-2">
+        <div className="mt-2 flex gap-2 sm:mt-3">
           <button onClick={() => setInfoOpen(true)} disabled={!curExercise}
-            className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-border bg-card text-xs font-semibold text-muted-foreground disabled:opacity-40">
+            className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl border border-border bg-card text-xs font-semibold text-muted-foreground disabled:opacity-40 sm:h-10">
             <Info className="h-4 w-4" /> {t('activeWorkout.infoBtn')}
           </button>
-          <button onClick={skipExercise} className="h-10 flex-1 rounded-xl border border-border bg-card text-xs font-semibold text-muted-foreground">{t('activeWorkout.skipExercise')}</button>
+          <button onClick={skipExercise} className="h-9 flex-1 rounded-xl border border-border bg-card text-xs font-semibold text-muted-foreground sm:h-10">{t('activeWorkout.skipExercise')}</button>
         </div>
       </footer>
 

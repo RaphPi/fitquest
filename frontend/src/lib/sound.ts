@@ -61,6 +61,17 @@ function getCtx(): AudioContext | null {
   }
 }
 
+/**
+ * Débloque l'AudioContext depuis un geste utilisateur (touchstart/clic).
+ * Safari iOS refuse de démarrer un AudioContext créé hors interaction : il reste
+ * `suspended` et tout son est muet. On le crée donc et on le `resume()` ici, dans
+ * le handler d'un vrai geste, ce qui « déverrouille » l'audio pour le reste de la séance.
+ */
+export function unlockAudio(): void {
+  const audio = getCtx();
+  if (audio && audio.state === 'suspended') void audio.resume();
+}
+
 /** Joue un son nommé si le son est activé dans les paramètres. */
 export function playSound(name: SoundName): void {
   if (!useSettingsStore.getState().soundEnabled) return;

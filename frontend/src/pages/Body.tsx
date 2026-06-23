@@ -116,13 +116,17 @@ const EMPTY_FORM: FormState = {
 };
 
 function formToPayload(form: FormState): MetricPayload {
-  const out: MetricPayload = {};
-  if (form.weightEnabled) out.weightKg = form.weightKg;
-  if (form.bodyFatEnabled) out.bodyFatPct = form.bodyFatPct;
+  // On envoie explicitement `null` pour chaque champ décoché : le PATCH backend
+  // teste `'key' in body`, donc omettre un champ ne l'efface pas — il faut
+  // transmettre la valeur nulle pour réinitialiser la mesure en BDD.
+  const out: MetricPayload = {
+    weightKg: form.weightEnabled ? form.weightKg : null,
+    bodyFatPct: form.bodyFatEnabled ? form.bodyFatPct : null,
+    customMetrics: form.customFields,
+  };
   STD.forEach(({ key }) => {
-    if (form.measures[key].enabled) Object.assign(out, { [key]: form.measures[key].value });
+    out[key] = form.measures[key].enabled ? form.measures[key].value : null;
   });
-  if (form.customFields.length > 0) out.customMetrics = form.customFields;
   return out;
 }
 
@@ -727,15 +731,15 @@ function MetricCard({ metric, onEdit, onDelete, getColor }: MetricCardProps) {
 
 // ─── FitnessIndexCard ─────────────────────────────────────────────────────────
 
-/** Petite tuile chiffre/libellé — même pattern visuel que les chips de MetricCard. */
+/** Tuile chiffre/libellé de l'indice de forme — valeur mise en avant, libellé dessous. */
 function StatBox({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div
-      className="rounded-lg border px-2.5 py-1.5"
+      className="flex flex-col justify-center rounded-lg border px-3 py-2"
       style={{ borderColor: hexToRgba(color, 0.35), background: hexToRgba(color, 0.08) }}
     >
-      <p className="text-sm font-bold leading-tight" style={{ color }}>{value}</p>
-      <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground">{label}</p>
+      <p className="text-xl font-black leading-none" style={{ color }}>{value}</p>
+      <p className="mt-1 text-[11px] font-medium leading-tight text-muted-foreground">{label}</p>
     </div>
   );
 }
@@ -830,7 +834,7 @@ function FitnessIndexCard({
           {t('body.fitnessIndex.basedOn', { date: fmtLong(latest.date) })}
         </p>
       )}
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
         {result.mode === 'full' && (
           <>
             <StatBox label={t('body.fitnessIndex.ffmi')} value={`${result.ffmi}`} color={color} />
@@ -850,7 +854,7 @@ function FitnessIndexCard({
         <p className="mt-3 text-[11px] text-muted-foreground">{t('body.fitnessIndex.hintBodyFat')}</p>
       )}
       {showScale && (
-        <div className="mt-3 space-y-3 rounded-lg border border-border/50 bg-card/30 p-3 text-[11px]">
+        <div className="mt-3 space-y-3 rounded-lg border border-border/50 bg-card/30 p-3 text-xs leading-relaxed">
           {result.mode === 'full' && (
             <ScaleBlock
               title={t('body.fitnessIndex.scaleFfmiTitle')}
@@ -967,6 +971,7 @@ function MetricsTab() {
   const { metrics, isLoading, error, fetchMetrics, addMetric, updateMetric, deleteMetric } = useBodyStore();
   const [editingMetric, setEditingMetric] = useState<BodyMetric | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const editRef = useRef<HTMLDivElement>(null);
   const { getColor, setColor } = useColorMap();
   const heightCm = useUserStore((s) => s.user?.heightCm ?? null);
@@ -994,7 +999,50 @@ function MetricsTab() {
 
   return (
     <div className="space-y-5">
-      {/* Indice de Forme — carte en tête + évolution */}
+      {/* Ajout d'un relevé — en tête, accessible sans scroller */}
+      {!editingMetric && (
+        <div className="rounded-xl border border-border bg-card p-4">
+          {isEmpty || showAddForm ? (
+            <>
+              <h3 className="mb-4 text-sm font-semibold text-foreground">{t('body.metrics.newRecord')}</h3>
+              <MetricForm
+                onSubmit={handleAdd}
+                onCancel={metrics.length > 0 ? () => setShowAddForm(false) : undefined}
+                submitLabel={t('body.metrics.submitLabelNew')}
+                getColor={getColor}
+                setColor={setColor}
+              />
+            </>
+          ) : (
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary/15 py-2.5 text-sm font-semibold text-primary ring-1 ring-primary/30 transition hover:bg-primary/25 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
+            >
+              <Plus className="h-4 w-4" />
+              {t('body.metrics.addRecord')}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Formulaire édition */}
+      {editingMetric && (
+        <div ref={editRef} className="rounded-xl border border-primary/40 bg-card p-4">
+          <h3 className="mb-4 text-sm font-semibold text-foreground">
+            {t('body.metrics.editTitle', { date: fmtLong(editingMetric.date) })}
+          </h3>
+          <MetricForm
+            initial={metricToForm(editingMetric)}
+            onSubmit={handleUpdate}
+            onCancel={() => setEditingMetric(null)}
+            submitLabel={t('body.metrics.submitLabelEdit')}
+            getColor={getColor}
+            setColor={setColor}
+          />
+        </div>
+      )}
+
+      {/* Indice de Forme — carte + évolution */}
       {metrics.length > 0 && (
         <FitnessIndexCard metrics={metrics} heightCm={heightCm} getColor={getColor} />
       )}
@@ -1016,49 +1064,6 @@ function MetricsTab() {
         </div>
       )}
 
-      {/* Formulaire édition */}
-      {editingMetric && (
-        <div ref={editRef} className="rounded-xl border border-primary/40 bg-card p-4">
-          <h3 className="mb-4 text-sm font-semibold text-foreground">
-            {t('body.metrics.editTitle', { date: fmtLong(editingMetric.date) })}
-          </h3>
-          <MetricForm
-            initial={metricToForm(editingMetric)}
-            onSubmit={handleUpdate}
-            onCancel={() => setEditingMetric(null)}
-            submitLabel={t('body.metrics.submitLabelEdit')}
-            getColor={getColor}
-            setColor={setColor}
-          />
-        </div>
-      )}
-
-      {/* Formulaire ajout */}
-      {!editingMetric && (
-        <div className="rounded-xl border border-border bg-card p-4">
-          {isEmpty || showAddForm ? (
-            <>
-              <h3 className="mb-4 text-sm font-semibold text-foreground">{t('body.metrics.newRecord')}</h3>
-              <MetricForm
-                onSubmit={handleAdd}
-                onCancel={metrics.length > 0 ? () => setShowAddForm(false) : undefined}
-                submitLabel={t('body.metrics.submitLabelNew')}
-                getColor={getColor}
-                setColor={setColor}
-              />
-            </>
-          ) : (
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
-            >
-              <Plus className="h-4 w-4" />
-              {t('body.metrics.addRecord')}
-            </button>
-          )}
-        </div>
-      )}
-
       {/* États */}
       {isLoading && (
         <p className="py-4 text-center text-sm text-muted-foreground">{t('common.loading')}</p>
@@ -1067,13 +1072,29 @@ function MetricsTab() {
         <p className="py-4 text-center text-sm text-red-400">{error}</p>
       )}
 
-      {/* Liste */}
+      {/* Historique — accordéon (replié par défaut) */}
       {metrics.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-foreground">{t('body.metrics.history')}</h3>
-          {metrics.map((m) => (
-            <MetricCard key={m.id} metric={m} onEdit={handleEdit} onDelete={deleteMetric} getColor={getColor} />
-          ))}
+        <div className="overflow-hidden rounded-xl border border-border bg-card">
+          <button
+            type="button"
+            onClick={() => setShowHistory((s) => !s)}
+            aria-expanded={showHistory}
+            className="flex w-full items-center justify-between px-4 py-3.5 text-left focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
+          >
+            <span className="text-sm font-semibold text-foreground">
+              {t('body.metrics.history')} ({metrics.length})
+            </span>
+            <ChevronDown
+              className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${showHistory ? 'rotate-180' : ''}`}
+            />
+          </button>
+          {showHistory && (
+            <div className="space-y-3 border-t border-border p-4">
+              {metrics.map((m) => (
+                <MetricCard key={m.id} metric={m} onEdit={handleEdit} onDelete={deleteMetric} getColor={getColor} />
+              ))}
+            </div>
+          )}
         </div>
       )}
 
