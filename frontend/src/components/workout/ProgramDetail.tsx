@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, ChevronDown, ChevronRight, Clock, Dumbbell,
-  Layers, Calendar, Pencil, Trash2, Plus, Info, Swords,
+  Layers, Calendar, Pencil, Trash2, Plus, Info, Swords, Users,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useProgramStore } from '@/stores/programStore';
@@ -52,6 +52,8 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
   const canManage =
     !!currentUser &&
     (currentUser.role === 'ADMIN' || (!!program.createdBy && program.createdBy === currentUser.id));
+  // Programme du catalogue partagé (seed) : supprimer impacte tous les utilisateurs.
+  const isShared = program.createdBy == null;
   const [openSession, setOpenSession] = useState<string | null>(program.sessions[0]?.id ?? null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [infoExercise, setInfoExercise] = useState<Exercise | null>(null);
@@ -91,12 +93,23 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
       <div className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-1.5">
-            <span
-              className="inline-flex w-fit rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider"
-              style={tierBadgeStyle(program.level as Level)}
-            >
-              {t(`workout.level.${program.level}`)}
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className="inline-flex w-fit rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider"
+                style={tierBadgeStyle(program.level as Level)}
+              >
+                {t(`workout.level.${program.level}`)}
+              </span>
+              {isShared && (
+                <span
+                  className="inline-flex w-fit items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider"
+                  style={{ color: 'rgba(234,179,8,1)', backgroundColor: 'rgba(234,179,8,0.12)', borderColor: 'rgba(234,179,8,0.4)' }}
+                >
+                  <Users className="h-3 w-3" />
+                  {t('workout.detail.sharedBadge')}
+                </span>
+              )}
+            </div>
             <h2 className="font-display text-xl font-black leading-tight text-foreground">
               {program.nameFr}
             </h2>
@@ -326,6 +339,14 @@ export default function ProgramDetail({ program, onBack, onEdit, onDelete }: Pro
             <p className="mt-2 text-sm text-muted-foreground">
               {t('workout.detail.confirmDeleteBody')}
             </p>
+            {isShared && (
+              <p
+                className="mt-3 rounded-lg border px-3 py-2 text-sm font-semibold"
+                style={{ color: 'rgba(234,179,8,1)', backgroundColor: 'rgba(234,179,8,0.1)', borderColor: 'rgba(234,179,8,0.4)' }}
+              >
+                {t('workout.detail.confirmDeleteSharedWarning')}
+              </p>
+            )}
             <div className="mt-5 flex gap-3">
               <button
                 onClick={() => setDeleteConfirm(false)}

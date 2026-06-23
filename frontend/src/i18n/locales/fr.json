@@ -193,7 +193,9 @@
       "exerciseCount_plural": "{{count}} exercices",
       "rest": "Repos {{secs}}s",
       "confirmDeleteTitle": "Supprimer ce programme ?",
-      "confirmDeleteBody": "Cette action est irréversible. Toutes les séances associées seront supprimées."
+      "confirmDeleteBody": "Cette action est irréversible. Toutes les séances associées seront supprimées.",
+      "sharedBadge": "Catalogue partagé",
+      "confirmDeleteSharedWarning": "Ce programme fait partie du catalogue partagé : le supprimer le retirera pour tous les utilisateurs."
     },
     "builder": {
       "createTitle": "Créer un programme",

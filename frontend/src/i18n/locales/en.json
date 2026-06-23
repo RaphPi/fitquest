@@ -193,7 +193,9 @@
       "exerciseCount_plural": "{{count}} exercises",
       "rest": "Rest {{secs}}s",
       "confirmDeleteTitle": "Delete this program?",
-      "confirmDeleteBody": "This action is irreversible. All associated sessions will be deleted."
+      "confirmDeleteBody": "This action is irreversible. All associated sessions will be deleted.",
+      "sharedBadge": "Shared catalogue",
+      "confirmDeleteSharedWarning": "This program is part of the shared catalogue: deleting it will remove it for all users."
     },
     "builder": {
       "createTitle": "Create a program",
