@@ -842,5 +842,26 @@
       "versionLabel": "Current version:",
       "releasesLink": "View releases on GitHub"
     }
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "next": "Next",
+    "finish": "Done",
+    "saving": "Saving…",
+    "height": {
+      "title": "Your height",
+      "subtitle": "Used to compute your Fitness Index (FFMI, BMI).",
+      "hint": "You can update this anytime in your Profile."
+    },
+    "goal": {
+      "title": "Your main goal",
+      "subtitle": "Highlights recommended programs that match your objective.",
+      "hint": "You can update this anytime in your Profile. Optional."
+    },
+    "avatar": {
+      "title": "Choose your class",
+      "subtitle": "Your character will evolve visually as you level up.",
+      "hint": "You can change class anytime in your Profile."
+    }
   }
 }

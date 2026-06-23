@@ -10,6 +10,7 @@ import XPBar from '@/components/ui/XPBar';
 import Avatar from '@/components/avatar/Avatar';
 import FitQuestIcon from '@/assets/logo/FitQuestIcon';
 import GlobalBadgeUnlock from '@/components/badge/GlobalBadgeUnlock';
+import OnboardingModal from '@/components/onboarding/OnboardingModal';
 import SidebarWidgets from './SidebarWidgets';
 import type { ReactNode } from 'react';
 
@@ -217,6 +218,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </div>
       <BottomNav />
       <GlobalBadgeUnlock />
+      <OnboardingModal />
     </div>
   );
 }

@@ -842,5 +842,26 @@
       "versionLabel": "Version actuelle :",
       "releasesLink": "Voir les releases sur GitHub"
     }
+  },
+  "onboarding": {
+    "skip": "Passer",
+    "next": "Suivant",
+    "finish": "Terminer",
+    "saving": "Sauvegarde…",
+    "height": {
+      "title": "Ta taille",
+      "subtitle": "Utilisée pour calculer l'Indice de Forme (FFMI, IMC).",
+      "hint": "Tu pourras modifier ça dans ton Profil à tout moment."
+    },
+    "goal": {
+      "title": "Ton objectif principal",
+      "subtitle": "Sert à mettre en avant les programmes recommandés pour toi.",
+      "hint": "Tu pourras modifier ça dans ton Profil. Facultatif."
+    },
+    "avatar": {
+      "title": "Choisis ta classe",
+      "subtitle": "Ton personnage évoluera visuellement au fil des niveaux.",
+      "hint": "Tu pourras changer de classe dans ton Profil à tout moment."
+    }
   }
 }
