@@ -1,8 +1,9 @@
 import { cn } from '@/lib/utils';
-import type { Exercise, Category, Equipment, Level } from '@/types';
+import type { Exercise, Category, Equipment } from '@/types';
 import type { ExercisePR } from '@/stores/exerciseStore';
 import { Dumbbell, User, Zap, ChevronRight, Trophy } from 'lucide-react';
 import { formatPr } from '@/lib/formatPr';
+import { levelTextColor } from '@/lib/levelColors';
 import { useTranslation } from 'react-i18next';
 
 interface ExerciseCardProps {
@@ -29,12 +30,6 @@ const equipmentIcons: Record<Equipment, typeof Dumbbell> = {
   other: Dumbbell,
 };
 
-const levelColors: Record<Level, string> = {
-  beginner: 'text-emerald-400',
-  intermediate: 'text-amber-400',
-  advanced: 'text-red-400',
-};
-
 export default function ExerciseCard({ exercise, pr, onClick, className }: ExerciseCardProps) {
   const { t } = useTranslation();
   const EquipIcon = equipmentIcons[exercise.equipment];
@@ -58,7 +53,7 @@ export default function ExerciseCard({ exercise, pr, onClick, className }: Exerc
           >
             {t(`library.category.${exercise.category}`)}
           </span>
-          <span className={cn('text-[11px] font-semibold uppercase tracking-wider', levelColors[exercise.level])}>
+          <span className={cn('text-[11px] font-semibold uppercase tracking-wider', levelTextColor[exercise.level])}>
             {t(`library.level.${exercise.level}`)}
           </span>
         </div>

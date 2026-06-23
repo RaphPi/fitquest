@@ -110,6 +110,14 @@
   "dashboard": {
     "title": "Tableau de bord",
     "welcome": "Prêt à monter de niveau ?",
+    "goalWelcome": {
+      "prise_de_masse": "Cap sur la <hl>prise de masse</hl> !",
+      "perte_de_gras": "Direction la <hl>perte de gras</hl> !",
+      "force": "En route vers plus de <hl>force</hl> !",
+      "endurance": "Construis ton <hl>endurance</hl> !",
+      "forme_generale": "Garde la <hl>forme générale</hl> !",
+      "remise_en_forme": "C'est l'heure de la <hl>remise en forme</hl> !"
+    },
     "weeklyFrequency": "Fréq. hebdo",
     "currentWeight": "Poids actuel",
     "nextSession": "Prochaine séance",
@@ -597,10 +605,14 @@
     "title": "Paramètres",
     "subtitle": "Personnalise ton expérience de combat.",
     "sections": {
+      "language": "Langue",
+      "languageHint": "Choisis la langue de l'application.",
       "appearance": "Apparence",
+      "appearanceHint": "Thème, son et widgets de la barre latérale.",
       "combat": "Combat",
       "combatHint": "Réglages du mode séance actif.",
       "account": "Compte",
+      "accountHint": "Email, données du compte et déconnexion.",
       "data": "Données",
       "dataHint": "Import et export de contenu externe."
     },

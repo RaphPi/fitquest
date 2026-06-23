@@ -115,10 +115,14 @@ export default function Library() {
             {isLoading ? t('library.loading') : t('library.count', { count: results.length })}
           </p>
         </div>
-        <GlowButton variant="primary" size="sm" onClick={() => setModal('create')}>
-          <Plus className="mr-1.5 h-4 w-4" />
+        <button
+          type="button"
+          onClick={() => setModal('create')}
+          className="flex shrink-0 items-center gap-1.5 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 font-display text-xs font-bold uppercase tracking-widest text-primary-soft transition-all hover:shadow-glow focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
+        >
+          <Plus className="h-4 w-4" />
           {t('library.create')}
-        </GlowButton>
+        </button>
       </div>
 
       {/* Search + filter toggle */}

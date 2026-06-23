@@ -148,17 +148,20 @@ function Sidebar() {
               />
               <div className="hidden min-w-0 flex-1 lg:block">
                 <p className="truncate text-sm font-semibold leading-tight text-foreground">{user.username}</p>
-                <p className="mb-1.5 text-[11px] font-medium leading-tight" style={{ color: tier.color }}>
+                <p className="text-[11px] font-medium leading-tight" style={{ color: tier.color }}>
                   {meta.name} · {t('sidebar.level')} {user.level}
                 </p>
-                <XPBar
-                  current={user.currentXP}
-                  required={xpRequiredForLevel(user.level)}
-                  level={user.level}
-                  animated={false}
-                  showLevel={false}
-                />
               </div>
+            </div>
+            {/* XP bar pleine largeur sous le bloc avatar+nom+grade */}
+            <div className="mt-2.5 hidden lg:block">
+              <XPBar
+                current={user.currentXP}
+                required={xpRequiredForLevel(user.level)}
+                level={user.level}
+                animated={false}
+                showLevel={false}
+              />
             </div>
           </div>
         );

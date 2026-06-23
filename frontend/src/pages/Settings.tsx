@@ -76,7 +76,7 @@ const THEME_LIST: { id: ThemeId; label: string }[] = [
 const BOSS_KEYS = Object.keys(BOSSES) as BossKey[];
 const WEAPON_KEYS = Object.keys(WEAPONS) as WeaponKey[];
 
-type SectionId = 'apparence' | 'combat' | 'compte' | 'donnees';
+type SectionId = 'langue' | 'apparence' | 'combat' | 'compte' | 'donnees';
 
 /** Interrupteur on/off. */
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
@@ -279,10 +279,38 @@ export default function Settings() {
         <p className="mt-1 text-muted-foreground">{t('settings.subtitle')}</p>
       </div>
 
+      {/* ── Langue ───────────────────────────────────────────────────── */}
+      <SectionCard
+        id="langue"
+        title={t('settings.sections.language')}
+        hint={t('settings.sections.languageHint')}
+        open={open === 'langue'}
+        onToggle={() => toggle('langue')}
+      >
+        <div className="flex gap-3">
+          {(['fr', 'en'] as const).map((id) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => handleLang(id)}
+              className={cn(
+                'rounded-lg border px-5 py-2.5 font-display text-sm font-bold uppercase tracking-widest transition-all focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none',
+                i18n.language === id
+                  ? 'border-primary text-primary shadow-glow'
+                  : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground',
+              )}
+            >
+              {t(id === 'fr' ? 'settings.appearance.languageFr' : 'settings.appearance.languageEn')}
+            </button>
+          ))}
+        </div>
+      </SectionCard>
+
       {/* ── Apparence ─────────────────────────────────────────────────── */}
       <SectionCard
         id="apparence"
         title={t('settings.sections.appearance')}
+        hint={t('settings.sections.appearanceHint')}
         open={open === 'apparence'}
         onToggle={() => toggle('apparence')}
       >
@@ -305,23 +333,18 @@ export default function Settings() {
           ))}
         </div>
 
-        <SubLabel className="mt-5">{t('settings.appearance.language')}</SubLabel>
-        <div className="flex gap-3">
-          {(['fr', 'en'] as const).map((id) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => handleLang(id)}
-              className={cn(
-                'rounded-lg border px-5 py-2.5 font-display text-sm font-bold uppercase tracking-widest transition-all focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none',
-                i18n.language === id
-                  ? 'border-primary text-primary shadow-glow'
-                  : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground',
-              )}
-            >
-              {t(id === 'fr' ? 'settings.appearance.languageFr' : 'settings.appearance.languageEn')}
-            </button>
-          ))}
+        <SubLabel className="mt-5">{t('settings.combat.sound')}</SubLabel>
+        <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
+          <div className="flex items-center gap-3">
+            {soundEnabled
+              ? <Volume2 className="h-5 w-5 text-primary-soft" />
+              : <VolumeX className="h-5 w-5 text-muted-foreground" />}
+            <div>
+              <div className="text-sm font-semibold text-foreground">{t('settings.combat.sound')}</div>
+              <div className="text-xs text-muted-foreground">{t('settings.combat.soundHint')}</div>
+            </div>
+          </div>
+          <Toggle on={soundEnabled} onChange={setSoundEnabled} />
         </div>
 
         <SubLabel className="mt-5">
@@ -438,19 +461,7 @@ export default function Settings() {
         </div>
 
         {/* Toggles */}
-        <div className="mt-6 divide-y divide-border rounded-lg border border-border">
-          <div className="flex items-center justify-between gap-4 p-4">
-            <div className="flex items-center gap-3">
-              {soundEnabled
-                ? <Volume2 className="h-5 w-5 text-primary-soft" />
-                : <VolumeX className="h-5 w-5 text-muted-foreground" />}
-              <div>
-                <div className="text-sm font-semibold text-foreground">{t('settings.combat.sound')}</div>
-                <div className="text-xs text-muted-foreground">{t('settings.combat.soundHint')}</div>
-              </div>
-            </div>
-            <Toggle on={soundEnabled} onChange={setSoundEnabled} />
-          </div>
+        <div className="mt-6 rounded-lg border border-border">
           <div className="flex items-center justify-between gap-4 p-4">
             <div>
               <div className="text-sm font-semibold text-foreground">{t('settings.combat.autoAdvance')}</div>
@@ -469,6 +480,7 @@ export default function Settings() {
       <SectionCard
         id="compte"
         title={t('settings.sections.account')}
+        hint={t('settings.sections.accountHint')}
         open={open === 'compte'}
         onToggle={() => toggle('compte')}
       >

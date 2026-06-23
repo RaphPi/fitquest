@@ -110,6 +110,14 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Ready to level up?",
+    "goalWelcome": {
+      "prise_de_masse": "Time to build <hl>muscle</hl>!",
+      "perte_de_gras": "Focus on <hl>fat loss</hl>!",
+      "force": "On your way to more <hl>strength</hl>!",
+      "endurance": "Build your <hl>endurance</hl>!",
+      "forme_generale": "Stay in <hl>general shape</hl>!",
+      "remise_en_forme": "Time to <hl>get back in shape</hl>!"
+    },
     "weeklyFrequency": "Weekly freq.",
     "currentWeight": "Current weight",
     "nextSession": "Next session",
@@ -597,10 +605,14 @@
     "title": "Settings",
     "subtitle": "Customize your combat experience.",
     "sections": {
+      "language": "Language",
+      "languageHint": "Choose the app language.",
       "appearance": "Appearance",
+      "appearanceHint": "Theme, sound and sidebar widgets.",
       "combat": "Combat",
       "combatHint": "Active session mode settings.",
       "account": "Account",
+      "accountHint": "Email, account data and logout.",
       "data": "Data",
       "dataHint": "Import and export external content."
     },

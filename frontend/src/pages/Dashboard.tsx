@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { xpRequiredForLevel } from '@/lib/xp';
+import { GOALS, type Goal } from '@/lib/goals';
 import { avatarClassFromStage, getAvatarStageMeta } from '@/lib/avatar';
 import { buildActiveSession } from '@/lib/launchSession';
 import { useUserStore } from '@/stores/userStore';
@@ -152,7 +153,16 @@ export default function Dashboard() {
                 {' · '}
                 <span style={{ color: stageMeta.tier.color }}>{stageMeta.name}</span>
               </p>
-              <p className="mt-0.5 text-xs text-muted-foreground">{t('dashboard.welcome')}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {user.primaryGoal && GOALS.includes(user.primaryGoal as Goal) ? (
+                  <Trans
+                    i18nKey={`dashboard.goalWelcome.${user.primaryGoal}`}
+                    components={{ hl: <span className="font-semibold text-primary-soft" /> }}
+                  />
+                ) : (
+                  t('dashboard.welcome')
+                )}
+              </p>
             </>
           )}
         </div>
@@ -182,7 +192,9 @@ export default function Dashboard() {
             </div>
           )}
 
+          <div className="flex flex-col gap-5">
           {/* ── Fréquence + Poids : toujours 2 colonnes ── */}
+          <div className="order-2 empty:hidden lg:order-1">
           {isDashboardLoading ? (
             <div className="grid grid-cols-2 gap-3">
               <div className="h-28 animate-pulse rounded-lg border border-border bg-card" />
@@ -242,8 +254,10 @@ export default function Dashboard() {
               )}
             </div>
           )}
+          </div>
 
           {/* ── Prochaine séance ── */}
+          <div className="order-1 lg:order-2">
           {isDashboardLoading ? (
             <div className="h-28 animate-pulse rounded-lg border border-border bg-card" />
           ) : (
@@ -320,6 +334,8 @@ export default function Dashboard() {
             )}
           </div>
           )}
+          </div>
+          </div>
         </>
       )}
 
