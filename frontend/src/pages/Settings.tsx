@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Volume2, VolumeX, Plus, Lock, LogOut, Mail, ChevronDown, FileJson, Flame, Zap, Clock, Activity, Trophy, Gauge, Check, ShieldCheck, Archive, Loader2, Send } from 'lucide-react';
+import { Volume2, VolumeX, Plus, Lock, LogOut, Mail, ChevronDown, FileJson, Flame, Zap, Clock, Activity, Trophy, Gauge, Check, ShieldCheck, Archive, Loader2, Send, HelpCircle } from 'lucide-react';
 import { useSettingsStore, type WidgetId } from '@/stores/settingsStore';
 import { useUserStore } from '@/stores/userStore';
 import { cn } from '@/lib/utils';
@@ -278,6 +278,24 @@ export default function Settings() {
         <h1 className="font-display text-2xl font-bold">{t('settings.title')}</h1>
         <p className="mt-1 text-muted-foreground">{t('settings.subtitle')}</p>
       </div>
+
+      {/* ── Aide ─────────────────────────────────────────────────────── */}
+      <button
+        type="button"
+        onClick={() => navigate('/help')}
+        className="flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-card px-5 py-4 text-left transition-colors hover:bg-card-shield/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+      >
+        <span className="flex items-center gap-3">
+          <HelpCircle className="h-5 w-5 shrink-0 text-primary-soft" />
+          <span>
+            <span className="block font-display text-sm font-bold uppercase tracking-widest">
+              {t('settings.help.btn')}
+            </span>
+            <span className="mt-0.5 block text-xs text-muted-foreground">{t('settings.help.btnHint')}</span>
+          </span>
+        </span>
+        <ChevronDown className="h-4 w-4 shrink-0 -rotate-90 text-muted-foreground" />
+      </button>
 
       {/* ── Langue ───────────────────────────────────────────────────── */}
       <SectionCard

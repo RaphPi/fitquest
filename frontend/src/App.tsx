@@ -15,6 +15,7 @@ import EmailSettings from '@/pages/EmailSettings';
 import ImportLFY from '@/pages/ImportLFY';
 import ExportPrograms from '@/pages/ExportPrograms';
 import AdminPanel from '@/pages/AdminPanel';
+import Help from '@/pages/Help';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/import" element={<ProtectedRoute><ImportLFY /></ProtectedRoute>} />
         <Route path="/export" element={<ProtectedRoute><ExportPrograms /></ProtectedRoute>} />
         <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
+        <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppLayout>

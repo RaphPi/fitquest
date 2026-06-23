@@ -703,7 +703,18 @@
       "exportZip": "Export my data (ZIP)",
       "exportZipHint": "Download all your data as a ZIP file (GDPR compliance).",
       "exportZipError": "Export failed. Please try again."
+    },
+    "help": {
+      "btn": "Help & Documentation",
+      "btnHint": "Complete FitQuest user guide."
     }
+  },
+  "help": {
+    "title": "Help",
+    "subtitle": "Complete FitQuest documentation.",
+    "toc": "Sections",
+    "screenshotAlt": "Screenshot",
+    "screenshotPending": "Screenshot coming soon"
   },
   "emailPage": {
     "title": "Email notifications",

@@ -703,7 +703,18 @@
       "exportZip": "Exporter mes données (ZIP)",
       "exportZipHint": "Télécharge toutes vos données au format ZIP (conformité RGPD).",
       "exportZipError": "Erreur lors de l'export. Veuillez réessayer."
+    },
+    "help": {
+      "btn": "Aide & Documentation",
+      "btnHint": "Guide utilisateur complet de FitQuest."
     }
+  },
+  "help": {
+    "title": "Aide",
+    "subtitle": "Documentation complète de FitQuest.",
+    "toc": "Sections",
+    "screenshotAlt": "Capture d'écran",
+    "screenshotPending": "Capture à venir"
   },
   "emailPage": {
     "title": "Notifications email",
