@@ -34,6 +34,3 @@ Archives/
 
 # Guide projet local (contient des informations personnelles)
 CLAUDE.md
-
-# Screenshots doc (générées localement via Puppeteer)
-frontend/public/docs/screenshots/*.png
