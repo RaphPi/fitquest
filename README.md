@@ -2,6 +2,16 @@
 
 Web app de renforcement musculaire gamifiée (RPG). Self-hosted, déploiement Docker en une commande.
 
+## Aperçu
+
+| Tableau de bord | Séance — Boss Fight |
+|---|---|
+| ![Tableau de bord](frontend/public/docs/screenshots/dashboard.png) | ![Écran de combat](frontend/public/docs/screenshots/workouts.png) |
+
+| Programmes | Gamification |
+|---|---|
+| ![Programmes](frontend/public/docs/screenshots/programs.png) | ![Trophées & paliers](frontend/public/docs/screenshots/gamification.png) |
+
 ## Stack
 
 - **Frontend** : React 18 + Vite + TypeScript (strict) · TailwindCSS + shadcn/ui · Zustand · React Router · react-i18next · Recharts
