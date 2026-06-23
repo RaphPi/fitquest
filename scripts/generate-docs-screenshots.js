@@ -51,15 +51,37 @@ const OUTPUT_DIR =
 // Chaque capture illustre l'écran RÉEL de l'app correspondant à une section de
 // l'aide. Les noms de fichiers doivent rester alignés avec les placeholders
 // ![](docs/screenshots/xxx.png) insérés dans help.fr.md / help.en.md.
+// Pages atteignables par simple navigation. (La section « Séances » /
+// workouts.png est un cas à part : l'écran de combat n'existe que pendant une
+// séance, on le génère via captureWorkout ci-dessous.)
 const PAGES = [
   { file: 'dashboard.png', path: '/' },
-  { file: 'programs.png', path: '/library' },
-  { file: 'workouts.png', path: '/workout' },
+  { file: 'programs.png', path: '/workout' },
   { file: 'body.png', path: '/body' },
   { file: 'profile.png', path: '/profile' },
   { file: 'settings.png', path: '/settings' },
   { file: 'gamification.png', path: '/trophees' },
 ];
+
+// Capture l'écran de combat (séance en cours). On reproduit le parcours UI :
+// liste des programmes → ouvrir le 1er programme → lancer la séance. Les
+// sélecteurs ciblent les icônes Lucide (lucide-chevron-right / lucide-swords),
+// indépendants de la langue. `start()` est purement client (aucune donnée créée
+// côté serveur tant qu'on ne valide pas la séance).
+async function captureWorkout(page, baseUrl, outDir) {
+  await page.goto(`${baseUrl}/workout`, { waitUntil: 'networkidle2' });
+  await page.waitForSelector('button:has(svg.lucide-chevron-right)', { timeout: 15000 });
+  await page.click('button:has(svg.lucide-chevron-right)');
+  await page.waitForSelector('button:has(svg.lucide-swords)', { timeout: 15000 });
+  await page.click('button:has(svg.lucide-swords)');
+  await page.waitForFunction(() => window.location.pathname === '/workout/active', {
+    timeout: 15000,
+  });
+  // Laisse le temps au rendu du canvas (boss pixel art) et des animations.
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+  await page.screenshot({ path: path.join(outDir, 'workouts.png') });
+  console.log('✓ workouts.png  (/workout/active)');
+}
 
 async function main() {
   if (!EMAIL || !PASSWORD) {
@@ -102,6 +124,9 @@ async function main() {
       await page.screenshot({ path: path.join(OUTPUT_DIR, file) });
       console.log(`✓ ${file}  (${route})`);
     }
+
+    // Écran de combat (section « Séances »).
+    await captureWorkout(page, BASE_URL, OUTPUT_DIR);
   } finally {
     await browser.close();
   }
