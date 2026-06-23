@@ -141,19 +141,26 @@ Copier `.env.example` en `.env` et adapter les valeurs. Le script `install.sh` g
 | `WEBHOOK_URL` | Webhook générique — Discord, Slack, n8n, Make… (optionnel) |
 | `PUPPETEER_SKIP_DOWNLOAD` | `true` — évite le téléchargement de Chromium (Phase 2) |
 
-## Évolutions prévues (Phase 2)
+## Phase 2 — livré
 
-- **IA multi-provider** — génération de programme personnalisé via questionnaire (Claude API, Ollama, LM Studio) + illustrations d'exercices générées par IA
-- **Notifications** — web push, SMS FreeSMS, Home Assistant, webhook générique (rappels séance, badges débloqués)
-- **Export fiche personnage PDF** — avatar, niveau, badges, métriques, top exercices, graphique fréquence (Puppeteer)
-- **Export de données** — CSV et JSON complets (historique, métriques, photos)
+- **i18n complet** — FR / EN sur l'ensemble de l'app, bascule à chaud
+- **Indice de Forme** — FFMI + score 0-100 avec interprétation, graphe d'évolution
+- **Objectif principal & packs** — objectif utilisateur, programmes recommandés, catalogue de packs JSON importables
+- **Ressenti post-séance** — échelle 1-5 (visages pixel art), affiché dans l'historique
+- **Onboarding guidé** — modale 1er login (taille, objectif, avatar), non bloquante
+- **Export fiche personnage PDF** — avatar, niveau, badges, métriques (Puppeteer)
 - **Email digest** — synthèse périodique (quotidienne / hebdomadaire / mensuelle)
-- **i18n complet** — FR / EN sur l'ensemble de l'app
-- **Widgets sidebar configurables** — mini-graphes, lancement rapide séance, personnalisables dans les paramètres
+- **Widgets sidebar configurables** — streak, XP, dernière séance, poids, badges
 - **Changement de personnage** — sélecteur de classe accessible après l'inscription
 - **Panel admin** — gestion des utilisateurs, purge sélective, statistiques globales
-- **Gestion de compte (utilisateur)** — suppression du compte, export profil RGPD (JSON), import / restauration
-- **Partage communauté** — import / export de programmes au format JSON
+- **Gestion de compte (RGPD)** — export ZIP complet, suppression de compte
+- **Import / export de programmes JSON** — traçabilité des imports, purge par lot
+- **Documentation intégrée** — page `/help` FR / EN avec captures d'écran
+
+## Évolutions futures
+
+- **IA multi-provider** — génération de programme personnalisé via questionnaire (Claude API, Ollama, LM Studio) + illustrations d'exercices générées par IA *(conçu, reporté)*
+- **Notifications** — web push, SMS FreeSMS, Home Assistant, webhook générique *(conçu, reporté)*
 - **Sync multi-appareils** — compte cloud optionnel
 
 ## Structure
