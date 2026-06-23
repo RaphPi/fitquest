@@ -1,10 +1,23 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, BookOpen } from 'lucide-react';
+import { slugify } from '@/lib/utils';
+import MarkdownDocs from '@/components/docs/MarkdownDocs';
+import helpFr from '@/docs/help.fr.md?raw';
+import helpEn from '@/docs/help.en.md?raw';
+
+const SECTIONS = {
+  fr: ['Tableau de bord', 'Programmes', 'Séances', 'Corps', 'Profil', 'Réglages', 'Gamification'],
+  en: ['Dashboard', 'Programs', 'Workouts', 'Body', 'Profile', 'Settings', 'Gamification'],
+} as const;
 
 export default function Help() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+
+  const lang = i18n.language.startsWith('fr') ? 'fr' : 'en';
+  const content = lang === 'fr' ? helpFr : helpEn;
+  const sections = SECTIONS[lang];
 
   return (
     <section className="space-y-4">
@@ -27,11 +40,25 @@ export default function Help() {
         <p className="mt-1 text-muted-foreground">{t('help.subtitle')}</p>
       </div>
 
-      {/* Contenu ajouté à l'étape 2 */}
-      <div className="rounded-xl border border-border bg-card p-6 text-center text-muted-foreground">
-        <BookOpen className="mx-auto mb-3 h-10 w-10 opacity-30" />
-        <p className="text-sm">{t('common.loading')}</p>
-      </div>
+      <nav className="rounded-xl border border-border bg-card p-4">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          {t('help.toc')}
+        </p>
+        <ul className="flex flex-wrap gap-2">
+          {sections.map((section) => (
+            <li key={section}>
+              <a
+                href={`#${slugify(section)}`}
+                className="rounded-md bg-card-shield px-2.5 py-1 text-sm text-primary transition-colors hover:text-primary-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+              >
+                {section}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <MarkdownDocs content={content} />
     </section>
   );
 }
