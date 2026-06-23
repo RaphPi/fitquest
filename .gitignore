@@ -11,6 +11,7 @@ backend/dist/
 # Env
 .env
 *.local
+.env.screenshots
 
 # Prisma
 backend/prisma/*.db
