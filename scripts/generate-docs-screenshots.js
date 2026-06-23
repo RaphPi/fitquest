@@ -19,11 +19,21 @@
 const path = require('path');
 const fs = require('fs');
 
-// Puppeteer est installé côté backend (Chromium géré séparément sur la LXC).
-const puppeteer = require('../backend/node_modules/puppeteer');
+// Résolution robuste : sur l'hôte les modules vivent dans backend/node_modules ;
+// dans le conteneur backend ils sont résolus normalement (WORKDIR /app).
+function loadModule(name) {
+  try {
+    return require(`../backend/node_modules/${name}`);
+  } catch {
+    return require(name);
+  }
+}
+
+const puppeteer = loadModule('puppeteer');
 
 // Charge les variables d'environnement depuis .env.screenshots (à la racine).
-require('../backend/node_modules/dotenv').config({
+// Sans effet si le fichier est absent (cas conteneur où l'env est passé via -e).
+loadModule('dotenv').config({
   path: path.resolve(__dirname, '..', '.env.screenshots'),
 });
 
@@ -32,14 +42,11 @@ const EMAIL = process.env.SCREENSHOTS_EMAIL;
 const PASSWORD = process.env.SCREENSHOTS_PASSWORD;
 const EXECUTABLE_PATH = process.env.PUPPETEER_EXECUTABLE_PATH;
 
-const OUTPUT_DIR = path.resolve(
-  __dirname,
-  '..',
-  'frontend',
-  'public',
-  'docs',
-  'screenshots',
-);
+// Dossier de sortie : surchargeable via SCREENSHOTS_OUT_DIR (utile en conteneur,
+// où l'on monte le dossier public de l'hôte sur un point de montage dédié).
+const OUTPUT_DIR =
+  process.env.SCREENSHOTS_OUT_DIR ||
+  path.resolve(__dirname, '..', 'frontend', 'public', 'docs', 'screenshots');
 
 // Ordre des sections tel qu'il apparaît dans les fichiers Markdown (les <h2>).
 // Doit rester aligné avec les placeholders ![](docs/screenshots/xxx.png).
