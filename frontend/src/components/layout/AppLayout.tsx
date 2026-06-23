@@ -115,7 +115,7 @@ function Sidebar() {
             aria-label={t(`nav.${key}`)}
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition',
+                'flex items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm transition lg:justify-start',
                 isActive
                   ? 'bg-card-shield text-primary shadow-glow'
                   : 'text-muted-foreground hover:bg-card-shield/50 hover:text-foreground',
