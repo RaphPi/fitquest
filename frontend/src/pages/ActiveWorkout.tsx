@@ -6,7 +6,7 @@ import { useWorkoutStore } from '@/stores/workoutStore';
 import { useUserStore } from '@/stores/userStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
-import { effortPoints, typeCopy } from '@/lib/bossFight';
+import { effortPoints, typeCopyKeys } from '@/lib/bossFight';
 import { levelProgressPct } from '@/lib/xp';
 import { playSound } from '@/lib/sound';
 import { renderBoss, drawSprite, WEAPONS, SHIELD, ANVIL, HAMMER, FEEL_FACES } from '@/lib/pixelSprites';
@@ -84,7 +84,7 @@ export default function ActiveWorkout() {
   const stageUp = !!result && getAvatarStage(result.user.level) > getAvatarStage(result.user.level - result.levelsGained);
 
   const cur = session?.exercises[exerciseIndex];
-  const copy = cur ? typeCopy(cur.type) : typeCopy('reps');
+  const copy = cur ? typeCopyKeys(cur.type) : typeCopyKeys('reps');
   const clock = useMemo(() => new Date().toTimeString().slice(0, 5), []);
   const curExercise = useMemo(
     () => exercises.find((e) => e.id === cur?.exerciseId) ?? null,
@@ -260,7 +260,7 @@ export default function ActiveWorkout() {
           </div>
         </div>
         <div className="text-right font-display text-[11px] text-muted-foreground">
-          Exo<b className="block text-sm text-foreground">{exerciseIndex + 1}/{session.exercises.length}</b>
+          {t('activeWorkout.exerciseAbbr')}<b className="block text-sm text-foreground">{exerciseIndex + 1}/{session.exercises.length}</b>
         </div>
       </header>
 
@@ -280,7 +280,7 @@ export default function ActiveWorkout() {
       <div className="z-20 px-4 pt-3">
         <div className="mb-1.5 flex items-baseline justify-between">
           <span className="text-xs text-red-300" style={{ fontFamily: PX }}>{session.bossTitle.toUpperCase()}</span>
-          <span className="font-display text-xs text-muted-foreground"><b className="text-foreground">{striking ? displayHp : bossHp}</b> / {bossMaxHp} PV</span>
+          <span className="font-display text-xs text-muted-foreground"><b className="text-foreground">{striking ? displayHp : bossHp}</b> / {bossMaxHp} {t('activeWorkout.hp')}</span>
         </div>
         <div className="relative h-4 overflow-hidden border-2 bg-[#1a0d12]" style={{ borderColor: 'rgba(239,68,68,.5)' }}>
           <div className="h-full transition-[width] duration-200" style={{
@@ -294,12 +294,12 @@ export default function ActiveWorkout() {
       <div className="z-20 grid flex-1 grid-cols-1 lg:grid-cols-[260px_1fr_280px]">
         {/* Panneau gauche (desktop) : stats de séance */}
         <aside className="hidden flex-col gap-3 border-r border-border/60 p-5 lg:flex">
-          <div className="text-xs uppercase tracking-widest text-muted-foreground">Combat</div>
-          <StatLine label="Durée" value={fmt(elapsed)} />
-          <StatLine label="Heure" value={clock} />
-          <StatLine label="Dégâts infligés" value={`${dealt}`} accent />
-          <StatLine label="Séries faites" value={`${completed.length}`} />
-          <div className="mt-2 text-xs uppercase tracking-widest text-muted-foreground">Dernier coup</div>
+          <div className="text-xs uppercase tracking-widest text-muted-foreground">{t('activeWorkout.sidebarCombat')}</div>
+          <StatLine label={t('activeWorkout.statDuration')} value={fmt(elapsed)} />
+          <StatLine label={t('activeWorkout.statTime')} value={clock} />
+          <StatLine label={t('activeWorkout.statDamage')} value={`${dealt}`} accent />
+          <StatLine label={t('activeWorkout.statSets')} value={`${completed.length}`} />
+          <div className="mt-2 text-xs uppercase tracking-widest text-muted-foreground">{t('activeWorkout.statLastHit')}</div>
           <div className="font-display text-2xl text-primary-soft">{combo > 0 ? `×${combo}` : '—'}</div>
         </aside>
 
@@ -308,8 +308,8 @@ export default function ActiveWorkout() {
           <div className="pointer-events-none absolute left-1/2 top-[44%] h-56 w-56 rounded-full" style={{ background: 'radial-gradient(circle, rgba(239,68,68,.20), transparent 62%)', animation: 'fq-pulse 3s ease-in-out infinite' }} />
           {/* Flash doré de surpassement */}
           {surpass && <div key={`sf-${hitKey}`} className="pointer-events-none absolute inset-0 z-20" style={{ background: 'radial-gradient(circle at 50% 44%, rgba(245,158,11,.5), transparent 60%)', animation: 'fq-flash 1s ease-out forwards' }} />}
-          {surpass && <div className="absolute top-[4%] z-30 font-black text-xp" style={{ fontFamily: PX, fontSize: 16, left: '50%', textShadow: '0 0 16px rgba(245,158,11,1),2px 2px 0 #7f1d1d', animation: 'fq-surpass 1.5s ease-out' }}>✦ SURPASSEMENT ✦</div>}
-          {combo > 0 && striking && <div className="absolute top-[12%] z-30 -translate-x-1/2 text-[15px] text-primary-soft" style={{ fontFamily: PX, left: '50%', textShadow: '2px 2px 0 #312e81' }}>COMBO x{combo}</div>}
+          {surpass && <div className="absolute top-[4%] z-30 font-black text-xp" style={{ fontFamily: PX, fontSize: 16, left: '50%', textShadow: '0 0 16px rgba(245,158,11,1),2px 2px 0 #7f1d1d', animation: 'fq-surpass 1.5s ease-out' }}>{t('activeWorkout.surpass')}</div>}
+          {combo > 0 && striking && <div className="absolute top-[12%] z-30 -translate-x-1/2 text-[15px] text-primary-soft" style={{ fontFamily: PX, left: '50%', textShadow: '2px 2px 0 #312e81' }}>{t('activeWorkout.comboLabel', { combo })}</div>}
           {striking && <div key={`f-${hitKey}`} className="absolute top-[24%] z-30 font-display text-2xl font-black text-xp" style={{ left: '55%', textShadow: '2px 2px 0 #7f1d1d', animation: 'fq-float 1.3s ease-out' }}>-{floatDmg}</div>}
           <div className="pointer-events-none absolute top-[42%] z-30" style={{ left: '50%' }}>
             {particles.map((p) => (
@@ -329,7 +329,7 @@ export default function ActiveWorkout() {
 
         {/* Panneau droit (desktop) : liste des exercices */}
         <aside className="hidden flex-col gap-2 border-l border-border/60 p-5 lg:flex">
-          <div className="text-xs uppercase tracking-widest text-muted-foreground">Séance</div>
+          <div className="text-xs uppercase tracking-widest text-muted-foreground">{t('activeWorkout.sidebarSession')}</div>
           {session.exercises.map((ex, i) => {
             const isCurrent = i === exerciseIndex;
             const isDone = i < exerciseIndex;
@@ -351,7 +351,7 @@ export default function ActiveWorkout() {
                   {isDone ? '✓' : i + 1}
                 </span>
                 <span className={`flex-1 truncate ${isCurrent ? 'font-semibold' : ''}`}>{ex.name}</span>
-                {isCurrent && <span className="shrink-0 text-[9px] font-bold uppercase tracking-wider text-primary-soft">en cours</span>}
+                {isCurrent && <span className="shrink-0 text-[9px] font-bold uppercase tracking-wider text-primary-soft">{t('activeWorkout.inProgress')}</span>}
                 <span className="ml-1 shrink-0 font-display text-[11px]">{ex.sets}×{ex.target}{ex.type === 'duration' ? 's' : ''}</span>
               </div>
             );
@@ -372,17 +372,17 @@ export default function ActiveWorkout() {
         </div>
         <div className="mt-1.5 flex items-center justify-center gap-3">
           <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-bold text-primary-soft">{cur.category.toUpperCase()}</span>
-          <span className="text-[11px] font-bold text-muted-foreground">Série {setIndex + 1}/{cur.sets}</span>
+          <span className="text-[11px] font-bold text-muted-foreground">{t('activeWorkout.set', { current: setIndex + 1, total: cur.sets })}</span>
         </div>
         {/* Objectif bien visible */}
         <div className="mt-2.5 inline-flex items-baseline gap-2 rounded-2xl border-2 px-6 py-2"
           style={cur.type === 'duration'
             ? { borderColor: 'rgba(34,211,238,.5)', background: 'rgba(34,211,238,.08)' }
             : { borderColor: 'rgba(255,255,255,.2)', background: 'rgba(255,255,255,.04)' }}>
-          <span className="text-xs uppercase tracking-widest text-muted-foreground">Objectif</span>
+          <span className="text-xs uppercase tracking-widest text-muted-foreground">{t('activeWorkout.objective')}</span>
           <span className="font-display text-5xl font-black leading-none"
             style={{ color: cur.type === 'duration' ? 'rgba(34,211,238,1)' : '#ffffff' }}>{cur.target}</span>
-          <span className="text-sm font-bold text-muted-foreground">{cur.type === 'duration' ? 'sec' : 'reps'}</span>
+          <span className="text-sm font-bold text-muted-foreground">{cur.type === 'duration' ? t('activeWorkout.seconds') : t('activeWorkout.reps')}</span>
         </div>
         <div className="mt-2.5">{setsRow}</div>
       </div>
@@ -393,8 +393,8 @@ export default function ActiveWorkout() {
         style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.25rem)' }}
       >
         <div className="mb-1 flex justify-between text-xs uppercase tracking-wide text-muted-foreground">
-          <span>Niveau {user?.level ?? 1}</span>
-          <span className="font-display text-xp">{dealt} pts d'effort</span>
+          <span>{t('activeWorkout.level', { level: user?.level ?? 1 })}</span>
+          <span className="font-display text-xp">{dealt} {t('activeWorkout.effortPoints')}</span>
         </div>
         <div className="mb-3 h-2 overflow-hidden border border-[#2a2d40] bg-border">
           <div className="h-full transition-[width] duration-700" style={{ width: `${levelProgressPct(user?.currentXP ?? 0, user?.level ?? 1)}%`, backgroundImage: 'linear-gradient(90deg,#b45309,var(--xp))' }} />
@@ -402,14 +402,14 @@ export default function ActiveWorkout() {
         <button onClick={openConfirm} disabled={striking || phase !== 'fight'}
           className="flex h-14 w-full items-center justify-center gap-2 border-2 text-white disabled:opacity-50"
           style={{ fontFamily: PX, fontSize: 12, borderColor: '#fca5a5', background: 'linear-gradient(180deg,#ef4444,#991b1b)', boxShadow: '0 6px 0 #5b1212' }}>
-          ⚔ {copy.cta}
+          ⚔ {t(copy.cta)}
         </button>
         <div className="mt-3 flex gap-2">
           <button onClick={() => setInfoOpen(true)} disabled={!curExercise}
             className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-border bg-card text-xs font-semibold text-muted-foreground disabled:opacity-40">
-            <Info className="h-4 w-4" /> Fiche
+            <Info className="h-4 w-4" /> {t('activeWorkout.infoBtn')}
           </button>
-          <button onClick={skipExercise} className="h-10 flex-1 rounded-xl border border-border bg-card text-xs font-semibold text-muted-foreground">Passer l'exo ▸</button>
+          <button onClick={skipExercise} className="h-10 flex-1 rounded-xl border border-border bg-card text-xs font-semibold text-muted-foreground">{t('activeWorkout.skipExercise')}</button>
         </div>
       </footer>
 
@@ -422,19 +422,23 @@ export default function ActiveWorkout() {
       {confirmOpen && (
         <Overlay>
           <div className="w-full max-w-sm rounded-2xl border-2 border-border p-6" style={{ background: 'linear-gradient(180deg,#12141d,#0c0d14)' }}>
-            <h3 className="text-center text-[11px] leading-relaxed" style={{ fontFamily: PX }}>{copy.confirmTitle}</h3>
-            <p className="mb-4 mt-2.5 text-center text-xs text-muted-foreground">{copy.confirmHint}</p>
+            <h3 className="text-center text-[11px] leading-relaxed" style={{ fontFamily: PX }}>{t(copy.confirmTitle)}</h3>
+            <p className="mb-4 mt-2.5 text-center text-xs text-muted-foreground">{t(copy.confirmHint)}</p>
             <div className="mb-1 flex items-center justify-center gap-4">
               <button onClick={() => setInputVal((v) => Math.max(0, v - 1))} className="grid h-14 w-14 place-items-center rounded-2xl border border-border bg-card text-2xl"><Minus className="h-6 w-6" /></button>
               <div className="min-w-[100px] text-center font-display text-5xl font-bold">{inputVal}</div>
               <button onClick={() => setInputVal((v) => v + 1)} className="grid h-14 w-14 place-items-center rounded-2xl border border-border bg-card text-2xl"><Plus className="h-6 w-6" /></button>
             </div>
-            <div className="mb-3 text-center text-xs text-muted-foreground">{copy.unit} · cible {cur.target}</div>
+            <div className="mb-3 text-center text-xs text-muted-foreground">{t(copy.unit)} · {t('activeWorkout.bossFight.target', { target: cur.target })}</div>
             <div className="mb-4 text-center text-xs" style={{ color: inputVal > cur.target ? 'var(--accent-soft)' : inputVal === cur.target ? 'var(--success)' : 'var(--xp)' }}>
-              {inputVal > cur.target ? `✦ Surpassement ! (+${inputVal - cur.target}) — magie bonus` : inputVal === cur.target ? '🎯 Objectif atteint' : '⚠️ Sous la cible — moins de dégâts'}
+              {inputVal > cur.target
+                ? t('activeWorkout.surpassBonus', { bonus: inputVal - cur.target })
+                : inputVal === cur.target
+                  ? t('activeWorkout.objectiveReached')
+                  : t('activeWorkout.belowTarget')}
             </div>
-            <button onClick={() => doStrike(inputVal)} className="h-14 w-full border-2 text-white" style={{ fontFamily: PX, fontSize: 12, borderColor: '#fca5a5', background: 'linear-gradient(180deg,#ef4444,#991b1b)', boxShadow: '0 5px 0 #5b1212' }}>⚔ PORTER LE COUP</button>
-            <button onClick={() => setConfirmOpen(false)} className="mt-3 w-full text-xs text-muted-foreground">Annuler</button>
+            <button onClick={() => doStrike(inputVal)} className="h-14 w-full border-2 text-white" style={{ fontFamily: PX, fontSize: 12, borderColor: '#fca5a5', background: 'linear-gradient(180deg,#ef4444,#991b1b)', boxShadow: '0 5px 0 #5b1212' }}>{t('activeWorkout.strikeBtn')}</button>
+            <button onClick={() => setConfirmOpen(false)} className="mt-3 w-full text-xs text-muted-foreground">{t('common.cancel')}</button>
           </div>
         </Overlay>
       )}
@@ -445,21 +449,21 @@ export default function ActiveWorkout() {
           <div className="flex flex-col items-center gap-4 text-center">
             {restKind === 'repos' ? (
               <>
-                <div style={{ fontFamily: PX, fontSize: 11, color: 'var(--xp)', textShadow: '0 0 10px rgba(245,158,11,.6)' }}>⚒ À LA FORGE</div>
+                <div style={{ fontFamily: PX, fontSize: 11, color: 'var(--xp)', textShadow: '0 0 10px rgba(245,158,11,.6)' }}>{t('activeWorkout.rest.forge')}</div>
                 <Forge />
-                <p className="-mt-1 text-xs italic text-muted-foreground">« Le forgeron répare ton bouclier… »</p>
+                <p className="-mt-1 text-xs italic text-muted-foreground">{t('activeWorkout.rest.forgeFlavor')}</p>
               </>
             ) : (
-              <div style={{ fontFamily: PX, fontSize: 11, color: 'var(--accent-soft)', textShadow: '0 0 10px rgba(167,139,250,.6)' }}>⏳ REPRENDS TON SOUFFLE</div>
+              <div style={{ fontFamily: PX, fontSize: 11, color: 'var(--accent-soft)', textShadow: '0 0 10px rgba(167,139,250,.6)' }}>{t('activeWorkout.rest.breathe')}</div>
             )}
             <RestRing remaining={restRemaining} total={restTotalRef.current} color={restKind === 'transition' ? '#a78bfa' : '#f59e0b'} />
             <div className="rounded-xl border border-border bg-card px-4 py-2.5">
-              <div className="text-[9px] uppercase tracking-widest text-muted-foreground">Prochaine attaque</div>
-              <div className="mt-0.5 font-display text-sm font-bold">Série {setIndex + 1} — {cur.name}</div>
+              <div className="text-[9px] uppercase tracking-widest text-muted-foreground">{t('activeWorkout.rest.nextAttack')}</div>
+              <div className="mt-0.5 font-display text-sm font-bold">{t('activeWorkout.rest.nextSet', { set: setIndex + 1, name: cur.name })}</div>
             </div>
             <button onClick={() => { playSound('resume'); resumeFromRest(); }}
               className="rounded-xl border border-primary bg-primary px-8 py-3 font-display text-base font-bold text-white shadow-glow">
-              Reprendre ⚔
+              {t('activeWorkout.rest.resume')}
             </button>
           </div>
         </Overlay>
@@ -469,12 +473,12 @@ export default function ActiveWorkout() {
       {phase === 'pause' && (
         <Overlay blur>
           <div className="flex flex-col items-center gap-5 text-center">
-            <div style={{ fontFamily: PX, fontSize: 18 }}>⏸ EN PAUSE</div>
+            <div style={{ fontFamily: PX, fontSize: 18 }}>{t('activeWorkout.pause.title')}</div>
             <div className="font-display text-4xl text-cyan-300">{fmt(elapsed)}</div>
-            <p className="text-xs text-muted-foreground">Chrono &amp; durée figés — prends ton temps</p>
+            <p className="text-xs text-muted-foreground">{t('activeWorkout.pause.hint')}</p>
             <div className="flex w-60 flex-col gap-2.5">
-              <button onClick={resume} className="h-12 rounded-2xl border border-success bg-success font-display text-sm font-bold text-[#04250f]">▶ Reprendre</button>
-              <button onClick={abandon} className="h-12 rounded-2xl border border-danger/40 font-display text-sm font-bold text-red-300">Abandonner</button>
+              <button onClick={resume} className="h-12 rounded-2xl border border-success bg-success font-display text-sm font-bold text-[#04250f]">{t('activeWorkout.pause.resume')}</button>
+              <button onClick={abandon} className="h-12 rounded-2xl border border-danger/40 font-display text-sm font-bold text-red-300">{t('activeWorkout.pause.abandon')}</button>
             </div>
           </div>
         </Overlay>
@@ -486,26 +490,26 @@ export default function ActiveWorkout() {
           <div className="flex flex-col items-center gap-3 text-center">
             <PixelCanvas className={bossHp <= 0 ? 'rotate-90 opacity-30' : 'opacity-75'} render={(c) => renderBoss(c, bossKey, bossHp <= 0 ? 0.1 : 0.25, 8)} deps={[bossHp]} />
             <div style={{ fontFamily: PX, fontSize: 18, color: bossHp <= 0 ? 'var(--xp)' : 'var(--accent-soft)', textShadow: bossHp <= 0 ? '2px 2px 0 #7f1d1d' : 'none' }}>
-              {bossHp <= 0 ? 'BOSS VAINCU !' : 'BIEN BATTU !'}
+              {bossHp <= 0 ? t('activeWorkout.done.bossDefeated') : t('activeWorkout.done.bossEscaped')}
             </div>
             <p className="max-w-xs text-sm italic text-muted-foreground">
-              {bossHp <= 0 ? '« Impossible… si fort… » — le boss s\'effondre.' : '« Je pars… mais on se reverra ! » — le boss s\'enfuit en boitant.'}
+              {bossHp <= 0 ? t('activeWorkout.done.flavorDefeated') : t('activeWorkout.done.flavorEscaped')}
             </p>
-            {isSubmitting && <div className="text-xs text-muted-foreground">Calcul des récompenses…</div>}
+            {isSubmitting && <div className="text-xs text-muted-foreground">{t('activeWorkout.done.calculating')}</div>}
             {result && (
               <>
                 {result.leveledUp && <LevelUpBurst level={result.user.level} gained={result.levelsGained} />}
                 <div className="font-display text-2xl text-xp" style={{ animation: 'fq-xpcount .5s ease-out' }}>+{result.xpEarned} XP</div>
                 <div className="mt-1 flex gap-3">
-                  <ResultStat v={`${dealt}/${bossMaxHp}`} l="dégâts" />
-                  <ResultStat v={`${completed.length}`} l="séries" />
-                  <ResultStat v={fmt(elapsed)} l="durée" />
+                  <ResultStat v={`${dealt}/${bossMaxHp}`} l={t('activeWorkout.done.statDamage')} />
+                  <ResultStat v={`${completed.length}`} l={t('activeWorkout.done.statSets')} />
+                  <ResultStat v={fmt(elapsed)} l={t('activeWorkout.done.statDuration')} />
                 </div>
               </>
             )}
             <button onClick={() => { if (result) setShowFeel(true); }} disabled={isSubmitting || !result}
               className="mt-2 rounded-2xl border-none bg-gradient-to-br from-primary to-indigo-800 px-6 py-3 font-display text-sm font-bold text-white disabled:opacity-50">
-              {result ? 'Récupérer le butin ▸' : '…'}
+              {result ? t('activeWorkout.done.loot') : '…'}
             </button>
           </div>
         </Overlay>
@@ -562,6 +566,7 @@ function StatLine({ label, value, accent }: { label: string; value: string; acce
 }
 
 function LevelUpBurst({ level, gained }: { level: number; gained: number }) {
+  const { t } = useTranslation();
   const sparks = Array.from({ length: 14 });
   return (
     <div className="relative my-1 grid place-items-center">
@@ -592,9 +597,9 @@ function LevelUpBurst({ level, gained }: { level: number; gained: number }) {
       </div>
       {/* Texte */}
       <div className="relative z-30 flex flex-col items-center" style={{ animation: 'fq-lvlpop .6s cubic-bezier(.2,.8,.3,1.4)' }}>
-        <div className="text-xp" style={{ fontFamily: PX, fontSize: 13, animation: 'fq-lvlglow 1.4s ease-in-out infinite' }}>★ LEVEL UP ★</div>
-        <div className="mt-1.5 font-display text-3xl font-black text-primary-soft" style={{ textShadow: '0 0 14px rgba(99,102,241,.8)' }}>NIVEAU {level}</div>
-        {gained > 1 && <div className="mt-0.5 text-[11px] font-bold text-xp">+{gained} niveaux d'un coup !</div>}
+        <div className="text-xp" style={{ fontFamily: PX, fontSize: 13, animation: 'fq-lvlglow 1.4s ease-in-out infinite' }}>{t('activeWorkout.levelUp.title')}</div>
+        <div className="mt-1.5 font-display text-3xl font-black text-primary-soft" style={{ textShadow: '0 0 14px rgba(99,102,241,.8)' }}>{t('activeWorkout.levelUp.level', { level })}</div>
+        {gained > 1 && <div className="mt-0.5 text-[11px] font-bold text-xp">{t('activeWorkout.levelUp.multiLevel', { gained })}</div>}
       </div>
     </div>
   );

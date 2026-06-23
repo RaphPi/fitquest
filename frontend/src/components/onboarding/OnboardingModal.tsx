@@ -41,7 +41,7 @@ function StepDots({ current, total }: { current: number; total: number }) {
 }
 
 export default function OnboardingModal() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const user = useUserStore((s) => s.user);
   const updateProfile = useUserStore((s) => s.updateProfile);
 
@@ -199,7 +199,7 @@ export default function OnboardingModal() {
                       className="text-[10px] font-bold uppercase tracking-wider"
                       style={{ color: avatarStage === av.id ? 'var(--accent-soft)' : 'var(--text-secondary)' }}
                     >
-                      {av.labelFr}
+                      {i18n.language === 'en' ? av.labelEn : av.labelFr}
                     </span>
                   </button>
                 ))}

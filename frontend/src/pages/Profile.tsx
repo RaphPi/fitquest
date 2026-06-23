@@ -223,7 +223,7 @@ function GoalSection() {
 }
 
 function AvatarPicker() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const user = useUserStore((s) => s.user);
   const updateProfile = useUserStore((s) => s.updateProfile);
   const [open, setOpen] = useState(false);
@@ -260,7 +260,7 @@ function AvatarPicker() {
           </h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {t('profile.avatarPicker.currentClass', {
-              class: AVATAR_CLASSES.find((a) => a.id === user.avatarStage)?.labelFr ?? '—',
+              class: AVATAR_CLASSES.find((a) => a.id === user.avatarStage)?.[i18n.language === 'en' ? 'labelEn' : 'labelFr'] ?? '—',
             })}
           </p>
         </div>
@@ -306,7 +306,7 @@ function AvatarPicker() {
                   className="text-xs font-bold uppercase tracking-wider"
                   style={{ color: selected === av.id ? 'var(--accent-soft)' : 'var(--text-secondary)' }}
                 >
-                  {av.labelFr}
+                  {i18n.language === 'en' ? av.labelEn : av.labelFr}
                 </span>
               </button>
             ))}

@@ -57,7 +57,7 @@ const continueCls =
 
 /* ── Main component ─────────────────────────────────────────── */
 export default function Register() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { register, isLoading, error, clearError } = useUserStore();
   const navigate = useNavigate();
 
@@ -202,7 +202,7 @@ export default function Register() {
                     className="text-xs font-bold uppercase tracking-wider"
                     style={{ color: avatarStage === av.id ? 'var(--accent-soft)' : 'var(--text-secondary)' }}
                   >
-                    {av.labelFr}
+                    {i18n.language === 'en' ? av.labelEn : av.labelFr}
                   </span>
                 </button>
               ))}

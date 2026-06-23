@@ -82,10 +82,10 @@ function useColorMap() {
 type StdKey = 'waistCm' | 'chestCm' | 'bicepCm' | 'thighCm';
 
 const STD = [
-  { key: 'waistCm' as StdKey, label: 'Tour de taille', unit: 'cm', step: 0.5, min: 40, max: 200, def: 80 },
-  { key: 'chestCm' as StdKey, label: 'Poitrine',        unit: 'cm', step: 0.5, min: 40, max: 200, def: 95 },
-  { key: 'bicepCm' as StdKey, label: 'Biceps',          unit: 'cm', step: 0.5, min: 10, max: 100, def: 35 },
-  { key: 'thighCm' as StdKey, label: 'Cuisses',         unit: 'cm', step: 0.5, min: 20, max: 120, def: 55 },
+  { key: 'waistCm' as StdKey, unit: 'cm', step: 0.5, min: 40, max: 200, def: 80 },
+  { key: 'chestCm' as StdKey, unit: 'cm', step: 0.5, min: 40, max: 200, def: 95 },
+  { key: 'bicepCm' as StdKey, unit: 'cm', step: 0.5, min: 10, max: 100, def: 35 },
+  { key: 'thighCm' as StdKey, unit: 'cm', step: 0.5, min: 20, max: 120, def: 55 },
 ] as const;
 
 // ─── Form helpers ─────────────────────────────────────────────────────────────
@@ -169,7 +169,7 @@ function getMeasureUnit(key: string, metrics: BodyMetric[]): string {
 }
 
 function getMeasureLabel(key: string): string {
-  return STD.find((s) => s.key === key)?.label ?? key;
+  return key;
 }
 
 // ─── Photo constants & helpers ────────────────────────────────────────────────

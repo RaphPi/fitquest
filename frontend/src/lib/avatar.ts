@@ -7,11 +7,11 @@ import { getLevelTierIndex, getLevelTier, type LevelTier } from '@/lib/levelTier
 
 export type AvatarClassKey = 'warrior' | 'archer' | 'mage' | 'knight';
 
-export const AVATAR_CLASSES: { id: number; key: AvatarClassKey; labelFr: string }[] = [
-  { id: 0, key: 'warrior', labelFr: 'Guerrier' },
-  { id: 1, key: 'archer', labelFr: 'Archer' },
-  { id: 2, key: 'mage', labelFr: 'Mage' },
-  { id: 3, key: 'knight', labelFr: 'Chevalier' },
+export const AVATAR_CLASSES: { id: number; key: AvatarClassKey; labelFr: string; labelEn: string }[] = [
+  { id: 0, key: 'warrior', labelFr: 'Guerrier',   labelEn: 'Warrior' },
+  { id: 1, key: 'archer',  labelFr: 'Archer',     labelEn: 'Archer' },
+  { id: 2, key: 'mage',    labelFr: 'Mage',       labelEn: 'Mage' },
+  { id: 3, key: 'knight',  labelFr: 'Chevalier',  labelEn: 'Knight' },
 ];
 
 /** Clé de classe à partir de la valeur stockée dans User.avatarStage. */

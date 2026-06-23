@@ -18,16 +18,6 @@ export function bossMaxHp(exercises: ActiveExercise[]): number {
   return exercises.reduce((sum, ex) => sum + ex.sets * effortPoints(ex.type, ex.target), 0);
 }
 
-// ─── Titres de boss dérivés de la CATÉGORIE (enum fixe, jamais du nom libre) ───
-const CATEGORY_TITLE: Record<Category, string> = {
-  push: 'Colosse du Push',
-  pull: 'Titan du Pull',
-  legs: 'Béhémoth des Jambes',
-  core: 'Gardien du Gainage',
-  cardio: 'Spectre du Cardio',
-  back: 'Golem du Dos',
-};
-
 /** Catégorie dominante d'une séance (la plus fréquente parmi ses exercices). */
 export function dominantCategory(exercises: ActiveExercise[]): Category {
   const counts = new Map<Category, number>();
@@ -39,30 +29,31 @@ export function dominantCategory(exercises: ActiveExercise[]): Category {
 }
 
 export function bossTitle(exercises: ActiveExercise[]): string {
-  return CATEGORY_TITLE[dominantCategory(exercises)];
+  const titles: Record<Category, string> = {
+    push: 'Colosse du Push',
+    pull: 'Titan du Pull',
+    legs: 'Béhémoth des Jambes',
+    core: 'Gardien du Gainage',
+    cardio: 'Spectre du Cardio',
+    back: 'Golem du Dos',
+  };
+  return titles[dominantCategory(exercises)];
 }
 
-// ─── Messages indexés sur le TYPE d'exercice (pas le nom libre) ───
-export interface TypeCopy {
-  cta: string;        // bouton « série terminée »
+// ─── Clés i18n indexées sur le TYPE d'exercice ───
+export interface TypeCopyKeys {
+  cta: string;
   confirmTitle: string;
   confirmHint: string;
   unit: string;
 }
 
-export function typeCopy(type: ExerciseType): TypeCopy {
-  if (type === 'duration') {
-    return {
-      cta: 'GAINAGE TERMINÉ',
-      confirmTitle: 'SECONDES TENUES ?',
-      confirmHint: 'Chaque seconde alimente la puissance de ton coup',
-      unit: 'secondes',
-    };
-  }
+export function typeCopyKeys(type: ExerciseType): TypeCopyKeys {
+  const ns = type === 'duration' ? 'activeWorkout.bossFight.duration' : 'activeWorkout.bossFight.reps';
   return {
-    cta: 'SÉRIE TERMINÉE',
-    confirmTitle: 'RÉPÉTITIONS RÉALISÉES ?',
-    confirmHint: 'Chaque répétition = un coup porté au boss',
-    unit: 'répétitions',
+    cta: `${ns}.cta`,
+    confirmTitle: `${ns}.confirmTitle`,
+    confirmHint: `${ns}.confirmHint`,
+    unit: `${ns}.unit`,
   };
 }
