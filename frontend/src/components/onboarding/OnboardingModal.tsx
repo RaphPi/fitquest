@@ -9,17 +9,23 @@ import NumberStepper from '@/components/ui/NumberStepper';
 import Avatar from '@/components/avatar/Avatar';
 import { cn } from '@/lib/utils';
 
-const LS_KEY = 'fq_onboarding_done';
+const LS_PREFIX = 'fq_onboarding_done';
 const TOTAL_STEPS = 3;
 
-function shouldShow(user: { heightCm?: number | null; primaryGoal?: string | null } | null): boolean {
+// Clé par utilisateur : un nouveau compte revoit l'onboarding même si un autre
+// compte l'a déjà complété dans le même navigateur (localStorage est partagé).
+function lsKey(userId: string): string {
+  return `${LS_PREFIX}:${userId}`;
+}
+
+function shouldShow(user: { id: string; heightCm?: number | null; primaryGoal?: string | null } | null): boolean {
   if (!user) return false;
-  if (localStorage.getItem(LS_KEY)) return false;
+  if (localStorage.getItem(lsKey(user.id))) return false;
   return user.heightCm == null && user.primaryGoal == null;
 }
 
-function dismiss() {
-  localStorage.setItem(LS_KEY, '1');
+function dismiss(userId: string) {
+  localStorage.setItem(lsKey(userId), '1');
 }
 
 // Progress dots
@@ -62,7 +68,7 @@ export default function OnboardingModal() {
   if (!open) return null;
 
   function handleSkip() {
-    dismiss();
+    if (user) dismiss(user.id);
     setOpen(false);
   }
 
@@ -78,13 +84,13 @@ export default function OnboardingModal() {
         setStep(3);
       } else {
         await updateProfile({ avatarStage });
-        dismiss();
+        if (user) dismiss(user.id);
         setOpen(false);
       }
     } catch {
       // fire-and-forget : avancer quand même
       if (step < TOTAL_STEPS) setStep((s) => s + 1);
-      else { dismiss(); setOpen(false); }
+      else { if (user) dismiss(user.id); setOpen(false); }
     } finally {
       setSaving(false);
     }
