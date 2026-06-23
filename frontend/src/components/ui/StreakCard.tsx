@@ -22,7 +22,7 @@ export default function StreakCard({ streak }: Props) {
 
   return (
     <div
-      className="flex flex-col items-center gap-1 rounded-lg border bg-card p-3"
+      className="flex flex-col items-center gap-1 rounded-lg border bg-card p-2 sm:p-3"
       style={animated ? { borderColor: outer + '66', boxShadow: `0 0 14px ${glow}` } : {}}
     >
       <style>{STYLES}</style>
@@ -53,7 +53,7 @@ export default function StreakCard({ streak }: Props) {
         </div>
       </div>
 
-      <span className="font-display text-xl font-black" style={{ color: animated ? outer : '' }}>
+      <span className="font-display text-lg font-black sm:text-xl" style={{ color: animated ? outer : '' }}>
         {streak}
       </span>
       <span className="text-xs uppercase tracking-widest text-muted-foreground whitespace-nowrap">

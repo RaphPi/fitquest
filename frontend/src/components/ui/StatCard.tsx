@@ -15,7 +15,7 @@ export default function StatCard({ icon: Icon, value, label, accent = false, com
     <div
       className={cn(
         'flex flex-col items-center gap-1 rounded-lg border bg-card',
-        compact ? 'p-3' : 'p-4',
+        compact ? 'p-2 sm:p-3' : 'p-4',
         accent && 'border-primary/40 shadow-glow',
         className,
       )}
@@ -24,7 +24,7 @@ export default function StatCard({ icon: Icon, value, label, accent = false, com
       <div className={cn('flex items-center justify-center', compact ? 'h-5' : 'h-6')}>
         <Icon className={cn(compact ? 'h-4 w-4' : 'h-5 w-5', accent ? 'text-primary' : 'text-muted-foreground')} />
       </div>
-      <span className={cn('font-display font-black', compact ? 'text-xl' : 'text-2xl', accent ? 'text-primary' : 'text-foreground')}>
+      <span className={cn('font-display font-black', compact ? 'text-lg sm:text-xl' : 'text-2xl', accent ? 'text-primary' : 'text-foreground')}>
         {value}
       </span>
       <span className={cn(

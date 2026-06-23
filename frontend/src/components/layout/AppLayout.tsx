@@ -151,6 +151,9 @@ function Sidebar() {
                 <p className="text-[11px] font-medium leading-tight" style={{ color: tier.color }}>
                   {meta.name} · {t('sidebar.level')} {user.level}
                 </p>
+                <p className="text-[11px] leading-tight text-muted-foreground">
+                  {user.currentXP} / {xpRequiredForLevel(user.level)} XP
+                </p>
               </div>
             </div>
             {/* XP bar pleine largeur sous le bloc avatar+nom+grade */}
@@ -161,6 +164,7 @@ function Sidebar() {
                 level={user.level}
                 animated={false}
                 showLevel={false}
+                showValue={false}
               />
             </div>
           </div>
