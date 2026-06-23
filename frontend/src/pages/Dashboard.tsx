@@ -15,6 +15,7 @@ import {
   BarChart,
   Bar,
   XAxis,
+  YAxis,
   Tooltip,
   ResponsiveContainer,
   LineChart,
@@ -231,37 +232,38 @@ export default function Dashboard() {
 
               {weightData ? (
                 <div className="rounded-lg border border-border bg-card p-3">
-                  <h2 className="mb-1 font-display text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                    {t('dashboard.currentWeight')}
-                  </h2>
-                  <p className="font-display text-xl font-black" style={{ color: weightColor }}>
-                    {weightData.current.toFixed(1)}{' '}
-                    <span className="text-xs font-normal text-muted-foreground">kg</span>
-                  </p>
+                  <div className="mb-2 flex items-baseline justify-between gap-2">
+                    <h2 className="font-display text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                      {t('dashboard.currentWeight')}
+                    </h2>
+                    <p className="font-display text-xl font-black leading-none" style={{ color: weightColor }}>
+                      {weightData.current.toFixed(1)}{' '}
+                      <span className="text-xs font-normal text-muted-foreground">kg</span>
+                    </p>
+                  </div>
                   {weightData.sparkline.length > 1 ? (
-                    <div className="mt-1.5">
-                      <ResponsiveContainer width="100%" height={56}>
-                        <LineChart data={weightData.sparkline} margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
-                          <Tooltip
-                            contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, padding: '2px 8px' }}
-                            labelFormatter={() => ''}
-                            formatter={(v: number) => [`${v.toFixed(1)} kg`, '']}
-                            itemStyle={{ color: weightColor, fontSize: 12 }}
-                            separator=""
-                          />
-                          <Line
-                            type="monotone"
-                            dataKey="v"
-                            stroke={weightColor}
-                            strokeWidth={2}
-                            dot={{ r: 2.5, fill: weightColor, strokeWidth: 0 }}
-                            activeDot={{ r: 4, fill: weightColor, strokeWidth: 0 }}
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
+                    <ResponsiveContainer width="100%" height={90}>
+                      <LineChart data={weightData.sparkline} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
+                        <YAxis hide domain={['dataMin - 0.5', 'dataMax + 0.5']} />
+                        <Tooltip
+                          contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, padding: '2px 8px' }}
+                          labelFormatter={() => ''}
+                          formatter={(v: number) => [`${v.toFixed(1)} kg`, '']}
+                          itemStyle={{ color: weightColor, fontSize: 12 }}
+                          separator=""
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="v"
+                          stroke={weightColor}
+                          strokeWidth={2}
+                          dot={{ r: 2.5, fill: weightColor, strokeWidth: 0 }}
+                          activeDot={{ r: 4, fill: weightColor, strokeWidth: 0 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
                   ) : (
-                    <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
+                    <p className="text-[11px] leading-snug text-muted-foreground">
                       {t('dashboard.weightNeedMore')}
                     </p>
                   )}
